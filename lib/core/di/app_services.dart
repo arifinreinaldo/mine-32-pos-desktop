@@ -1,3 +1,4 @@
+import '../../features/catalog/data/catalog_sync.dart';
 import '../database/app_database.dart';
 import '../sync/change_log_writer.dart';
 import '../sync/core_sync_entities.dart';
@@ -39,6 +40,7 @@ class AppServices {
     final changeLog = ChangeLogWriter(db, deviceId);
     final registry = SyncRegistry();
     registerCoreSyncEntities(registry);
+    registerCatalogSyncEntities(registry);
     // Feature modules register their entities here as they are added.
     return AppServices(
       db: db,

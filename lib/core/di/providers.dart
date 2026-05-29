@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/formatters/money_format.dart';
 import '../database/app_database.dart';
 import '../time/clock.dart';
 import 'app_services.dart';
@@ -20,3 +21,7 @@ final clockProvider = Provider<Clock>(
 final deviceIdProvider = Provider<String>(
   (ref) => ref.watch(appServicesProvider).deviceId,
 );
+
+/// App-wide money formatter. (Currency symbol will be sourced from company
+/// settings in a later milestone.)
+final moneyFormatProvider = Provider<MoneyFormat>((ref) => const MoneyFormat());

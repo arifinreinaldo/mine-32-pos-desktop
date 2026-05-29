@@ -26,10 +26,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tests: HLC ordering, **convergence** & **idempotency** & **order-independence** & **tombstone-safety** round-trips (no-lost-stock property lands in M3 with event tables)
 
 ## M2 — Catalog (parts) [Shopify + auto]
-- [ ] Tables: products, product_variants, categories, brands (+ FTS search)
-- [ ] Domain + repository (CRUD via ChangeLogWriter) + tests
-- [ ] UI: catalog list (search/filter/paginate), product editor (variants, sku, barcode, price, cost, core charge)
+- [x] Tables: products, product_variants, categories, brands (LIKE search; FTS is a later optimisation)
+- [x] Domain + repository (CRUD via SyncRepository) + tests (CRUD, search, brand find-or-create, sync round-trip)
+- [x] UI: catalog list (search/filter), part editor (sku, barcode, price, cost, core charge, brand, active)
 - [ ] Seed/import: CSV import of parts; sample data seeder
+- [ ] Multi-variant editing (a product with several variants)
 - [ ] Auto-parts: vehicles (YMME), fitments, cross_references, supersessions + UI + tests
 
 ## M3 — Inventory [Shopify multi-location]

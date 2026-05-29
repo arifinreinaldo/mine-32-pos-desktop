@@ -52,4 +52,21 @@ abstract class SyncRepository {
       return row;
     });
   }
+
+  /// Reads the original `created_at` of an existing row (any syncable table),
+  /// so updates preserve creation time. Returns null if the row is absent.
+  Future<int?> existingCreatedAt(
+    TableInfo<Table, dynamic> table,
+    String id,
+  ) async {
+    final idCol = table.columnsByName['id']! as GeneratedColumn<String>;
+    final createdCol =
+        table.columnsByName['created_at']! as GeneratedColumn<int>;
+    final result =
+        await (db.selectOnly(table)
+              ..addColumns([createdCol])
+              ..where(idCol.equals(id)))
+            .getSingleOrNull();
+    return result?.read(createdCol);
+  }
 }
