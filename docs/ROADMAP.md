@@ -68,9 +68,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] UI + tests for both
 
 ## M7 — Sync UX & Dashboard
-- [ ] Sync screen: status, transport config (pick shared folder), "Sync now", history, conflict/override audit log
-- [ ] Background timer + folder watcher; status badge in shell
-- [ ] Dashboard: today's sales, low stock, top parts, cash position (fl_chart)
+- [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine
+- [x] SyncService + controller; **real shared-folder round-trip test** (replicates via files, no server)
+- [x] Dashboard: today's sales + revenue, low-stock count/list, parts count, recent sales
+- [ ] Background timer + folder watcher; sync status badge in the shell; sync history / conflict-override audit log
 
 ## M8 — Polish & hardening
 - [ ] Settings: company, currency/rounding, tax defaults, receipt header/footer, backup/restore (DB file copy + bundle export)

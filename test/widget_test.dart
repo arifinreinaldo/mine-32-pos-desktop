@@ -37,5 +37,10 @@ void main() {
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Catalog'), findsWidgets);
     expect(find.text('Sell'), findsWidgets);
+
+    // The dashboard opens Drift streams; unmount + pump to flush their
+    // stream-close timers so testWidgets doesn't report pending timers.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 500));
   });
 }
