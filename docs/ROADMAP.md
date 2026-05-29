@@ -14,7 +14,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Project docs (VISION, ARCHITECTURE, DATA_MODEL, SYNC, ROADMAP, CLAUDE)
 - [x] Dependencies added (riverpod, drift, go_router, uuid, intl, decimal, pdf, etc.)
 - [x] `scripts/check.sh` runs all gates; strict `analysis_options.yaml` (lints)
-- [ ] App shell: Material 3 theme, `window_manager` (title/min size), nav rail + go_router shell, placeholder screens for each section
+- [x] App shell: Material 3 theme, `window_manager` (title/min size), scrollable side-nav + go_router shell, placeholder screens for each section
 - [x] `Money` value type + tests; `Hlc` type + tests; `Result`/`AppFailure`
 
 ## M1 — Database & sync core
