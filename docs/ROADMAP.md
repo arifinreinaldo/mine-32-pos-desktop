@@ -29,9 +29,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tables: products, product_variants, categories, brands (LIKE search; FTS is a later optimisation)
 - [x] Domain + repository (CRUD via SyncRepository) + tests (CRUD, search, brand find-or-create, sync round-trip)
 - [x] UI: catalog list (search/filter), part editor (sku, barcode, price, cost, core charge, brand, active)
+- [x] Auto-parts data: vehicles (YMME), fitments, cross_references, supersessions + repository + number-lookup + tests
+- [ ] Auto-parts UI: fitment/cross-ref editor on the part screen
 - [ ] Seed/import: CSV import of parts; sample data seeder
 - [ ] Multi-variant editing (a product with several variants)
-- [ ] Auto-parts: vehicles (YMME), fitments, cross_references, supersessions + UI + tests
 
 ## M3 — Inventory [Shopify multi-location]
 - [x] Tables: locations (M), stock_movements (E, append-only ledger)
@@ -42,13 +43,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Materialised inventory_levels projection (perf optimisation at scale)
 
 ## M4 — Sales / Checkout [Shopify POS]
-- [ ] Tables: sales, sale_lines, payments (drafts M, posted E)
-- [ ] Cart controller: add by search/scan, qty, line discount, tax, totals
-- [ ] Checkout: tender (cash/card/transfer/store credit), change, park/recall, void
-- [ ] Posting: emit stock_movements + accounting journals on complete
-- [ ] Receipt: PDF + print (`pdf`/`printing`); receipt settings
-- [ ] Returns/refunds (negative sale linked to original)
-- [ ] Keyboard-first UX + barcode (keyboard-wedge) + shortcuts; widget tests
+- [x] Tables: sales, sale_lines, payments (completed sales = immutable events)
+- [x] Cart controller: add by search/scan, qty, totals (line discount in model)
+- [x] Checkout: tender (cash/card/transfer), change; Sell screen (search+cart)
+- [x] Posting: emit stock_movements on complete (deducts stock atomically)
+- [x] Barcode (keyboard-wedge): search + Enter adds first match
+- [x] Tests: cart math/controller, completeSale persist+stock+sync round-trip,
+      full Sell-flow widget test (search→add→charge→complete)
+- [ ] Accounting journals on complete (lands in M5)
+- [ ] Receipt: PDF + print; returns/refunds; park/recall; void; line-discount UI
 
 ## M5 — Accounting [Xero]
 - [ ] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E), account_balances (P)

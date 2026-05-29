@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'tables/catalog_tables.dart';
 import 'tables/inventory_tables.dart';
+import 'tables/sales_tables.dart';
 import 'tables/settings_tables.dart';
 import 'tables/sync_tables.dart';
 
@@ -35,6 +36,10 @@ part 'app_database.g.dart';
     // Inventory
     Locations,
     StockMovements,
+    // Sales
+    Sales,
+    SaleLines,
+    Payments,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -43,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -69,6 +74,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.createTable(locations);
         await m.createTable(stockMovements);
+      }
+      // v4 -> v5: sales tables.
+      if (from < 5) {
+        await m.createTable(sales);
+        await m.createTable(saleLines);
+        await m.createTable(payments);
       }
     },
     beforeOpen: (details) async {
