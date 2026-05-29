@@ -7328,6 +7328,1250 @@ class SupersessionsCompanion extends UpdateCompanion<Supersession> {
   }
 }
 
+class $LocationsTable extends Locations
+    with TableInfo<$LocationsTable, Location> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedHlcMeta = const VerificationMeta(
+    'updatedHlc',
+  );
+  @override
+  late final GeneratedColumn<String> updatedHlc = GeneratedColumn<String>(
+    'updated_hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('store'),
+  );
+  static const VerificationMeta _isDefaultMeta = const VerificationMeta(
+    'isDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
+    'is_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_default" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    name,
+    type,
+    isDefault,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'locations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Location> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_hlc')) {
+      context.handle(
+        _updatedHlcMeta,
+        updatedHlc.isAcceptableOrUnknown(data['updated_hlc']!, _updatedHlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedHlcMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    }
+    if (data.containsKey('is_default')) {
+      context.handle(
+        _isDefaultMeta,
+        isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Location map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Location(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      updatedHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_hlc'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      isDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_default'],
+      )!,
+    );
+  }
+
+  @override
+  $LocationsTable createAlias(String alias) {
+    return $LocationsTable(attachedDatabase, alias);
+  }
+}
+
+class Location extends DataClass implements Insertable<Location> {
+  /// UUID v7 string, generated client-side (never an autoincrement int).
+  final String id;
+
+  /// Epoch millis (UTC) the row was first created.
+  final int createdAt;
+
+  /// Epoch millis (UTC) of the most recent local or merged write.
+  final int updatedAt;
+
+  /// Tombstone: epoch millis when soft-deleted, or null while live.
+  final int? deletedAt;
+
+  /// Packed HLC of the last write — drives last-write-wins resolution.
+  final String updatedHlc;
+  final String name;
+  final String type;
+  final bool isDefault;
+  const Location({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.updatedHlc,
+    required this.name,
+    required this.type,
+    required this.isDefault,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['updated_hlc'] = Variable<String>(updatedHlc);
+    map['name'] = Variable<String>(name);
+    map['type'] = Variable<String>(type);
+    map['is_default'] = Variable<bool>(isDefault);
+    return map;
+  }
+
+  LocationsCompanion toCompanion(bool nullToAbsent) {
+    return LocationsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      updatedHlc: Value(updatedHlc),
+      name: Value(name),
+      type: Value(type),
+      isDefault: Value(isDefault),
+    );
+  }
+
+  factory Location.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Location(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
+      name: serializer.fromJson<String>(json['name']),
+      type: serializer.fromJson<String>(json['type']),
+      isDefault: serializer.fromJson<bool>(json['isDefault']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'updatedHlc': serializer.toJson<String>(updatedHlc),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(type),
+      'isDefault': serializer.toJson<bool>(isDefault),
+    };
+  }
+
+  Location copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? updatedHlc,
+    String? name,
+    String? type,
+    bool? isDefault,
+  }) => Location(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    updatedHlc: updatedHlc ?? this.updatedHlc,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    isDefault: isDefault ?? this.isDefault,
+  );
+  Location copyWithCompanion(LocationsCompanion data) {
+    return Location(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      updatedHlc: data.updatedHlc.present
+          ? data.updatedHlc.value
+          : this.updatedHlc,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Location(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('isDefault: $isDefault')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    name,
+    type,
+    isDefault,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Location &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.updatedHlc == this.updatedHlc &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.isDefault == this.isDefault);
+}
+
+class LocationsCompanion extends UpdateCompanion<Location> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> updatedHlc;
+  final Value<String> name;
+  final Value<String> type;
+  final Value<bool> isDefault;
+  final Value<int> rowid;
+  const LocationsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.updatedHlc = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocationsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String updatedHlc,
+    required String name,
+    this.type = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       updatedHlc = Value(updatedHlc),
+       name = Value(name);
+  static Insertable<Location> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? updatedHlc,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<bool>? isDefault,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (updatedHlc != null) 'updated_hlc': updatedHlc,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (isDefault != null) 'is_default': isDefault,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocationsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? updatedHlc,
+    Value<String>? name,
+    Value<String>? type,
+    Value<bool>? isDefault,
+    Value<int>? rowid,
+  }) {
+    return LocationsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      updatedHlc: updatedHlc ?? this.updatedHlc,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      isDefault: isDefault ?? this.isDefault,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (updatedHlc.present) {
+      map['updated_hlc'] = Variable<String>(updatedHlc.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (isDefault.present) {
+      map['is_default'] = Variable<bool>(isDefault.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StockMovementsTable extends StockMovements
+    with TableInfo<$StockMovementsTable, StockMovement> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StockMovementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedHlcMeta = const VerificationMeta(
+    'updatedHlc',
+  );
+  @override
+  late final GeneratedColumn<String> updatedHlc = GeneratedColumn<String>(
+    'updated_hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _variantIdMeta = const VerificationMeta(
+    'variantId',
+  );
+  @override
+  late final GeneratedColumn<String> variantId = GeneratedColumn<String>(
+    'variant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationIdMeta = const VerificationMeta(
+    'locationId',
+  );
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+    'location_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
+  @override
+  late final GeneratedColumn<int> qty = GeneratedColumn<int>(
+    'qty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refTypeMeta = const VerificationMeta(
+    'refType',
+  );
+  @override
+  late final GeneratedColumn<String> refType = GeneratedColumn<String>(
+    'ref_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _refIdMeta = const VerificationMeta('refId');
+  @override
+  late final GeneratedColumn<String> refId = GeneratedColumn<String>(
+    'ref_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitCostMinorMeta = const VerificationMeta(
+    'unitCostMinor',
+  );
+  @override
+  late final GeneratedColumn<int> unitCostMinor = GeneratedColumn<int>(
+    'unit_cost_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    variantId,
+    locationId,
+    qty,
+    reason,
+    refType,
+    refId,
+    unitCostMinor,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stock_movements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StockMovement> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_hlc')) {
+      context.handle(
+        _updatedHlcMeta,
+        updatedHlc.isAcceptableOrUnknown(data['updated_hlc']!, _updatedHlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedHlcMeta);
+    }
+    if (data.containsKey('variant_id')) {
+      context.handle(
+        _variantIdMeta,
+        variantId.isAcceptableOrUnknown(data['variant_id']!, _variantIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_variantIdMeta);
+    }
+    if (data.containsKey('location_id')) {
+      context.handle(
+        _locationIdMeta,
+        locationId.isAcceptableOrUnknown(data['location_id']!, _locationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationIdMeta);
+    }
+    if (data.containsKey('qty')) {
+      context.handle(
+        _qtyMeta,
+        qty.isAcceptableOrUnknown(data['qty']!, _qtyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_qtyMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('ref_type')) {
+      context.handle(
+        _refTypeMeta,
+        refType.isAcceptableOrUnknown(data['ref_type']!, _refTypeMeta),
+      );
+    }
+    if (data.containsKey('ref_id')) {
+      context.handle(
+        _refIdMeta,
+        refId.isAcceptableOrUnknown(data['ref_id']!, _refIdMeta),
+      );
+    }
+    if (data.containsKey('unit_cost_minor')) {
+      context.handle(
+        _unitCostMinorMeta,
+        unitCostMinor.isAcceptableOrUnknown(
+          data['unit_cost_minor']!,
+          _unitCostMinorMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StockMovement map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StockMovement(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      updatedHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_hlc'],
+      )!,
+      variantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}variant_id'],
+      )!,
+      locationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_id'],
+      )!,
+      qty: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}qty'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      refType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_type'],
+      ),
+      refId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ref_id'],
+      ),
+      unitCostMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unit_cost_minor'],
+      )!,
+    );
+  }
+
+  @override
+  $StockMovementsTable createAlias(String alias) {
+    return $StockMovementsTable(attachedDatabase, alias);
+  }
+}
+
+class StockMovement extends DataClass implements Insertable<StockMovement> {
+  /// UUID v7 string, generated client-side (never an autoincrement int).
+  final String id;
+
+  /// Epoch millis (UTC) the row was first created.
+  final int createdAt;
+
+  /// Epoch millis (UTC) of the most recent local or merged write.
+  final int updatedAt;
+
+  /// Tombstone: epoch millis when soft-deleted, or null while live.
+  final int? deletedAt;
+
+  /// Packed HLC of the last write — drives last-write-wins resolution.
+  final String updatedHlc;
+  final String variantId;
+  final String locationId;
+
+  /// Signed quantity delta (+receipt/-sale).
+  final int qty;
+
+  /// adjustment | sale | purchase | count | transfer_in | transfer_out | return
+  final String reason;
+
+  /// Optional link back to the source document (sale, PO, transfer...).
+  final String? refType;
+  final String? refId;
+
+  /// Unit cost (minor units) at the time of the movement, for valuation/COGS.
+  final int unitCostMinor;
+  const StockMovement({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.updatedHlc,
+    required this.variantId,
+    required this.locationId,
+    required this.qty,
+    required this.reason,
+    this.refType,
+    this.refId,
+    required this.unitCostMinor,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['updated_hlc'] = Variable<String>(updatedHlc);
+    map['variant_id'] = Variable<String>(variantId);
+    map['location_id'] = Variable<String>(locationId);
+    map['qty'] = Variable<int>(qty);
+    map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || refType != null) {
+      map['ref_type'] = Variable<String>(refType);
+    }
+    if (!nullToAbsent || refId != null) {
+      map['ref_id'] = Variable<String>(refId);
+    }
+    map['unit_cost_minor'] = Variable<int>(unitCostMinor);
+    return map;
+  }
+
+  StockMovementsCompanion toCompanion(bool nullToAbsent) {
+    return StockMovementsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      updatedHlc: Value(updatedHlc),
+      variantId: Value(variantId),
+      locationId: Value(locationId),
+      qty: Value(qty),
+      reason: Value(reason),
+      refType: refType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refType),
+      refId: refId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refId),
+      unitCostMinor: Value(unitCostMinor),
+    );
+  }
+
+  factory StockMovement.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StockMovement(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
+      variantId: serializer.fromJson<String>(json['variantId']),
+      locationId: serializer.fromJson<String>(json['locationId']),
+      qty: serializer.fromJson<int>(json['qty']),
+      reason: serializer.fromJson<String>(json['reason']),
+      refType: serializer.fromJson<String?>(json['refType']),
+      refId: serializer.fromJson<String?>(json['refId']),
+      unitCostMinor: serializer.fromJson<int>(json['unitCostMinor']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'updatedHlc': serializer.toJson<String>(updatedHlc),
+      'variantId': serializer.toJson<String>(variantId),
+      'locationId': serializer.toJson<String>(locationId),
+      'qty': serializer.toJson<int>(qty),
+      'reason': serializer.toJson<String>(reason),
+      'refType': serializer.toJson<String?>(refType),
+      'refId': serializer.toJson<String?>(refId),
+      'unitCostMinor': serializer.toJson<int>(unitCostMinor),
+    };
+  }
+
+  StockMovement copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? updatedHlc,
+    String? variantId,
+    String? locationId,
+    int? qty,
+    String? reason,
+    Value<String?> refType = const Value.absent(),
+    Value<String?> refId = const Value.absent(),
+    int? unitCostMinor,
+  }) => StockMovement(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    updatedHlc: updatedHlc ?? this.updatedHlc,
+    variantId: variantId ?? this.variantId,
+    locationId: locationId ?? this.locationId,
+    qty: qty ?? this.qty,
+    reason: reason ?? this.reason,
+    refType: refType.present ? refType.value : this.refType,
+    refId: refId.present ? refId.value : this.refId,
+    unitCostMinor: unitCostMinor ?? this.unitCostMinor,
+  );
+  StockMovement copyWithCompanion(StockMovementsCompanion data) {
+    return StockMovement(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      updatedHlc: data.updatedHlc.present
+          ? data.updatedHlc.value
+          : this.updatedHlc,
+      variantId: data.variantId.present ? data.variantId.value : this.variantId,
+      locationId: data.locationId.present
+          ? data.locationId.value
+          : this.locationId,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      refType: data.refType.present ? data.refType.value : this.refType,
+      refId: data.refId.present ? data.refId.value : this.refId,
+      unitCostMinor: data.unitCostMinor.present
+          ? data.unitCostMinor.value
+          : this.unitCostMinor,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockMovement(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('variantId: $variantId, ')
+          ..write('locationId: $locationId, ')
+          ..write('qty: $qty, ')
+          ..write('reason: $reason, ')
+          ..write('refType: $refType, ')
+          ..write('refId: $refId, ')
+          ..write('unitCostMinor: $unitCostMinor')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    variantId,
+    locationId,
+    qty,
+    reason,
+    refType,
+    refId,
+    unitCostMinor,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StockMovement &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.updatedHlc == this.updatedHlc &&
+          other.variantId == this.variantId &&
+          other.locationId == this.locationId &&
+          other.qty == this.qty &&
+          other.reason == this.reason &&
+          other.refType == this.refType &&
+          other.refId == this.refId &&
+          other.unitCostMinor == this.unitCostMinor);
+}
+
+class StockMovementsCompanion extends UpdateCompanion<StockMovement> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> updatedHlc;
+  final Value<String> variantId;
+  final Value<String> locationId;
+  final Value<int> qty;
+  final Value<String> reason;
+  final Value<String?> refType;
+  final Value<String?> refId;
+  final Value<int> unitCostMinor;
+  final Value<int> rowid;
+  const StockMovementsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.updatedHlc = const Value.absent(),
+    this.variantId = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.refType = const Value.absent(),
+    this.refId = const Value.absent(),
+    this.unitCostMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StockMovementsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String updatedHlc,
+    required String variantId,
+    required String locationId,
+    required int qty,
+    required String reason,
+    this.refType = const Value.absent(),
+    this.refId = const Value.absent(),
+    this.unitCostMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       updatedHlc = Value(updatedHlc),
+       variantId = Value(variantId),
+       locationId = Value(locationId),
+       qty = Value(qty),
+       reason = Value(reason);
+  static Insertable<StockMovement> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? updatedHlc,
+    Expression<String>? variantId,
+    Expression<String>? locationId,
+    Expression<int>? qty,
+    Expression<String>? reason,
+    Expression<String>? refType,
+    Expression<String>? refId,
+    Expression<int>? unitCostMinor,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (updatedHlc != null) 'updated_hlc': updatedHlc,
+      if (variantId != null) 'variant_id': variantId,
+      if (locationId != null) 'location_id': locationId,
+      if (qty != null) 'qty': qty,
+      if (reason != null) 'reason': reason,
+      if (refType != null) 'ref_type': refType,
+      if (refId != null) 'ref_id': refId,
+      if (unitCostMinor != null) 'unit_cost_minor': unitCostMinor,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StockMovementsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? updatedHlc,
+    Value<String>? variantId,
+    Value<String>? locationId,
+    Value<int>? qty,
+    Value<String>? reason,
+    Value<String?>? refType,
+    Value<String?>? refId,
+    Value<int>? unitCostMinor,
+    Value<int>? rowid,
+  }) {
+    return StockMovementsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      updatedHlc: updatedHlc ?? this.updatedHlc,
+      variantId: variantId ?? this.variantId,
+      locationId: locationId ?? this.locationId,
+      qty: qty ?? this.qty,
+      reason: reason ?? this.reason,
+      refType: refType ?? this.refType,
+      refId: refId ?? this.refId,
+      unitCostMinor: unitCostMinor ?? this.unitCostMinor,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (updatedHlc.present) {
+      map['updated_hlc'] = Variable<String>(updatedHlc.value);
+    }
+    if (variantId.present) {
+      map['variant_id'] = Variable<String>(variantId.value);
+    }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<int>(qty.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (refType.present) {
+      map['ref_type'] = Variable<String>(refType.value);
+    }
+    if (refId.present) {
+      map['ref_id'] = Variable<String>(refId.value);
+    }
+    if (unitCostMinor.present) {
+      map['unit_cost_minor'] = Variable<int>(unitCostMinor.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockMovementsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('variantId: $variantId, ')
+          ..write('locationId: $locationId, ')
+          ..write('qty: $qty, ')
+          ..write('reason: $reason, ')
+          ..write('refType: $refType, ')
+          ..write('refId: $refId, ')
+          ..write('unitCostMinor: $unitCostMinor, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7350,6 +8594,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $SupersessionsTable supersessions = $SupersessionsTable(this);
+  late final $LocationsTable locations = $LocationsTable(this);
+  late final $StockMovementsTable stockMovements = $StockMovementsTable(this);
   late final Index idxVariantProduct = Index(
     'idx_variant_product',
     'CREATE INDEX idx_variant_product ON product_variants (product_id)',
@@ -7382,6 +8628,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_supersession_old',
     'CREATE INDEX idx_supersession_old ON supersessions (old_variant_id)',
   );
+  late final Index idxMovementVariant = Index(
+    'idx_movement_variant',
+    'CREATE INDEX idx_movement_variant ON stock_movements (variant_id)',
+  );
+  late final Index idxMovementLocation = Index(
+    'idx_movement_location',
+    'CREATE INDEX idx_movement_location ON stock_movements (location_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7400,6 +8654,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     fitments,
     crossReferences,
     supersessions,
+    locations,
+    stockMovements,
     idxVariantProduct,
     idxVariantSku,
     idxVariantBarcode,
@@ -7408,6 +8664,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxXrefVariant,
     idxXrefNumber,
     idxSupersessionOld,
+    idxMovementVariant,
+    idxMovementLocation,
   ];
 }
 
@@ -10991,6 +12249,600 @@ typedef $$SupersessionsTableProcessedTableManager =
       Supersession,
       PrefetchHooks Function()
     >;
+typedef $$LocationsTableCreateCompanionBuilder =
+    LocationsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String updatedHlc,
+      required String name,
+      Value<String> type,
+      Value<bool> isDefault,
+      Value<int> rowid,
+    });
+typedef $$LocationsTableUpdateCompanionBuilder =
+    LocationsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> updatedHlc,
+      Value<String> name,
+      Value<String> type,
+      Value<bool> isDefault,
+      Value<int> rowid,
+    });
+
+class $$LocationsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocationsTable> {
+  $$LocationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocationsTable> {
+  $$LocationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocationsTable> {
+  $$LocationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDefault =>
+      $composableBuilder(column: $table.isDefault, builder: (column) => column);
+}
+
+class $$LocationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocationsTable,
+          Location,
+          $$LocationsTableFilterComposer,
+          $$LocationsTableOrderingComposer,
+          $$LocationsTableAnnotationComposer,
+          $$LocationsTableCreateCompanionBuilder,
+          $$LocationsTableUpdateCompanionBuilder,
+          (Location, BaseReferences<_$AppDatabase, $LocationsTable, Location>),
+          Location,
+          PrefetchHooks Function()
+        > {
+  $$LocationsTableTableManager(_$AppDatabase db, $LocationsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> updatedHlc = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocationsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                name: name,
+                type: type,
+                isDefault: isDefault,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String updatedHlc,
+                required String name,
+                Value<String> type = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocationsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                name: name,
+                type: type,
+                isDefault: isDefault,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocationsTable,
+      Location,
+      $$LocationsTableFilterComposer,
+      $$LocationsTableOrderingComposer,
+      $$LocationsTableAnnotationComposer,
+      $$LocationsTableCreateCompanionBuilder,
+      $$LocationsTableUpdateCompanionBuilder,
+      (Location, BaseReferences<_$AppDatabase, $LocationsTable, Location>),
+      Location,
+      PrefetchHooks Function()
+    >;
+typedef $$StockMovementsTableCreateCompanionBuilder =
+    StockMovementsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String updatedHlc,
+      required String variantId,
+      required String locationId,
+      required int qty,
+      required String reason,
+      Value<String?> refType,
+      Value<String?> refId,
+      Value<int> unitCostMinor,
+      Value<int> rowid,
+    });
+typedef $$StockMovementsTableUpdateCompanionBuilder =
+    StockMovementsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> updatedHlc,
+      Value<String> variantId,
+      Value<String> locationId,
+      Value<int> qty,
+      Value<String> reason,
+      Value<String?> refType,
+      Value<String?> refId,
+      Value<int> unitCostMinor,
+      Value<int> rowid,
+    });
+
+class $$StockMovementsTableFilterComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refType => $composableBuilder(
+    column: $table.refType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refId => $composableBuilder(
+    column: $table.refId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StockMovementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refType => $composableBuilder(
+    column: $table.refType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refId => $composableBuilder(
+    column: $table.refId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StockMovementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get variantId =>
+      $composableBuilder(column: $table.variantId, builder: (column) => column);
+
+  GeneratedColumn<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get refType =>
+      $composableBuilder(column: $table.refType, builder: (column) => column);
+
+  GeneratedColumn<String> get refId =>
+      $composableBuilder(column: $table.refId, builder: (column) => column);
+
+  GeneratedColumn<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => column,
+  );
+}
+
+class $$StockMovementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StockMovementsTable,
+          StockMovement,
+          $$StockMovementsTableFilterComposer,
+          $$StockMovementsTableOrderingComposer,
+          $$StockMovementsTableAnnotationComposer,
+          $$StockMovementsTableCreateCompanionBuilder,
+          $$StockMovementsTableUpdateCompanionBuilder,
+          (
+            StockMovement,
+            BaseReferences<_$AppDatabase, $StockMovementsTable, StockMovement>,
+          ),
+          StockMovement,
+          PrefetchHooks Function()
+        > {
+  $$StockMovementsTableTableManager(
+    _$AppDatabase db,
+    $StockMovementsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StockMovementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StockMovementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StockMovementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> updatedHlc = const Value.absent(),
+                Value<String> variantId = const Value.absent(),
+                Value<String> locationId = const Value.absent(),
+                Value<int> qty = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String?> refType = const Value.absent(),
+                Value<String?> refId = const Value.absent(),
+                Value<int> unitCostMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StockMovementsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                variantId: variantId,
+                locationId: locationId,
+                qty: qty,
+                reason: reason,
+                refType: refType,
+                refId: refId,
+                unitCostMinor: unitCostMinor,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String updatedHlc,
+                required String variantId,
+                required String locationId,
+                required int qty,
+                required String reason,
+                Value<String?> refType = const Value.absent(),
+                Value<String?> refId = const Value.absent(),
+                Value<int> unitCostMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StockMovementsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                variantId: variantId,
+                locationId: locationId,
+                qty: qty,
+                reason: reason,
+                refType: refType,
+                refId: refId,
+                unitCostMinor: unitCostMinor,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StockMovementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StockMovementsTable,
+      StockMovement,
+      $$StockMovementsTableFilterComposer,
+      $$StockMovementsTableOrderingComposer,
+      $$StockMovementsTableAnnotationComposer,
+      $$StockMovementsTableCreateCompanionBuilder,
+      $$StockMovementsTableUpdateCompanionBuilder,
+      (
+        StockMovement,
+        BaseReferences<_$AppDatabase, $StockMovementsTable, StockMovement>,
+      ),
+      StockMovement,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11021,4 +12873,8 @@ class $AppDatabaseManager {
       $$CrossReferencesTableTableManager(_db, _db.crossReferences);
   $$SupersessionsTableTableManager get supersessions =>
       $$SupersessionsTableTableManager(_db, _db.supersessions);
+  $$LocationsTableTableManager get locations =>
+      $$LocationsTableTableManager(_db, _db.locations);
+  $$StockMovementsTableTableManager get stockMovements =>
+      $$StockMovementsTableTableManager(_db, _db.stockMovements);
 }

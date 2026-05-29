@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'tables/catalog_tables.dart';
+import 'tables/inventory_tables.dart';
 import 'tables/settings_tables.dart';
 import 'tables/sync_tables.dart';
 
@@ -31,6 +32,9 @@ part 'app_database.g.dart';
     Fitments,
     CrossReferences,
     Supersessions,
+    // Inventory
+    Locations,
+    StockMovements,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -39,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +64,11 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(fitments);
         await m.createTable(crossReferences);
         await m.createTable(supersessions);
+      }
+      // v3 -> v4: inventory tables.
+      if (from < 4) {
+        await m.createTable(locations);
+        await m.createTable(stockMovements);
       }
     },
     beforeOpen: (details) async {

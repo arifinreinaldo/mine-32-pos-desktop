@@ -34,10 +34,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Auto-parts: vehicles (YMME), fitments, cross_references, supersessions + UI + tests
 
 ## M3 — Inventory [Shopify multi-location]
-- [ ] Tables: locations, bins, stock_movements (E), inventory_levels (P), stock_counts, transfers
-- [ ] Projection rebuild from movements; on-hand/available/committed
-- [ ] UI: stock by location, adjustments, transfers, stock count session
-- [ ] Tests: projection correctness, concurrent-movement convergence
+- [x] Tables: locations (M), stock_movements (E, append-only ledger)
+- [x] On-hand via SUM-of-movements projection (computed; conflict-free, no reproject needed)
+- [x] UI: stock list (search) + count-style adjust dialog (pick location, set new count)
+- [x] Tests: on-hand/adjustTo correctness + **NO-LOST-STOCK** concurrent-movement convergence + location replication
+- [ ] bins, stock_counts session, transfers, committed/incoming quantities + UI
+- [ ] Materialised inventory_levels projection (perf optimisation at scale)
 
 ## M4 — Sales / Checkout [Shopify POS]
 - [ ] Tables: sales, sale_lines, payments (drafts M, posted E)
