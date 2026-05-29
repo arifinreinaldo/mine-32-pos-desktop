@@ -1,16 +1,46 @@
 // Chart configuration reads more clearly with explicit fl_chart defaults.
 // ignore_for_file: avoid_redundant_argument_values
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../accounting/domain/coretax_csv.dart';
 import '../../accounting/presentation/accounting_controller.dart';
 import '../data/reports_repository.dart';
 import 'reports_controller.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
+
+  Future<void> _exportPpnCsv(BuildContext context, WidgetRef ref) async {
+    final range = ref.read(reportRangeProvider);
+    final rows = await ref
+        .read(accountingRepositoryProvider)
+        .fakturRowsForPeriod(fromMs: range.fromMs, toMs: range.toMs);
+    final scale = ref.read(moneyFormatProvider).scale;
+    final csv = buildCoreTaxCsv(rows, scale: scale);
+    final path = await FilePicker.saveFile(
+      dialogTitle: 'Export PPN CSV',
+      fileName: 'ppn-${range.label.toLowerCase().replaceAll(' ', '-')}.csv',
+      bytes: Uint8List.fromList(utf8.encode(csv)),
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            path == null
+                ? 'Export cancelled'
+                : 'Exported ${rows.length} faktur row(s)',
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +57,12 @@ class ReportsScreen extends ConsumerWidget {
             children: [
               Text('Reports', style: theme.textTheme.headlineSmall),
               const Spacer(),
+              OutlinedButton.icon(
+                onPressed: () => _exportPpnCsv(context, ref),
+                icon: const Icon(Icons.download_outlined),
+                label: const Text('PPN CSV'),
+              ),
+              const SizedBox(width: 12),
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'today', label: Text('Today')),

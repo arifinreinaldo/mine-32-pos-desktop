@@ -5,6 +5,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_repository.dart';
 import '../../../core/money/money.dart';
 import '../domain/accounting_models.dart';
+import '../domain/coretax_csv.dart';
 
 /// Double-entry accounting: chart of accounts, balanced journals, posting rules,
 /// trial balance and the PPN (VAT) summary used for Indonesian CoreTax.
@@ -310,5 +311,23 @@ class AccountingRepository extends SyncRepository {
           ..where((_) => predicate)
           ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
         .get();
+  }
+
+  /// Faktur rows for a CoreTax-style PPN export over a period.
+  Future<List<FakturRow>> fakturRowsForPeriod({int? fromMs, int? toMs}) async {
+    final sales = await salesForTaxPeriod(fromMs: fromMs, toMs: toMs);
+    return [
+      for (final s in sales)
+        FakturRow(
+          number: s.number,
+          dateMs: s.createdAt,
+          buyerName: s.buyerName,
+          buyerNpwp: s.buyerNpwp,
+          fakturNumber: s.fakturNumber,
+          dppMinor: s.subtotalMinor,
+          ppnMinor: s.taxTotalMinor,
+          totalMinor: s.totalMinor,
+        ),
+    ];
   }
 }

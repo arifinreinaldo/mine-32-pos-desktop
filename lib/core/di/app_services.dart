@@ -3,6 +3,7 @@ import '../../features/accounting/data/accounting_sync.dart';
 import '../../features/catalog/data/catalog_sync.dart';
 import '../../features/inventory/data/inventory_sync.dart';
 import '../../features/sales/data/sales_sync.dart';
+import '../../features/settings/data/settings_repository.dart';
 import '../database/app_database.dart';
 import '../sync/change_log_writer.dart';
 import '../sync/core_sync_entities.dart';
@@ -57,6 +58,14 @@ class AppServices {
       hlcService: hlc,
       clock: clock,
     ).seedDefaults();
+
+    // Seed the default company-settings row (idempotent).
+    await SettingsRepository(
+      db: db,
+      changeLog: changeLog,
+      hlcService: hlc,
+      clock: clock,
+    ).seedDefault();
 
     return AppServices(
       db: db,

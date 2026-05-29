@@ -22,6 +22,19 @@ final deviceIdProvider = Provider<String>(
   (ref) => ref.watch(appServicesProvider).deviceId,
 );
 
-/// App-wide money formatter. (Currency symbol will be sourced from company
-/// settings in a later milestone.)
-final moneyFormatProvider = Provider<MoneyFormat>((ref) => const MoneyFormat());
+/// The single company-settings row (id = 'default'), reactive to edits/sync.
+final companySettingsStreamProvider = StreamProvider<CompanySetting?>((ref) {
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.companySettings)
+        ..where((t) => t.id.equals('default'))
+        ..limit(1))
+      .watchSingleOrNull();
+});
+
+/// App-wide money formatter, derived from the company currency (defaults to USD
+/// until settings load), so switching to IDR shows "Rp" everywhere.
+final moneyFormatProvider = Provider<MoneyFormat>((ref) {
+  final settings = ref.watch(companySettingsStreamProvider).value;
+  if (settings == null) return const MoneyFormat();
+  return MoneyFormat.forCurrency(settings.currency, settings.currencyScale);
+});

@@ -8,6 +8,25 @@ class MoneyFormat {
   final int scale;
   const MoneyFormat({this.symbol = r'$', this.scale = 2});
 
+  static const Map<String, String> _symbols = {
+    'USD': r'$',
+    'IDR': 'Rp ',
+    'EUR': '€',
+    'GBP': '£',
+    'SGD': r'S$',
+    'MYR': 'RM ',
+    'AUD': r'A$',
+  };
+
+  /// Build a formatter for a currency code + minor-unit scale (e.g. IDR → "Rp ",
+  /// scale 0). Falls back to the code itself when the symbol is unknown.
+  factory MoneyFormat.forCurrency(String currencyCode, int scale) {
+    return MoneyFormat(
+      symbol: _symbols[currencyCode] ?? '$currencyCode ',
+      scale: scale,
+    );
+  }
+
   String format(Money money) {
     final raw = money.toMajorString(scale: scale); // e.g. -1234.50
     final negative = raw.startsWith('-');

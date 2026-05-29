@@ -60,7 +60,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Sale completion posts the revenue/PPN/COGS journal automatically
 - [x] UI: Accounting screen (chart of accounts + balances); Reports screen (range filter, stat cards, fl_chart sales trend, top parts, trial balance, PPN summary)
 - [x] Tests: tax math, balanced posting, sale→journal, PPN tax summary, reports & accounting screens
-- [ ] CoreTax CSV/XML faktur export; P&L + Balance Sheet statements; journal browser; manual journal; tax-rate editor
+- [x] CoreTax PPN CSV export (Reports → "PPN CSV"; faktur rows with DPP/PPN/buyer/NPWP)
+- [ ] CoreTax XML faktur; P&L + Balance Sheet statements; journal browser; manual journal; tax-rate editor
 
 ## M6 — Customers & Purchasing
 - [ ] customers + customer_vehicles; AR balance; credit limit; price tiers
@@ -74,11 +75,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Background timer + folder watcher; sync status badge in the shell; sync history / conflict-override audit log
 
 ## M8 — Polish & hardening
-- [ ] Settings: company, currency/rounding, tax defaults, receipt header/footer, backup/restore (DB file copy + bundle export)
-- [ ] Empty/error/loading states everywhere; global error presenter
+- [x] Settings screen: company profile, currency (USD/IDR/… → reactive money format), NPWP + PKP, tax-inclusive, receipt header/footer
+- [x] CoreTax PPN CSV export
+- [ ] PDF receipt + print (`pdf`/`printing`)
+- [ ] README with Windows build instructions (`flutter build windows`)
+- [ ] Backup/restore (DB copy + bundle export); global error presenter
 - [ ] DB migration tests; performance pass (50k SKU search)
-- [ ] README with screenshots/build instructions for Windows (`flutter build windows`)
-- [ ] Optional: SQLCipher encryption flag; golden tests for receipts
+- [ ] Optional: SQLCipher encryption; golden tests for receipts
 
 ---
 
