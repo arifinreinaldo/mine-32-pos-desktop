@@ -53,7 +53,8 @@ class Money implements Comparable<Money> {
 
   Money operator -() => Money(-minorUnits, currency: currency);
 
-  Money operator *(int factor) => Money(minorUnits * factor, currency: currency);
+  Money operator *(int factor) =>
+      Money(minorUnits * factor, currency: currency);
 
   Money abs() => Money(minorUnits.abs(), currency: currency);
 

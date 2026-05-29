@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 run() { echo ""; echo "â–¶ $*"; "$@"; }
 
 if [[ "${1:-}" != "--no-codegen" ]]; then
-  run dart run build_runner build --delete-conflicting-outputs
+  run dart run build_runner build
 fi
 
 run flutter analyze

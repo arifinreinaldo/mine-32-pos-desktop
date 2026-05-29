@@ -18,11 +18,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] `Money` value type + tests; `Hlc` type + tests; `Result`/`AppFailure`
 
 ## M1 — Database & sync core
-- [ ] `SyncableTable` base; `AppDatabase` with `company_settings`, `devices`, `change_log`, `applied_changes`, `sync_meta`
-- [ ] `HlcService` (persists last hlc); `DeviceIdentity` (stable device id)
-- [ ] `ChangeLogWriter` — transactional write+oplog; converters (Money/enums/DateTime)
-- [ ] `SyncRegistry` + `SyncEngine` (export/import/reproject); `SyncTransport` iface + `SharedFolderTransport`
-- [ ] Tests: HLC ordering, change-log emission, **convergence** & **idempotency** round-trip, no-lost-stock property
+- [x] `SyncableTable` base; `AppDatabase` with `company_settings`, `devices`, `change_log`, `applied_changes`, `sync_meta`
+- [x] `HlcService` (persists last hlc); `DeviceIdentity` (stable device id)
+- [x] `ChangeLogWriter` + `SyncRepository` base — transactional write+oplog
+      (money stored as int minor units + mapped in repos; no Money/enum converters needed)
+- [x] `SyncRegistry` + `SyncEngine` (export/import/reproject hook); `SyncTransport` iface + `SharedFolderTransport` + `InMemoryTransport`
+- [x] Tests: HLC ordering, **convergence** & **idempotency** & **order-independence** & **tombstone-safety** round-trips (no-lost-stock property lands in M3 with event tables)
 
 ## M2 — Catalog (parts) [Shopify + auto]
 - [ ] Tables: products, product_variants, categories, brands (+ FTS search)

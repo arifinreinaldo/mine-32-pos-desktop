@@ -14,7 +14,11 @@ class Hlc implements Comparable<Hlc> {
   final int counter;
   final String nodeId;
 
-  const Hlc({required this.millis, required this.counter, required this.nodeId});
+  const Hlc({
+    required this.millis,
+    required this.counter,
+    required this.nodeId,
+  });
 
   factory Hlc.zero(String nodeId) => Hlc(millis: 0, counter: 0, nodeId: nodeId);
 

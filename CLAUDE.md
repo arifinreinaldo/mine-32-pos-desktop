@@ -40,8 +40,8 @@ export PATH="$PATH:/opt/flutter/bin"
 | Task | Command |
 |------|---------|
 | Get deps | `flutter pub get` |
-| **Codegen** (Drift + json_serializable) | `dart run build_runner build --delete-conflicting-outputs` |
-| Watch codegen | `dart run build_runner watch --delete-conflicting-outputs` |
+| **Codegen** (Drift + json_serializable) | `dart run build_runner build` |
+| Watch codegen | `dart run build_runner watch` |
 | **Analyze** (gate) | `flutter analyze` |
 | **Test** (gate) | `flutter test` |
 | Format | `dart format .` |
@@ -52,7 +52,7 @@ export PATH="$PATH:/opt/flutter/bin"
 
 A task is **done** only when ALL of these pass (in order):
 
-1. `dart run build_runner build --delete-conflicting-outputs` — no errors
+1. `dart run build_runner build` — no errors
 2. `flutter analyze` — **No issues found**
 3. `flutter test` — all pass
 4. `dart format --set-exit-if-changed .` — already formatted

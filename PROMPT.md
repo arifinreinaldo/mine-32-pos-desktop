@@ -22,7 +22,7 @@ runs repeatedly; each run makes ONE coherent, shippable increment.
      sync round-trip when you add a syncable entity).
 
 4. **Make it GREEN.** Run, in order, until all pass:
-   - `dart run build_runner build --delete-conflicting-outputs`
+   - `dart run build_runner build`
    - `flutter analyze`  → No issues found
    - `flutter test`     → all pass
    - `dart format .`

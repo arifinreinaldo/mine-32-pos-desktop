@@ -14,7 +14,11 @@ sealed class AppFailure {
 /// Input failed validation. [fieldErrors] maps field name -> message.
 final class ValidationFailure extends AppFailure {
   final Map<String, String> fieldErrors;
-  const ValidationFailure(super.message, {this.fieldErrors = const {}, super.cause});
+  const ValidationFailure(
+    super.message, {
+    this.fieldErrors = const {},
+    super.cause,
+  });
 }
 
 /// A requested entity does not exist.
