@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'tables/accounting_tables.dart';
 import 'tables/catalog_tables.dart';
 import 'tables/inventory_tables.dart';
 import 'tables/sales_tables.dart';
@@ -40,6 +41,11 @@ part 'app_database.g.dart';
     Sales,
     SaleLines,
     Payments,
+    // Accounting
+    Accounts,
+    TaxRates,
+    Journals,
+    JournalLines,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -48,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +86,19 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(sales);
         await m.createTable(saleLines);
         await m.createTable(payments);
+      }
+      // v5 -> v6: accounting + tax/faktur fields.
+      if (from < 6) {
+        await m.createTable(accounts);
+        await m.createTable(taxRates);
+        await m.createTable(journals);
+        await m.createTable(journalLines);
+        await m.addColumn(companySettings, companySettings.isPkp);
+        await m.addColumn(companySettings, companySettings.taxInclusive);
+        await m.addColumn(companySettings, companySettings.defaultTaxRateId);
+        await m.addColumn(sales, sales.buyerName);
+        await m.addColumn(sales, sales.buyerNpwp);
+        await m.addColumn(sales, sales.fakturNumber);
       }
     },
     beforeOpen: (details) async {

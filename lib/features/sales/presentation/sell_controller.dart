@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../accounting/presentation/accounting_controller.dart';
 import '../../catalog/domain/catalog_item.dart';
 import '../../catalog/presentation/catalog_controller.dart';
 import '../../inventory/presentation/inventory_controller.dart';
@@ -15,6 +16,7 @@ final salesRepositoryProvider = Provider<SalesRepository>((ref) {
     hlcService: services.hlc,
     clock: services.clock,
     inventory: ref.watch(inventoryRepositoryProvider),
+    accounting: ref.watch(accountingRepositoryProvider),
   );
 });
 

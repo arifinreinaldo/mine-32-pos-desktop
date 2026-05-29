@@ -18,6 +18,12 @@ class Sales extends Table with SyncableTable {
   IntColumn get totalMinor => integer().withDefault(const Constant(0))();
   IntColumn get paidTotalMinor => integer().withDefault(const Constant(0))();
   IntColumn get postedAt => integer().nullable()();
+
+  // Tax / faktur (Indonesia CoreTax) — subtotalMinor is the DPP (tax base) and
+  // taxTotalMinor is the PPN. Buyer details support issuing a tax invoice.
+  TextColumn get buyerName => text().nullable()();
+  TextColumn get buyerNpwp => text().nullable()();
+  TextColumn get fakturNumber => text().nullable()();
 }
 
 @TableIndex(name: 'idx_saleline_sale', columns: {#saleId})

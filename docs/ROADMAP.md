@@ -53,12 +53,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Accounting journals on complete (lands in M5)
 - [ ] Receipt: PDF + print; returns/refunds; park/recall; void; line-discount UI
 
-## M5 — Accounting [Xero]
-- [ ] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E), account_balances (P)
-- [ ] Posting engine + balanced-journal invariant; tax calculation
-- [ ] UI: chart of accounts, journal browser, manual journal, tax rates
-- [ ] Reports: Trial Balance, P&L, Balance Sheet, Tax summary (with date filters)
-- [ ] Tests: posting rules (cash/credit sale, payment, receipt, adjustment), balances
+## M5 — Accounting + Tax (Xero rigor; Indonesia CoreTax) + Reporting
+- [x] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E); balances via trial balance
+- [x] Posting engine + balanced-journal invariant; integer PPN tax math (inclusive/exclusive, DPP/PPN)
+- [x] CoreTax-ready data: company NPWP + PKP flag + tax-inclusive setting; per-sale DPP/PPN + buyer name/NPWP + faktur number
+- [x] Sale completion posts the revenue/PPN/COGS journal automatically
+- [x] UI: Accounting screen (chart of accounts + balances); Reports screen (range filter, stat cards, fl_chart sales trend, top parts, trial balance, PPN summary)
+- [x] Tests: tax math, balanced posting, sale→journal, PPN tax summary, reports & accounting screens
+- [ ] CoreTax CSV/XML faktur export; P&L + Balance Sheet statements; journal browser; manual journal; tax-rate editor
 
 ## M6 — Customers & Purchasing
 - [ ] customers + customer_vehicles; AR balance; credit limit; price tiers

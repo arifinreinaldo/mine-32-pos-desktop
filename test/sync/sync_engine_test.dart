@@ -91,6 +91,8 @@ class CompanyRepo extends SyncRepository {
         name: name,
         currency: 'USD',
         currencyScale: 2,
+        isPkp: false,
+        taxInclusive: true,
       ),
     );
   }

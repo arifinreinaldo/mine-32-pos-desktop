@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/database/app_database.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
+import '../../../shared/formatters/money_format.dart';
+import '../../accounting/domain/tax_math.dart';
+import '../../accounting/presentation/accounting_controller.dart';
 import '../../inventory/presentation/inventory_controller.dart';
 import '../domain/cart.dart';
 import 'sell_controller.dart';
@@ -32,11 +36,18 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   late final TextEditingController _tendered;
   String _method = 'cash';
   bool _saving = false;
+  TaxRate? _taxRate;
 
   @override
   void initState() {
     super.initState();
     _tendered = TextEditingController(text: widget.total.toMajorString());
+    _loadTaxRate();
+  }
+
+  Future<void> _loadTaxRate() async {
+    final rate = await ref.read(accountingRepositoryProvider).defaultTaxRate();
+    if (mounted) setState(() => _taxRate = rate);
   }
 
   @override
@@ -64,6 +75,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
     final locationId = await ref
         .read(inventoryRepositoryProvider)
         .ensureDefaultLocation();
+    final rate = _taxRate;
     final result = await ref
         .read(salesRepositoryProvider)
         .completeSale(
@@ -71,8 +83,42 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           locationId: locationId,
           tendered: _tenderedMoney,
           method: _method,
+          taxBasisPoints: rate?.basisPoints ?? 0,
+          taxInclusive: rate?.inclusive ?? true,
         );
     if (mounted) Navigator.of(context).pop(result);
+  }
+
+  /// DPP (tax base) + PPN breakdown of the inclusive total.
+  Widget _taxBreakdown(MoneyFormat money, ThemeData theme) {
+    final rate = _taxRate!;
+    final amounts = TaxMath.split(
+      amountMinor: widget.total.minorUnits,
+      basisPoints: rate.basisPoints,
+      inclusive: rate.inclusive,
+    );
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    Widget line(String label, int value) => Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(money.format(Money(value)), style: style),
+        ],
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Column(
+        children: [
+          line('Tax base (DPP)', amounts.baseMinor),
+          line('${rate.name} (included)', amounts.taxMinor),
+        ],
+      ),
+    );
   }
 
   @override
@@ -99,6 +145,8 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
                 ),
               ],
             ),
+            if (_taxRate != null && _taxRate!.basisPoints > 0)
+              _taxBreakdown(money, theme),
             const SizedBox(height: 16),
             SegmentedButton<String>(
               segments: const [
