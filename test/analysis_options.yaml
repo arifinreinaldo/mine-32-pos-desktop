@@ -1,0 +1,10 @@
+# Test code keeps the project lints but relaxes const/style rules that add noise
+# to value-object math and fixtures without improving test quality.
+include: ../analysis_options.yaml
+
+linter:
+  rules:
+    prefer_const_constructors: false
+    prefer_const_constructors_in_immutables: false
+    prefer_const_declarations: false
+    avoid_redundant_argument_values: false
