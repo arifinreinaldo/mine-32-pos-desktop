@@ -77,8 +77,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 ## M8 — Polish & hardening
 - [x] Settings screen: company profile, currency (USD/IDR/… → reactive money format), NPWP + PKP, tax-inclusive, receipt header/footer
 - [x] CoreTax PPN CSV export
-- [ ] PDF receipt + print (`pdf`/`printing`)
-- [ ] README with Windows build instructions (`flutter build windows`)
+- [x] PDF receipt (80mm) + print via `printing`; "Print" action after a sale
+- [x] README with Windows build instructions (`flutter build windows`)
 - [ ] Backup/restore (DB copy + bundle export); global error presenter
 - [ ] DB migration tests; performance pass (50k SKU search)
 - [ ] Optional: SQLCipher encryption; golden tests for receipts

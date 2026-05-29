@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/money/money.dart';
+import '../../settings/presentation/settings_controller.dart';
+import '../data/receipt_pdf.dart';
 import '../domain/cart.dart';
+import '../domain/receipt.dart';
 import 'payment_dialog.dart';
 import 'sell_controller.dart';
 
@@ -187,8 +192,51 @@ class _CartPanel extends ConsumerWidget {
         content: Text(
           'Sale ${result.number} completed • change ${money.format(result.change)}',
         ),
+        action: SnackBarAction(
+          label: 'Print',
+          onPressed: () => _printReceipt(ref, result.saleId),
+        ),
       ),
     );
+  }
+
+  Future<void> _printReceipt(WidgetRef ref, String saleId) async {
+    final salesRepo = ref.read(salesRepositoryProvider);
+    final sale = await salesRepo.getSale(saleId);
+    if (sale == null) return;
+    final lines = await salesRepo.linesForSale(saleId);
+    final settings = await ref.read(settingsRepositoryProvider).get();
+    final money = ref.read(moneyFormatProvider);
+    final hasTax = sale.taxTotalMinor > 0;
+    final data = ReceiptData(
+      companyName: settings?.name ?? 'My Auto Parts',
+      address: settings?.address,
+      npwp: settings?.taxNumber,
+      number: sale.number,
+      dateMs: sale.createdAt,
+      lines: [
+        for (final l in lines)
+          ReceiptLine(
+            name: l.description,
+            qty: l.qty,
+            unitPrice: money.format(Money(l.unitPriceMinor)),
+            lineTotal: money.format(Money(l.lineTotalMinor)),
+          ),
+      ],
+      dpp: hasTax ? money.format(Money(sale.subtotalMinor)) : null,
+      ppn: hasTax ? money.format(Money(sale.taxTotalMinor)) : null,
+      total: money.format(Money(sale.totalMinor)),
+      paid: money.format(Money(sale.paidTotalMinor)),
+      change: money.format(
+        Money(
+          sale.paidTotalMinor - sale.totalMinor < 0
+              ? 0
+              : sale.paidTotalMinor - sale.totalMinor,
+        ),
+      ),
+      footer: settings?.receiptFooter,
+    );
+    await Printing.layoutPdf(onLayout: (_) => buildReceiptPdf(data));
   }
 }
 

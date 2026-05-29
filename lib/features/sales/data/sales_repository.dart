@@ -186,6 +186,13 @@ class SalesRepository extends SyncRepository {
         .watch();
   }
 
+  Future<Sale?> getSale(String saleId) {
+    return (db.select(db.sales)
+          ..where((t) => t.id.equals(saleId))
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
   Future<List<SaleLine>> linesForSale(String saleId) {
     return (db.select(
       db.saleLines,
