@@ -23,6 +23,12 @@ class AppServices {
   final ChangeLogWriter changeLog;
   final SyncRegistry registry;
 
+  /// Company currency loaded at startup (used where the reactive settings stream
+  /// isn't yet available, e.g. dialog `initState`). Reactive reads use
+  /// `companySettingsStreamProvider` / `moneyFormatProvider`.
+  final String currency;
+  final int currencyScale;
+
   AppServices({
     required this.db,
     required this.deviceId,
@@ -30,6 +36,8 @@ class AppServices {
     required this.hlc,
     required this.changeLog,
     required this.registry,
+    this.currency = 'USD',
+    this.currencyScale = 2,
   });
 
   /// Open/prepare everything. Pass [database] (e.g. in-memory) and a fixed
@@ -59,13 +67,15 @@ class AppServices {
       clock: clock,
     ).seedDefaults();
 
-    // Seed the default company-settings row (idempotent).
-    await SettingsRepository(
+    // Seed the default company-settings row (idempotent) and read currency.
+    final settingsRepo = SettingsRepository(
       db: db,
       changeLog: changeLog,
       hlcService: hlc,
       clock: clock,
-    ).seedDefault();
+    );
+    await settingsRepo.seedDefault();
+    final settings = await settingsRepo.get();
 
     return AppServices(
       db: db,
@@ -74,6 +84,8 @@ class AppServices {
       hlc: hlc,
       changeLog: changeLog,
       registry: registry,
+      currency: settings?.currency ?? 'USD',
+      currencyScale: settings?.currencyScale ?? 2,
     );
   }
 

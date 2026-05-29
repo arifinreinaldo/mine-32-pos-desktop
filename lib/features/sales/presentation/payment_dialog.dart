@@ -34,6 +34,7 @@ class PaymentDialog extends ConsumerStatefulWidget {
 
 class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   late final TextEditingController _tendered;
+  late final int _scale;
   String _method = 'cash';
   bool _saving = false;
   TaxRate? _taxRate;
@@ -41,7 +42,10 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   @override
   void initState() {
     super.initState();
-    _tendered = TextEditingController(text: widget.total.toMajorString());
+    _scale = ref.read(currencyScaleProvider);
+    _tendered = TextEditingController(
+      text: widget.total.toMajorString(scale: _scale),
+    );
     _loadTaxRate();
   }
 
@@ -60,7 +64,12 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
     if (_method != 'cash') return widget.total;
     final t = _tendered.text.trim();
     if (t.isEmpty) return const Money(0);
-    return Money.fromMajor(t);
+    // Desktop number fields still accept stray characters; never throw in build.
+    try {
+      return Money.fromMajor(t, scale: _scale);
+    } on FormatException {
+      return const Money(0);
+    }
   }
 
   Money get _change {

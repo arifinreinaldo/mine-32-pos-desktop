@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
 import '../domain/part_draft.dart';
 import 'catalog_controller.dart';
@@ -32,20 +33,24 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
   late final TextEditingController _cost;
   late final TextEditingController _coreCharge;
   late bool _isActive;
+  late final int _scale;
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
+    _scale = ref.read(currencyScaleProvider);
     final d = widget.initial;
     _name = TextEditingController(text: d.name);
     _sku = TextEditingController(text: d.sku);
     _barcode = TextEditingController(text: d.barcode ?? '');
     _brand = TextEditingController(text: d.brandName ?? '');
     _description = TextEditingController(text: d.description ?? '');
-    _price = TextEditingController(text: d.price.toMajorString());
-    _cost = TextEditingController(text: d.cost.toMajorString());
-    _coreCharge = TextEditingController(text: d.coreCharge.toMajorString());
+    _price = TextEditingController(text: d.price.toMajorString(scale: _scale));
+    _cost = TextEditingController(text: d.cost.toMajorString(scale: _scale));
+    _coreCharge = TextEditingController(
+      text: d.coreCharge.toMajorString(scale: _scale),
+    );
     _isActive = d.isActive;
   }
 
@@ -76,7 +81,12 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
 
   Money _toMoney(TextEditingController c) {
     final t = c.text.trim();
-    return t.isEmpty ? const Money(0) : Money.fromMajor(t);
+    if (t.isEmpty) return const Money(0);
+    try {
+      return Money.fromMajor(t, scale: _scale);
+    } on FormatException {
+      return const Money(0);
+    }
   }
 
   Future<void> _save() async {

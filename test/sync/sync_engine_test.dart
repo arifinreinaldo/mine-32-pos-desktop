@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mine32_pos/core/database/app_database.dart';
@@ -10,6 +12,7 @@ import 'package:mine32_pos/core/sync/sync_engine.dart';
 import 'package:mine32_pos/core/sync/sync_entity.dart';
 import 'package:mine32_pos/core/sync/transport/in_memory_transport.dart';
 import 'package:mine32_pos/core/time/clock.dart';
+import 'package:mine32_pos/core/time/hlc.dart';
 
 /// A simulated device/installation with its own DB + clock, sharing a folder.
 class Node {
@@ -254,5 +257,104 @@ void main() {
         await b.close();
       },
     );
+
+    test('import does not skip an un-applied (unknown-entity) bundle', () async {
+      // Two bundles from peer 'a': an earlier one with an UNKNOWN entity, and a
+      // later one with a known entity. The cursor must NOT advance past the
+      // unknown bundle (so it is retried once this device learns the entity).
+      final folder = InMemoryFolder();
+      final h1 = const Hlc(millis: 1000, counter: 0, nodeId: 'a');
+      final h2 = const Hlc(millis: 2000, counter: 0, nodeId: 'a');
+
+      final unknownBundle = SyncBundle(
+        schemaVersion: 1,
+        deviceId: 'a',
+        fromHlc: h1.pack(),
+        toHlc: h1.pack(),
+        changes: [
+          ChangeRecord(
+            id: 'c1',
+            entityTable: 'mystery', // not in the registry
+            rowId: 'm1',
+            op: ChangeOp.upsert,
+            payload: const {'id': 'm1'},
+            hlc: h1,
+            deviceId: 'a',
+            createdAt: 1000,
+          ),
+        ],
+      );
+      final company = CompanySetting(
+        id: 'default',
+        createdAt: 2000,
+        updatedAt: 2000,
+        updatedHlc: h2.pack(),
+        name: 'From A',
+        currency: 'USD',
+        currencyScale: 2,
+        isPkp: false,
+        taxInclusive: true,
+      );
+      final knownBundle = SyncBundle(
+        schemaVersion: 1,
+        deviceId: 'a',
+        fromHlc: h2.pack(),
+        toHlc: h2.pack(),
+        changes: [
+          ChangeRecord(
+            id: 'c2',
+            entityTable: 'company_settings',
+            rowId: 'default',
+            op: ChangeOp.upsert,
+            payload: company.toJson(),
+            hlc: h2,
+            deviceId: 'a',
+            createdAt: 2000,
+          ),
+        ],
+      );
+      folder.data['a'] = {
+        SyncEngine.bundleName(h1.pack()): utf8.encode(
+          jsonEncode(unknownBundle.toJson()),
+        ),
+        SyncEngine.bundleName(h2.pack()): utf8.encode(
+          jsonEncode(knownBundle.toJson()),
+        ),
+      };
+
+      final db = AppDatabase(NativeDatabase.memory());
+      final hlc = HlcService(db, MutableClock(5000), 'b');
+      await hlc.load();
+      final registry = SyncRegistry();
+      registerCoreSyncEntities(
+        registry,
+      ); // knows company_settings, not 'mystery'
+      final engine = SyncEngine(
+        db: db,
+        hlc: hlc,
+        registry: registry,
+        transport: InMemoryTransport(folder, 'b'),
+        deviceId: 'b',
+      );
+
+      final applied = await engine.import();
+      expect(applied, 1, reason: 'only the known company change applies');
+
+      final onB = await (db.select(
+        db.companySettings,
+      )..where((t) => t.id.equals('default'))).getSingleOrNull();
+      expect(onB?.name, 'From A');
+
+      final cursorRow = await (db.select(
+        db.syncMeta,
+      )..where((t) => t.key.equals('sync.cursor.a'))).getSingleOrNull();
+      expect(
+        cursorRow?.value ?? '',
+        '',
+        reason: 'cursor must not advance past the un-applied mystery bundle',
+      );
+
+      await db.close();
+    });
   });
 }

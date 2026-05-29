@@ -101,33 +101,51 @@ class SyncEngine {
   /// Pull peers' bundles and merge any not-yet-applied changes. Returns #applied.
   Future<int> import() async {
     final refs = await transport.listPeerBundles();
-    refs.sort((a, b) => a.name.compareTo(b.name));
+
+    // Group by producing device so each peer's cursor advances independently.
+    final byPeer = <String, List<BundleRef>>{};
+    for (final ref in refs) {
+      byPeer.putIfAbsent(ref.deviceId, () => []).add(ref);
+    }
 
     var applied = 0;
-    for (final ref in refs) {
-      final cursorKey = 'sync.cursor.${ref.deviceId}';
+    for (final entry in byPeer.entries) {
+      final cursorKey = 'sync.cursor.${entry.key}';
       final cursor = await _meta(cursorKey) ?? '';
-      if (ref.name.compareTo(cursor) <= 0) continue; // already consumed
+      final peerRefs = entry.value..sort((a, b) => a.name.compareTo(b.name));
 
-      final bytes = await transport.getBundle(ref);
-      final bundle = SyncBundle.fromJson(
-        (jsonDecode(utf8.decode(bytes)) as Map).cast<String, dynamic>(),
-      );
+      var newCursor = cursor;
+      // Only advance the cursor through a *contiguous* run of fully-applied
+      // bundles; once a bundle is left partial (unknown entity), stop advancing
+      // so it (and everything after) is retried on a later import.
+      var contiguous = true;
 
-      var fullyApplied = true;
-      for (final change in bundle.changes) {
-        final entity = registry[change.entityTable];
-        if (entity == null) {
-          // Unknown entity (e.g. newer schema): leave it un-applied so a future
-          // version can pick it up; don't advance the cursor past this bundle.
-          fullyApplied = false;
-          continue;
+      for (final ref in peerRefs) {
+        if (ref.name.compareTo(cursor) <= 0) continue; // already consumed
+
+        final bytes = await transport.getBundle(ref);
+        final bundle = SyncBundle.fromJson(
+          (jsonDecode(utf8.decode(bytes)) as Map).cast<String, dynamic>(),
+        );
+
+        var fullyApplied = true;
+        for (final change in bundle.changes) {
+          final entity = registry[change.entityTable];
+          if (entity == null) {
+            fullyApplied = false; // unknown entity (e.g. newer schema)
+            continue;
+          }
+          if (await _applyOne(change, entity)) applied++;
         }
-        final newlyApplied = await _applyOne(change, entity);
-        if (newlyApplied) applied++;
+
+        if (fullyApplied && contiguous) {
+          newCursor = ref.name;
+        } else {
+          contiguous = false;
+        }
       }
 
-      if (fullyApplied) await _setMeta(cursorKey, ref.name);
+      if (newCursor != cursor) await _setMeta(cursorKey, newCursor);
     }
 
     if (applied > 0) {

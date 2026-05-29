@@ -8,6 +8,9 @@ void main() {
       expect(Money.fromMajor(0.1).minorUnits, 10);
       expect(Money.fromMajor('19.99').minorUnits, 1999);
       expect(Money.fromMajor('1', scale: 0).minorUnits, 1);
+      // IDR (scale 0): "50000" must be 50000 minor units, not 5,000,000.
+      expect(Money.fromMajor('50000', scale: 0).minorUnits, 50000);
+      expect(Money.fromMajor('500', scale: 2).minorUnits, 50000);
     });
 
     test('addition and subtraction', () {

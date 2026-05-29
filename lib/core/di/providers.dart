@@ -38,3 +38,13 @@ final moneyFormatProvider = Provider<MoneyFormat>((ref) {
   if (settings == null) return const MoneyFormat();
   return MoneyFormat.forCurrency(settings.currency, settings.currencyScale);
 });
+
+/// Currency minor-unit scale. Uses the reactive settings when available, else
+/// the value loaded at startup — so it is correct even inside `initState`
+/// (where the settings stream may not have emitted yet). Critical for parsing
+/// money input at the right scale (e.g. IDR = 0, USD = 2).
+final currencyScaleProvider = Provider<int>((ref) {
+  final settings = ref.watch(companySettingsStreamProvider).value;
+  return settings?.currencyScale ??
+      ref.watch(appServicesProvider).currencyScale;
+});
