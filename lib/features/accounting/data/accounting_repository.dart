@@ -164,6 +164,95 @@ class AccountingRepository extends SyncRepository {
     });
   }
 
+  /// Posts a user-entered ("manual") journal. Thin wrapper over [postJournal]
+  /// that tags the source; the balanced-debits/credits invariant still applies.
+  Future<String> postManualJournal({
+    required int date,
+    required List<JournalLineInput> lines,
+    String? memo,
+  }) {
+    return postJournal(
+      date: date,
+      source: 'manual',
+      refType: 'manual',
+      memo: memo,
+      lines: lines,
+    );
+  }
+
+  /// Active accounts, ordered by code — for pickers and the chart of accounts.
+  Future<List<Account>> listAccounts() {
+    return (db.select(db.accounts)
+          ..where((t) => t.deletedAt.isNull() & t.isActive.equals(true))
+          ..orderBy([(t) => OrderingTerm.asc(t.code)]))
+        .get();
+  }
+
+  /// Recent journals (most recent first) with their posted total, for the
+  /// journal browser. Optional date window filters on the journal date.
+  Stream<List<JournalSummary>> watchJournals({
+    int? fromMs,
+    int? toMs,
+    int limit = 200,
+  }) {
+    final j = db.journals;
+    final jl = db.journalLines;
+    final debit = jl.debitMinor.sum();
+    final statement =
+        db.select(j).join([
+            leftOuterJoin(
+              jl,
+              jl.journalId.equalsExp(j.id) & jl.deletedAt.isNull(),
+            ),
+          ])
+          ..addColumns([debit])
+          ..where(j.deletedAt.isNull())
+          ..groupBy([j.id])
+          ..orderBy([OrderingTerm.desc(j.date), OrderingTerm.desc(j.createdAt)])
+          ..limit(limit);
+    if (fromMs != null) {
+      statement.where(j.date.isBiggerOrEqualValue(fromMs));
+    }
+    if (toMs != null) {
+      statement.where(j.date.isSmallerThanValue(toMs));
+    }
+    return statement.watch().map(
+      (rows) => rows.map((row) {
+        final journal = row.readTable(j);
+        return JournalSummary(
+          id: journal.id,
+          dateMs: journal.date,
+          source: journal.source,
+          memo: journal.memo,
+          refType: journal.refType,
+          total: Money(row.read(debit) ?? 0),
+        );
+      }).toList(),
+    );
+  }
+
+  /// The posted lines of one journal, joined to account code/name.
+  Future<List<JournalLineView>> journalLines(String journalId) async {
+    final jl = db.journalLines;
+    final a = db.accounts;
+    final rows =
+        await (db.select(jl).join([innerJoin(a, a.id.equalsExp(jl.accountId))])
+              ..where(jl.journalId.equals(journalId) & jl.deletedAt.isNull())
+              ..orderBy([OrderingTerm.asc(a.code)]))
+            .get();
+    return rows.map((row) {
+      final line = row.readTable(jl);
+      final acc = row.readTable(a);
+      return JournalLineView(
+        accountCode: acc.code,
+        accountName: acc.name,
+        debit: Money(line.debitMinor),
+        credit: Money(line.creditMinor),
+        description: line.description,
+      );
+    }).toList();
+  }
+
   /// Posts the standard sale journal (revenue, PPN, COGS). The debit side is
   /// Cash, Bank or — for on-account/credit sales — Accounts Receivable.
   Future<void> postSaleJournal({

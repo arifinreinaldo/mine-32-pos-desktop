@@ -63,7 +63,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tests: tax math, balanced posting, sale→journal, PPN tax summary, reports & accounting screens
 - [x] CoreTax PPN CSV export (Reports → "PPN CSV"; faktur rows with DPP/PPN/buyer/NPWP)
 - [x] P&L + Balance Sheet statements (Reports screen, period-filtered)
-- [ ] CoreTax XML faktur; journal browser; manual journal; tax-rate editor
+- [x] Journal browser (Accounting → Journals tab: list + expandable legs) + manual journal entry (balanced-only Post)
+- [ ] CoreTax XML faktur; tax-rate editor
 
 ## M6 — Customers & Purchasing
 - [x] customers + customer_vehicles; AR balance (watch); credit limit

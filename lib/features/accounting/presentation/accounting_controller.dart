@@ -25,3 +25,15 @@ final trialBalanceProvider = StreamProvider.autoDispose<List<TrialBalanceRow>>((
 ) {
   return ref.watch(accountingRepositoryProvider).watchTrialBalance();
 });
+
+/// Recent journals for the journal browser (most recent first).
+final journalsProvider = StreamProvider.autoDispose<List<JournalSummary>>((
+  ref,
+) {
+  return ref.watch(accountingRepositoryProvider).watchJournals();
+});
+
+/// Active accounts (ordered by code) for the manual-journal account picker.
+final accountsListProvider = FutureProvider.autoDispose<List<Account>>((ref) {
+  return ref.watch(accountingRepositoryProvider).listAccounts();
+});

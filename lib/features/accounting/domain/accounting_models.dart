@@ -64,6 +64,40 @@ class TaxSummary {
   });
 }
 
+/// A journal header for the journal browser (with its posted total).
+class JournalSummary {
+  final String id;
+  final int dateMs;
+  final String source;
+  final String? memo;
+  final String? refType;
+  final Money total; // sum of debits (== sum of credits)
+  const JournalSummary({
+    required this.id,
+    required this.dateMs,
+    required this.source,
+    required this.total,
+    this.memo,
+    this.refType,
+  });
+}
+
+/// One posted journal line, joined to its account, for the browser detail view.
+class JournalLineView {
+  final String accountCode;
+  final String accountName;
+  final Money debit;
+  final Money credit;
+  final String? description;
+  const JournalLineView({
+    required this.accountCode,
+    required this.accountName,
+    required this.debit,
+    required this.credit,
+    this.description,
+  });
+}
+
 /// One account line on a financial statement (amount shown as a positive value
 /// of its natural sign).
 class StatementLine {

@@ -64,6 +64,70 @@ void main() {
       await db.close();
     });
 
+    test('postManualJournal lists in the browser with its legs', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final repo = _acct(db);
+      await repo.hlcService.load();
+      await repo.seedDefaults();
+      final cash = (await repo.accountByCode(AccountCode.cash))!;
+      final equity = (await repo.accountByCode(AccountCode.ownerEquity))!;
+
+      final id = await repo.postManualJournal(
+        date: 5,
+        memo: 'Opening cash',
+        lines: [
+          JournalLineInput(
+            accountId: cash.id,
+            debitMinor: 100000,
+            description: 'Cash',
+          ),
+          JournalLineInput(accountId: equity.id, creditMinor: 100000),
+        ],
+      );
+
+      final journals = await repo.watchJournals().first;
+      final j = journals.firstWhere((x) => x.id == id);
+      expect(j.source, 'manual');
+      expect(j.memo, 'Opening cash');
+      expect(j.total, const Money(100000));
+
+      final lines = await repo.journalLines(id);
+      expect(lines, hasLength(2));
+      final cashLine = lines.firstWhere(
+        (l) => l.accountCode == AccountCode.cash,
+      );
+      expect(cashLine.debit, const Money(100000));
+      expect(cashLine.credit, const Money(0));
+
+      // listAccounts returns the seeded accounts, ordered by code.
+      final accounts = await repo.listAccounts();
+      expect(accounts, hasLength(10));
+      final codes = accounts.map((a) => a.code).toList();
+      expect(codes, [...codes]..sort());
+
+      await db.close();
+    });
+
+    test('postManualJournal rejects an unbalanced entry', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final repo = _acct(db);
+      await repo.hlcService.load();
+      await repo.seedDefaults();
+      final cash = (await repo.accountByCode(AccountCode.cash))!;
+      final equity = (await repo.accountByCode(AccountCode.ownerEquity))!;
+      await expectLater(
+        repo.postManualJournal(
+          date: 1,
+          lines: [
+            JournalLineInput(accountId: cash.id, debitMinor: 100),
+            JournalLineInput(accountId: equity.id, creditMinor: 90),
+          ],
+        ),
+        throwsStateError,
+      );
+      await db.close();
+    });
+
     test('postSaleJournal produces a balanced trial balance', () async {
       final db = AppDatabase(NativeDatabase.memory());
       final repo = _acct(db);
