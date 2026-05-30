@@ -5,6 +5,7 @@ import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
 import '../domain/part_draft.dart';
 import 'catalog_controller.dart';
+import 'fitment_editor_dialog.dart';
 
 /// Create/edit a simple part. Returns `true` from the dialog when saved.
 class PartEditorDialog extends ConsumerStatefulWidget {
@@ -197,6 +198,22 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
                 ),
+                if (!widget.initial.isNew) ...[
+                  const Divider(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => FitmentEditorDialog.show(
+                        context,
+                        variantId: widget.initial.variantId!,
+                        partLabel:
+                            '${widget.initial.sku} · ${widget.initial.name}',
+                      ),
+                      icon: const Icon(Icons.directions_car_outlined, size: 18),
+                      label: const Text('Vehicle fitment & cross-references'),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

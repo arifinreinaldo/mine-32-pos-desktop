@@ -47,6 +47,45 @@ class AutoPartsRepository extends SyncRepository {
     return id;
   }
 
+  /// All non-deleted vehicles, sorted for a picker (make, then model).
+  Future<List<Vehicle>> listVehicles() {
+    return (db.select(db.vehicles)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([
+            (t) => OrderingTerm(expression: t.make),
+            (t) => OrderingTerm(expression: t.model),
+          ]))
+        .get();
+  }
+
+  /// Returns the id of an existing vehicle whose Year/Make/Model/Engine match
+  /// [draft] (case-insensitive), creating one only if none matches. Keeps the
+  /// vehicle list free of duplicates when adding fitment from the part screen.
+  Future<String> findOrCreateVehicle(VehicleDraft draft) async {
+    final make = draft.make.trim();
+    final model = draft.model.trim();
+    final engine = (draft.engine ?? '').trim();
+    for (final v in await listVehicles()) {
+      if (v.make.toLowerCase() == make.toLowerCase() &&
+          v.model.toLowerCase() == model.toLowerCase() &&
+          v.yearFrom == draft.yearFrom &&
+          v.yearTo == draft.yearTo &&
+          (v.engine ?? '').trim().toLowerCase() == engine.toLowerCase()) {
+        return v.id;
+      }
+    }
+    return upsertVehicle(
+      VehicleDraft(
+        make: make,
+        model: model,
+        yearFrom: draft.yearFrom,
+        yearTo: draft.yearTo,
+        engine: engine.isEmpty ? null : engine,
+        body: draft.body,
+      ),
+    );
+  }
+
   // --- Fitment ---
 
   Future<String> addFitment({
@@ -160,6 +199,26 @@ class AutoPartsRepository extends SyncRepository {
               )
               .toList(),
         );
+  }
+
+  Future<void> removeCrossReference(String id) async {
+    final row =
+        await (db.select(db.crossReferences)
+              ..where((t) => t.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) return;
+    await writeSyncable<CrossReference>(
+      entityTable: 'cross_references',
+      table: db.crossReferences,
+      rowId: id,
+      op: ChangeOp.delete,
+      build: (hlc, now) => row.copyWith(
+        deletedAt: Value(now),
+        updatedAt: now,
+        updatedHlc: hlc.pack(),
+      ),
+    );
   }
 
   // --- Supersession ---

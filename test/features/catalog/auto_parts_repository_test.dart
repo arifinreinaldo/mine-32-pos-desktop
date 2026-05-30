@@ -134,6 +134,63 @@ void main() {
       },
     );
 
+    test(
+      'findOrCreateVehicle dedupes by attributes, listVehicles sorts',
+      () async {
+        final n = await solo();
+        final id1 = await n.auto.findOrCreateVehicle(
+          const VehicleDraft(
+            make: 'Toyota',
+            model: 'Corolla',
+            yearFrom: 2015,
+            yearTo: 2018,
+            engine: '1.8L',
+          ),
+        );
+        // Same attributes (different case/whitespace) reuse the same vehicle.
+        final id2 = await n.auto.findOrCreateVehicle(
+          const VehicleDraft(
+            make: 'toyota',
+            model: '  Corolla ',
+            yearFrom: 2015,
+            yearTo: 2018,
+            engine: '1.8l',
+          ),
+        );
+        expect(id2, id1);
+        // Different attributes create a new vehicle.
+        final id3 = await n.auto.findOrCreateVehicle(
+          const VehicleDraft(make: 'Honda', model: 'Civic', engine: '2.0L'),
+        );
+        expect(id3, isNot(id1));
+
+        final all = await n.auto.listVehicles();
+        expect(all.map((v) => v.make).toList(), ['Honda', 'Toyota']);
+
+        await n.close();
+      },
+    );
+
+    test('removeCrossReference tombstones the reference', () async {
+      final n = await solo();
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Air Filter',
+          sku: 'AF-1',
+          price: Money(800),
+          cost: Money(400),
+          coreCharge: Money(0),
+        ),
+      );
+      await n.auto.addCrossReference(variantId: variantId, otherNumber: 'X-1');
+      final before = await n.auto.watchCrossReferences(variantId).first;
+      expect(before, hasLength(1));
+      await n.auto.removeCrossReference(before.first.id);
+      expect(await n.auto.watchCrossReferences(variantId).first, isEmpty);
+
+      await n.close();
+    });
+
     test('vehicle + fitment replicate to another device', () async {
       final folder = InMemoryFolder();
       final a = await Node.create('device-a', folder, 1000);

@@ -5,6 +5,7 @@ import '../../../core/di/providers.dart';
 import '../../../shared/widgets/section_placeholder.dart';
 import '../domain/catalog_item.dart';
 import 'catalog_controller.dart';
+import 'fitment_editor_dialog.dart';
 import 'part_editor_dialog.dart';
 
 class CatalogScreen extends ConsumerWidget {
@@ -107,7 +108,7 @@ class _HeaderRow extends StatelessWidget {
             flex: 2,
             child: Text('Margin', style: style, textAlign: TextAlign.right),
           ),
-          const SizedBox(width: 96),
+          const SizedBox(width: 144),
         ],
       ),
     );
@@ -173,17 +174,25 @@ class _ItemRow extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              width: 96,
+              width: 144,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
+                    tooltip: 'Fitment & cross-references',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.directions_car_outlined, size: 18),
+                    onPressed: () => _fitment(context),
+                  ),
+                  IconButton(
                     tooltip: 'Edit',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     onPressed: () => _edit(context, ref),
                   ),
                   IconButton(
                     tooltip: 'Delete',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.delete_outline, size: 18),
                     onPressed: () => _delete(context, ref),
                   ),
@@ -193,6 +202,14 @@ class _ItemRow extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _fitment(BuildContext context) {
+    FitmentEditorDialog.show(
+      context,
+      variantId: item.variantId,
+      partLabel: '${item.sku} · ${item.productName}',
     );
   }
 

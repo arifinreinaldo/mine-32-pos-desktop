@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/di/providers.dart';
 import '../data/auto_parts_repository.dart';
 import '../data/catalog_repository.dart';
+import '../domain/auto_parts_models.dart';
 import '../domain/catalog_item.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
@@ -44,3 +45,17 @@ final catalogItemsProvider = StreamProvider.autoDispose<List<CatalogItem>>((
   final query = ref.watch(catalogQueryProvider);
   return repo.watch(query: query);
 });
+
+/// Vehicles a part fits, keyed by variant id (for the fitment editor).
+final fitmentsProvider = StreamProvider.autoDispose
+    .family<List<FitmentView>, String>((ref, variantId) {
+      return ref.watch(autoPartsRepositoryProvider).watchFitments(variantId);
+    });
+
+/// Cross-reference / interchange numbers for a variant.
+final crossReferencesProvider = StreamProvider.autoDispose
+    .family<List<CrossReferenceView>, String>((ref, variantId) {
+      return ref
+          .watch(autoPartsRepositoryProvider)
+          .watchCrossReferences(variantId);
+    });

@@ -30,8 +30,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Domain + repository (CRUD via SyncRepository) + tests (CRUD, search, brand find-or-create, sync round-trip)
 - [x] UI: catalog list (search/filter), part editor (sku, barcode, price, cost, core charge, brand, active)
 - [x] Auto-parts data: vehicles (YMME), fitments, cross_references, supersessions + repository + number-lookup + tests
-- [ ] Auto-parts UI: fitment/cross-ref editor on the part screen
-- [ ] Seed/import: CSV import of parts; sample data seeder
+- [x] Auto-parts UI: fitment/cross-ref editor on the part screen (vehicle picker w/ dedupe; add/remove fitment + interchange)
+- [x] Sample data seeder (Settings → Load sample data: 10 parts + stock + supplier + customer + fitment)
+- [ ] Seed/import: CSV import of parts
 - [ ] Multi-variant editing (a product with several variants)
 
 ## M3 — Inventory [Shopify multi-location]
