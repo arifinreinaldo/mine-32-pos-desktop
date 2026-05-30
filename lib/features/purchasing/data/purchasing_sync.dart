@@ -27,4 +27,12 @@ void registerPurchasingSyncEntities(SyncRegistry registry) {
       fromJson: PurchaseOrderLine.fromJson,
     ),
   );
+  registry.register(
+    SyncEntity<SupplierPayment>(
+      name: 'supplier_payments',
+      kind: SyncKind.event,
+      tableOf: (db) => db.supplierPayments,
+      fromJson: SupplierPayment.fromJson,
+    ),
+  );
 }

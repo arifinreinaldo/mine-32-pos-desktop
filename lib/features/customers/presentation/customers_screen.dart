@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
+import '../../../shared/widgets/amount_dialog.dart';
 import 'customer_editor_dialog.dart';
 import 'customer_vehicle_dialog.dart';
 import 'customers_controller.dart';
@@ -169,6 +170,15 @@ class _CustomerDetail extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: () => _receivePayment(context, ref, ar.value ?? 0),
+              icon: const Icon(Icons.payments_outlined, size: 18),
+              label: const Text('Receive payment'),
+            ),
+          ),
           if (customer.address != null) ...[
             const SizedBox(height: 8),
             _info('Address', customer.address!),
@@ -243,6 +253,33 @@ class _CustomerDetail extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _receivePayment(
+    BuildContext context,
+    WidgetRef ref,
+    int suggested,
+  ) async {
+    final result = await AmountDialog.show(
+      context,
+      title: 'Receive payment',
+      suggested: suggested > 0 ? suggested : null,
+    );
+    if (result == null) return;
+    await ref
+        .read(customersRepositoryProvider)
+        .receivePayment(
+          customerId: customer.id,
+          amountMinor: result.amountMinor,
+          method: result.method,
+        );
+    ref.invalidate(customerArProvider(customer.id));
+    ref.invalidate(customerHistoryProvider(customer.id));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Payment received')));
+    }
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {

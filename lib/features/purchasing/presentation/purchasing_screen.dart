@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
+import '../../../shared/widgets/amount_dialog.dart';
 import 'po_create_dialog.dart';
 import 'purchasing_controller.dart';
 import 'supplier_editor_dialog.dart';
@@ -82,16 +83,8 @@ class _SuppliersTab extends ConsumerWidget {
                   : ListView.separated(
                       itemCount: list.length,
                       separatorBuilder: (_, _) => const Divider(height: 1),
-                      itemBuilder: (context, i) {
-                        final s = list[i];
-                        return ListTile(
-                          leading: const Icon(Icons.local_shipping_outlined),
-                          title: Text(s.name),
-                          subtitle: Text(s.phone ?? s.email ?? '—'),
-                          onTap: () =>
-                              SupplierEditorDialog.show(context, initial: s),
-                        );
-                      },
+                      itemBuilder: (context, i) =>
+                          _SupplierRow(supplier: list[i]),
                     ),
             ),
           ),
@@ -179,6 +172,67 @@ class _PurchaseOrdersTab extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Received — stock and AP updated')),
       );
+    }
+  }
+}
+
+class _SupplierRow extends ConsumerWidget {
+  final Supplier supplier;
+  const _SupplierRow({required this.supplier});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final money = ref.watch(moneyFormatProvider);
+    final ap = ref.watch(supplierApProvider(supplier.id));
+    final owed = ap.value ?? 0;
+    return ListTile(
+      leading: const Icon(Icons.local_shipping_outlined),
+      title: Text(supplier.name),
+      subtitle: Text(supplier.phone ?? supplier.email ?? '—'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (owed > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text('AP ${money.format(Money(owed))}'),
+            ),
+          if (owed > 0)
+            OutlinedButton(
+              onPressed: () => _pay(context, ref, owed),
+              child: const Text('Pay'),
+            ),
+          IconButton(
+            tooltip: 'Edit',
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            onPressed: () =>
+                SupplierEditorDialog.show(context, initial: supplier),
+          ),
+        ],
+      ),
+      onTap: () => SupplierEditorDialog.show(context, initial: supplier),
+    );
+  }
+
+  Future<void> _pay(BuildContext context, WidgetRef ref, int suggested) async {
+    final result = await AmountDialog.show(
+      context,
+      title: 'Pay supplier',
+      suggested: suggested > 0 ? suggested : null,
+    );
+    if (result == null) return;
+    await ref
+        .read(purchasingRepositoryProvider)
+        .paySupplier(
+          supplierId: supplier.id,
+          amountMinor: result.amountMinor,
+          method: result.method,
+        );
+    ref.invalidate(supplierApProvider(supplier.id));
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Payment recorded')));
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/di/providers.dart';
+import '../../accounting/presentation/accounting_controller.dart';
 import '../data/customers_repository.dart';
 
 final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
@@ -11,6 +12,7 @@ final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
     changeLog: services.changeLog,
     hlcService: services.hlc,
     clock: services.clock,
+    accounting: ref.watch(accountingRepositoryProvider),
   );
 });
 
@@ -45,8 +47,8 @@ final customerVehiclesProvider = StreamProvider.autoDispose
       (ref, id) => ref.watch(customersRepositoryProvider).watchVehicles(id),
     );
 
-final customerArProvider = StreamProvider.autoDispose.family<int, String>(
-  (ref, id) => ref.watch(customersRepositoryProvider).watchArBalance(id),
+final customerArProvider = FutureProvider.autoDispose.family<int, String>(
+  (ref, id) => ref.watch(customersRepositoryProvider).arBalance(id),
 );
 
 final customerHistoryProvider = FutureProvider.autoDispose

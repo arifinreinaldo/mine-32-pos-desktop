@@ -4,18 +4,23 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_repository.dart';
 import '../../../core/sync/change_record.dart';
+import '../../accounting/data/accounting_repository.dart';
 import '../domain/customer_draft.dart';
 
-/// Customers + their vehicles, plus AR (outstanding balance) and purchase
-/// history. All mutations replicate as master data (LWW).
+/// Customers + their vehicles, plus AR (outstanding balance), receipts and
+/// purchase history. Master data (LWW) except receipts (append-only events).
 class CustomersRepository extends SyncRepository {
   final Uuid _uuid;
+
+  /// When provided, settling a receipt posts the Dr Cash / Cr AR journal.
+  final AccountingRepository? accounting;
 
   CustomersRepository({
     required super.db,
     required super.changeLog,
     required super.hlcService,
     required super.clock,
+    this.accounting,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
@@ -140,34 +145,65 @@ class CustomersRepository extends SyncRepository {
 
   // --- AR & history ---
 
-  /// Outstanding balance (sum of total - paid over the customer's sales).
+  /// Outstanding AR: on-account sale balances (total - paid) minus receipts.
   Future<int> arBalance(String customerId) async {
     final s = db.sales;
-    final outstanding = (s.totalMinor - s.paidTotalMinor).sum();
-    final row =
+    final saleOutstanding = (s.totalMinor - s.paidTotalMinor).sum();
+    final saleRow =
         await (db.selectOnly(s)
-              ..addColumns([outstanding])
+              ..addColumns([saleOutstanding])
               ..where(
                 s.customerId.equals(customerId) &
                     s.deletedAt.isNull() &
                     s.status.equals('completed'),
               ))
             .getSingleOrNull();
-    return row?.read(outstanding) ?? 0;
+    final fromSales = saleRow?.read(saleOutstanding) ?? 0;
+
+    final r = db.customerReceipts;
+    final receiptSum = r.amountMinor.sum();
+    final receiptRow =
+        await (db.selectOnly(r)
+              ..addColumns([receiptSum])
+              ..where(r.customerId.equals(customerId) & r.deletedAt.isNull()))
+            .getSingleOrNull();
+    final received = receiptRow?.read(receiptSum) ?? 0;
+
+    return fromSales - received;
   }
 
-  Stream<int> watchArBalance(String customerId) {
-    final s = db.sales;
-    final outstanding = (s.totalMinor - s.paidTotalMinor).sum();
-    return (db.selectOnly(s)
-          ..addColumns([outstanding])
-          ..where(
-            s.customerId.equals(customerId) &
-                s.deletedAt.isNull() &
-                s.status.equals('completed'),
-          ))
-        .watchSingleOrNull()
-        .map((row) => row?.read(outstanding) ?? 0);
+  /// Record a receipt from a customer against AR and post Dr Cash / Cr AR.
+  Future<String> receivePayment({
+    required String customerId,
+    required int amountMinor,
+    String method = 'cash',
+    String? reference,
+  }) async {
+    final id = _uuid.v7();
+    await db.transaction(() async {
+      await writeSyncable<CustomerReceipt>(
+        entityTable: 'customer_receipts',
+        table: db.customerReceipts,
+        rowId: id,
+        build: (hlc, now) => CustomerReceipt(
+          id: id,
+          createdAt: now,
+          updatedAt: now,
+          updatedHlc: hlc.pack(),
+          customerId: customerId,
+          amountMinor: amountMinor,
+          method: method,
+          reference: reference,
+        ),
+      );
+      await accounting?.postReceiptJournal(
+        refId: id,
+        date: clock.nowMillis(),
+        amountMinor: amountMinor,
+        method: method,
+      );
+    });
+    return id;
   }
 
   Future<List<Sale>> purchaseHistory(String customerId, {int limit = 50}) {

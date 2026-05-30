@@ -80,6 +80,7 @@ class Node {
         changeLog: changeLog,
         hlcService: hlc,
         clock: clock,
+        accounting: accounting,
       ),
       CatalogRepository(
         db: db,
@@ -186,6 +187,59 @@ void main() {
         await n.close();
       },
     );
+
+    test('receiving a payment reduces AR and posts Dr Cash / Cr AR', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      final customerId = await n.customers.saveCustomer(
+        const CustomerDraft(name: 'PT Bengkel Jaya'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Clutch Kit',
+          sku: 'CK-1',
+          price: Money(50000),
+          cost: Money(30000),
+          coreCharge: Money(0),
+        ),
+      );
+      await n.inventory.addMovement(
+        variantId: variantId,
+        locationId: 'L1',
+        qty: 10,
+        reason: MovementReason.purchase,
+      );
+      await n.sales.completeSale(
+        lines: [
+          CartLine(
+            variantId: variantId,
+            sku: 'CK-1',
+            name: 'Clutch Kit',
+            unitPrice: const Money(50000),
+            unitCost: const Money(30000),
+          ),
+        ],
+        locationId: 'L1',
+        tendered: const Money(0),
+        customerId: customerId,
+        onAccount: true,
+      );
+      expect(await n.customers.arBalance(customerId), 50000);
+
+      await n.customers.receivePayment(
+        customerId: customerId,
+        amountMinor: 20000,
+      );
+      expect(await n.customers.arBalance(customerId), 30000);
+
+      final tb = await n.accounting.watchTrialBalance().first;
+      Money bal(String code) => tb.firstWhere((r) => r.code == code).balance;
+      expect(bal(AccountCode.receivable), const Money(30000));
+      expect(bal(AccountCode.cash), const Money(20000));
+      final totalDebit = tb.fold(0, (s, r) => s + r.debit.minorUnits);
+      final totalCredit = tb.fold(0, (s, r) => s + r.credit.minorUnits);
+      expect(totalDebit, totalCredit);
+      await n.close();
+    });
 
     test('customers replicate to another device', () async {
       final folder = InMemoryFolder();

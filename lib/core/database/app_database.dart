@@ -9,6 +9,7 @@ import 'tables/accounting_tables.dart';
 import 'tables/catalog_tables.dart';
 import 'tables/customers_tables.dart';
 import 'tables/inventory_tables.dart';
+import 'tables/ledger_tables.dart';
 import 'tables/purchasing_tables.dart';
 import 'tables/sales_tables.dart';
 import 'tables/settings_tables.dart';
@@ -55,6 +56,9 @@ part 'app_database.g.dart';
     Suppliers,
     PurchaseOrders,
     PurchaseOrderLines,
+    // Settlement ledger
+    CustomerReceipts,
+    SupplierPayments,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -63,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,6 +123,11 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(suppliers);
         await m.createTable(purchaseOrders);
         await m.createTable(purchaseOrderLines);
+      }
+      // v8 -> v9: settlement ledger (AR receipts, AP payments).
+      if (from < 9) {
+        await m.createTable(customerReceipts);
+        await m.createTable(supplierPayments);
       }
     },
     beforeOpen: (details) async {

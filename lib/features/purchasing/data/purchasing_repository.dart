@@ -89,11 +89,11 @@ class PurchasingRepository extends SyncRepository {
     );
   }
 
-  /// Outstanding payable to a supplier (sum of total - paid over received POs).
+  /// Outstanding payable to a supplier: received-PO balances minus payments.
   Future<int> apBalance(String supplierId) async {
     final p = db.purchaseOrders;
     final outstanding = (p.totalMinor - p.paidTotalMinor).sum();
-    final row =
+    final poRow =
         await (db.selectOnly(p)
               ..addColumns([outstanding])
               ..where(
@@ -102,7 +102,52 @@ class PurchasingRepository extends SyncRepository {
                     p.status.equals('received'),
               ))
             .getSingleOrNull();
-    return row?.read(outstanding) ?? 0;
+    final fromPos = poRow?.read(outstanding) ?? 0;
+
+    final sp = db.supplierPayments;
+    final paySum = sp.amountMinor.sum();
+    final payRow =
+        await (db.selectOnly(sp)
+              ..addColumns([paySum])
+              ..where(sp.supplierId.equals(supplierId) & sp.deletedAt.isNull()))
+            .getSingleOrNull();
+    final paid = payRow?.read(paySum) ?? 0;
+
+    return fromPos - paid;
+  }
+
+  /// Record a payment to a supplier against AP and post Dr AP / Cr Cash.
+  Future<String> paySupplier({
+    required String supplierId,
+    required int amountMinor,
+    String method = 'cash',
+    String? reference,
+  }) async {
+    final id = _uuid.v7();
+    await db.transaction(() async {
+      await writeSyncable<SupplierPayment>(
+        entityTable: 'supplier_payments',
+        table: db.supplierPayments,
+        rowId: id,
+        build: (hlc, now) => SupplierPayment(
+          id: id,
+          createdAt: now,
+          updatedAt: now,
+          updatedHlc: hlc.pack(),
+          supplierId: supplierId,
+          amountMinor: amountMinor,
+          method: method,
+          reference: reference,
+        ),
+      );
+      await accounting.postSupplierPaymentJournal(
+        refId: id,
+        date: clock.nowMillis(),
+        amountMinor: amountMinor,
+        method: method,
+      );
+    });
+    return id;
   }
 
   // --- Purchase orders ---

@@ -38,3 +38,8 @@ final purchaseOrdersProvider = StreamProvider.autoDispose<List<PurchaseOrder>>((
 ) {
   return ref.watch(purchasingRepositoryProvider).watchPurchaseOrders();
 });
+
+/// Outstanding payable to a supplier (refreshable).
+final supplierApProvider = FutureProvider.autoDispose.family<int, String>(
+  (ref, id) => ref.watch(purchasingRepositoryProvider).apBalance(id),
+);

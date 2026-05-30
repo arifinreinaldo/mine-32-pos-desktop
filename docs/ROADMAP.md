@@ -70,7 +70,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tests: customer CRUD/search/vehicles/sync + on-account→AR + balanced journal
 - [x] suppliers + purchase_orders + lines; create PO; **receive → +stock + Dr Inventory / Cr AP journal**; AP balance; idempotent receive
 - [x] Purchasing UI (tabbed: suppliers list/editor + POs list with New-PO dialog + Receive) + tests
-- [ ] Settle AR/AP (receipts/payments allocation); price tiers; partial receipts; input-PPN on purchases
+- [x] Settle AR (customer receipts) + AP (supplier payments): event-sourced ledger + balanced journals (Dr Cash/Cr AR; Dr AP/Cr Cash) + UI (Receive payment / Pay)
+- [ ] price tiers; partial receipts; input-PPN on purchases; receipt allocation per invoice
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine

@@ -165,5 +165,51 @@ void main() {
 
       await n.close();
     });
+
+    test('paying a supplier reduces AP and posts Dr AP / Cr Cash', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      final supplierId = await n.purchasing.saveSupplier(
+        const SupplierDraft(name: 'PT Sumber Parts'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Oil Filter',
+          sku: 'OF-1',
+          price: Money(900),
+          cost: Money(500),
+          coreCharge: Money(0),
+        ),
+      );
+      final poId = await n.purchasing.createPurchaseOrder(
+        supplierId: supplierId,
+        locationId: 'L1',
+        lines: [
+          PoLineInput(
+            variantId: variantId,
+            description: 'Oil Filter',
+            qty: 20,
+            unitCostMinor: 30000,
+          ),
+        ],
+      );
+      await n.purchasing.receivePurchaseOrder(poId);
+      expect(await n.purchasing.apBalance(supplierId), 600000);
+
+      await n.purchasing.paySupplier(
+        supplierId: supplierId,
+        amountMinor: 600000,
+      );
+      expect(await n.purchasing.apBalance(supplierId), 0);
+
+      final tb = await n.accounting.watchTrialBalance().first;
+      Money bal(String code) => tb.firstWhere((r) => r.code == code).balance;
+      expect(bal(AccountCode.accountsPayable), const Money(0));
+      expect(bal(AccountCode.cash), const Money(-600000));
+      final totalDebit = tb.fold(0, (s, r) => s + r.debit.minorUnits);
+      final totalCredit = tb.fold(0, (s, r) => s + r.credit.minorUnits);
+      expect(totalDebit, totalCredit);
+
+      await n.close();
+    });
   });
 }

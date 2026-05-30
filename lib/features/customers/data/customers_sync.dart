@@ -19,4 +19,12 @@ void registerCustomerSyncEntities(SyncRegistry registry) {
       fromJson: CustomerVehicle.fromJson,
     ),
   );
+  registry.register(
+    SyncEntity<CustomerReceipt>(
+      name: 'customer_receipts',
+      kind: SyncKind.event,
+      tableOf: (db) => db.customerReceipts,
+      fromJson: CustomerReceipt.fromJson,
+    ),
+  );
 }

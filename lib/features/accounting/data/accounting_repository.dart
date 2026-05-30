@@ -270,6 +270,74 @@ class AccountingRepository extends SyncRepository {
     );
   }
 
+  /// Customer receipt against AR: Dr Cash/Bank · Cr Accounts Receivable.
+  Future<void> postReceiptJournal({
+    required String refId,
+    required int date,
+    required int amountMinor,
+    String method = 'cash',
+  }) async {
+    if (amountMinor <= 0) return;
+    final into = await accountByCode(
+      method == 'cash' ? AccountCode.cash : AccountCode.bank,
+    );
+    final ar = await accountByCode(AccountCode.receivable);
+    if (into == null || ar == null) return;
+    await postJournal(
+      date: date,
+      source: 'payment',
+      refType: 'customer_receipt',
+      refId: refId,
+      memo: 'Customer receipt',
+      lines: [
+        JournalLineInput(
+          accountId: into.id,
+          debitMinor: amountMinor,
+          description: 'Cash received',
+        ),
+        JournalLineInput(
+          accountId: ar.id,
+          creditMinor: amountMinor,
+          description: 'Accounts receivable',
+        ),
+      ],
+    );
+  }
+
+  /// Payment to a supplier against AP: Dr Accounts Payable · Cr Cash/Bank.
+  Future<void> postSupplierPaymentJournal({
+    required String refId,
+    required int date,
+    required int amountMinor,
+    String method = 'cash',
+  }) async {
+    if (amountMinor <= 0) return;
+    final ap = await accountByCode(AccountCode.accountsPayable);
+    final from = await accountByCode(
+      method == 'cash' ? AccountCode.cash : AccountCode.bank,
+    );
+    if (ap == null || from == null) return;
+    await postJournal(
+      date: date,
+      source: 'payment',
+      refType: 'supplier_payment',
+      refId: refId,
+      memo: 'Supplier payment',
+      lines: [
+        JournalLineInput(
+          accountId: ap.id,
+          debitMinor: amountMinor,
+          description: 'Accounts payable',
+        ),
+        JournalLineInput(
+          accountId: from.id,
+          creditMinor: amountMinor,
+          description: 'Cash paid',
+        ),
+      ],
+    );
+  }
+
   // --- Reports ---
 
   Stream<List<TrialBalanceRow>> watchTrialBalance() {
