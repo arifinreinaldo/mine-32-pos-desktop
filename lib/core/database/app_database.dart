@@ -44,6 +44,8 @@ part 'app_database.g.dart';
     Sales,
     SaleLines,
     Payments,
+    SalesReturns,
+    SalesReturnLines,
     // Accounting
     Accounts,
     TaxRates,
@@ -67,7 +69,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -134,6 +136,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await m.createTable(customerReceipts);
         await m.createTable(supplierPayments);
+      }
+      // v9 -> v10: sales returns / refunds (event tables).
+      if (from < 10) {
+        await m.createTable(salesReturns);
+        await m.createTable(salesReturnLines);
       }
     },
     beforeOpen: (details) async {

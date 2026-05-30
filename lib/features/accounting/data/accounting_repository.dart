@@ -327,6 +327,79 @@ class AccountingRepository extends SyncRepository {
     );
   }
 
+  /// Reverses a sale for a return/refund: Dr Sales Revenue (DPP) + Dr PPN Output
+  /// (PPN) + Cr Cash/Bank (total refunded); and Dr Inventory + Cr COGS (cost of
+  /// the restocked goods). Mirrors [postSaleJournal] with the signs flipped.
+  Future<void> postReturnJournal({
+    required String returnId,
+    required int date,
+    required String method, // cash | bank
+    required int totalMinor,
+    required int dppMinor,
+    required int ppnMinor,
+    required int cogsMinor,
+  }) async {
+    if (totalMinor <= 0) return;
+    final refundFrom = await accountByCode(
+      method == 'bank' ? AccountCode.bank : AccountCode.cash,
+    );
+    final salesAcc = await accountByCode(AccountCode.salesRevenue);
+    final ppnAcc = await accountByCode(AccountCode.ppnOutput);
+    final cogsAcc = await accountByCode(AccountCode.cogs);
+    final invAcc = await accountByCode(AccountCode.inventory);
+    if (refundFrom == null ||
+        salesAcc == null ||
+        ppnAcc == null ||
+        cogsAcc == null ||
+        invAcc == null) {
+      return;
+    }
+
+    final lines = <JournalLineInput>[
+      JournalLineInput(
+        accountId: salesAcc.id,
+        debitMinor: dppMinor,
+        description: 'Sales return (revenue)',
+      ),
+      if (ppnMinor > 0)
+        JournalLineInput(
+          accountId: ppnAcc.id,
+          debitMinor: ppnMinor,
+          description: 'PPN output reversal',
+        ),
+      JournalLineInput(
+        accountId: refundFrom.id,
+        creditMinor: totalMinor,
+        description: 'Refund',
+      ),
+    ];
+    if (cogsMinor > 0) {
+      lines.add(
+        JournalLineInput(
+          accountId: invAcc.id,
+          debitMinor: cogsMinor,
+          description: 'Inventory restocked',
+        ),
+      );
+      lines.add(
+        JournalLineInput(
+          accountId: cogsAcc.id,
+          creditMinor: cogsMinor,
+          description: 'COGS reversal',
+        ),
+      );
+    }
+
+    await postJournal(
+      date: date,
+      source: 'return',
+      refType: 'sales_return',
+      refId: returnId,
+      memo: 'Sales return',
+      lines: lines,
+    );
+  }
+
   /// Goods-receipt journal for a received purchase order:
   /// Dr Inventory · Cr Accounts Payable.
   Future<void> postPurchaseJournal({

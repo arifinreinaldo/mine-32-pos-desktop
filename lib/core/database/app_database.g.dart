@@ -11263,6 +11263,1612 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
   }
 }
 
+class $SalesReturnsTable extends SalesReturns
+    with TableInfo<$SalesReturnsTable, SalesReturn> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SalesReturnsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedHlcMeta = const VerificationMeta(
+    'updatedHlc',
+  );
+  @override
+  late final GeneratedColumn<String> updatedHlc = GeneratedColumn<String>(
+    'updated_hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numberMeta = const VerificationMeta('number');
+  @override
+  late final GeneratedColumn<String> number = GeneratedColumn<String>(
+    'number',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _saleIdMeta = const VerificationMeta('saleId');
+  @override
+  late final GeneratedColumn<String> saleId = GeneratedColumn<String>(
+    'sale_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationIdMeta = const VerificationMeta(
+    'locationId',
+  );
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+    'location_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refundMethodMeta = const VerificationMeta(
+    'refundMethod',
+  );
+  @override
+  late final GeneratedColumn<String> refundMethod = GeneratedColumn<String>(
+    'refund_method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('cash'),
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subtotalMinorMeta = const VerificationMeta(
+    'subtotalMinor',
+  );
+  @override
+  late final GeneratedColumn<int> subtotalMinor = GeneratedColumn<int>(
+    'subtotal_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _taxTotalMinorMeta = const VerificationMeta(
+    'taxTotalMinor',
+  );
+  @override
+  late final GeneratedColumn<int> taxTotalMinor = GeneratedColumn<int>(
+    'tax_total_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalMinorMeta = const VerificationMeta(
+    'totalMinor',
+  );
+  @override
+  late final GeneratedColumn<int> totalMinor = GeneratedColumn<int>(
+    'total_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    number,
+    saleId,
+    locationId,
+    refundMethod,
+    reason,
+    subtotalMinor,
+    taxTotalMinor,
+    totalMinor,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sales_returns';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SalesReturn> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_hlc')) {
+      context.handle(
+        _updatedHlcMeta,
+        updatedHlc.isAcceptableOrUnknown(data['updated_hlc']!, _updatedHlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedHlcMeta);
+    }
+    if (data.containsKey('number')) {
+      context.handle(
+        _numberMeta,
+        number.isAcceptableOrUnknown(data['number']!, _numberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_numberMeta);
+    }
+    if (data.containsKey('sale_id')) {
+      context.handle(
+        _saleIdMeta,
+        saleId.isAcceptableOrUnknown(data['sale_id']!, _saleIdMeta),
+      );
+    }
+    if (data.containsKey('location_id')) {
+      context.handle(
+        _locationIdMeta,
+        locationId.isAcceptableOrUnknown(data['location_id']!, _locationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationIdMeta);
+    }
+    if (data.containsKey('refund_method')) {
+      context.handle(
+        _refundMethodMeta,
+        refundMethod.isAcceptableOrUnknown(
+          data['refund_method']!,
+          _refundMethodMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('subtotal_minor')) {
+      context.handle(
+        _subtotalMinorMeta,
+        subtotalMinor.isAcceptableOrUnknown(
+          data['subtotal_minor']!,
+          _subtotalMinorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tax_total_minor')) {
+      context.handle(
+        _taxTotalMinorMeta,
+        taxTotalMinor.isAcceptableOrUnknown(
+          data['tax_total_minor']!,
+          _taxTotalMinorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('total_minor')) {
+      context.handle(
+        _totalMinorMeta,
+        totalMinor.isAcceptableOrUnknown(data['total_minor']!, _totalMinorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SalesReturn map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SalesReturn(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      updatedHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_hlc'],
+      )!,
+      number: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}number'],
+      )!,
+      saleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sale_id'],
+      ),
+      locationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_id'],
+      )!,
+      refundMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}refund_method'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      subtotalMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}subtotal_minor'],
+      )!,
+      taxTotalMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tax_total_minor'],
+      )!,
+      totalMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_minor'],
+      )!,
+    );
+  }
+
+  @override
+  $SalesReturnsTable createAlias(String alias) {
+    return $SalesReturnsTable(attachedDatabase, alias);
+  }
+}
+
+class SalesReturn extends DataClass implements Insertable<SalesReturn> {
+  /// UUID v7 string, generated client-side (never an autoincrement int).
+  final String id;
+
+  /// Epoch millis (UTC) the row was first created.
+  final int createdAt;
+
+  /// Epoch millis (UTC) of the most recent local or merged write.
+  final int updatedAt;
+
+  /// Tombstone: epoch millis when soft-deleted, or null while live.
+  final int? deletedAt;
+
+  /// Packed HLC of the last write — drives last-write-wins resolution.
+  final String updatedHlc;
+  final String number;
+  final String? saleId;
+  final String locationId;
+
+  /// cash | bank — where the refund is paid from.
+  final String refundMethod;
+  final String? reason;
+  final int subtotalMinor;
+  final int taxTotalMinor;
+  final int totalMinor;
+  const SalesReturn({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.updatedHlc,
+    required this.number,
+    this.saleId,
+    required this.locationId,
+    required this.refundMethod,
+    this.reason,
+    required this.subtotalMinor,
+    required this.taxTotalMinor,
+    required this.totalMinor,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['updated_hlc'] = Variable<String>(updatedHlc);
+    map['number'] = Variable<String>(number);
+    if (!nullToAbsent || saleId != null) {
+      map['sale_id'] = Variable<String>(saleId);
+    }
+    map['location_id'] = Variable<String>(locationId);
+    map['refund_method'] = Variable<String>(refundMethod);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['subtotal_minor'] = Variable<int>(subtotalMinor);
+    map['tax_total_minor'] = Variable<int>(taxTotalMinor);
+    map['total_minor'] = Variable<int>(totalMinor);
+    return map;
+  }
+
+  SalesReturnsCompanion toCompanion(bool nullToAbsent) {
+    return SalesReturnsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      updatedHlc: Value(updatedHlc),
+      number: Value(number),
+      saleId: saleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(saleId),
+      locationId: Value(locationId),
+      refundMethod: Value(refundMethod),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      subtotalMinor: Value(subtotalMinor),
+      taxTotalMinor: Value(taxTotalMinor),
+      totalMinor: Value(totalMinor),
+    );
+  }
+
+  factory SalesReturn.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SalesReturn(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
+      number: serializer.fromJson<String>(json['number']),
+      saleId: serializer.fromJson<String?>(json['saleId']),
+      locationId: serializer.fromJson<String>(json['locationId']),
+      refundMethod: serializer.fromJson<String>(json['refundMethod']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      subtotalMinor: serializer.fromJson<int>(json['subtotalMinor']),
+      taxTotalMinor: serializer.fromJson<int>(json['taxTotalMinor']),
+      totalMinor: serializer.fromJson<int>(json['totalMinor']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'updatedHlc': serializer.toJson<String>(updatedHlc),
+      'number': serializer.toJson<String>(number),
+      'saleId': serializer.toJson<String?>(saleId),
+      'locationId': serializer.toJson<String>(locationId),
+      'refundMethod': serializer.toJson<String>(refundMethod),
+      'reason': serializer.toJson<String?>(reason),
+      'subtotalMinor': serializer.toJson<int>(subtotalMinor),
+      'taxTotalMinor': serializer.toJson<int>(taxTotalMinor),
+      'totalMinor': serializer.toJson<int>(totalMinor),
+    };
+  }
+
+  SalesReturn copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? updatedHlc,
+    String? number,
+    Value<String?> saleId = const Value.absent(),
+    String? locationId,
+    String? refundMethod,
+    Value<String?> reason = const Value.absent(),
+    int? subtotalMinor,
+    int? taxTotalMinor,
+    int? totalMinor,
+  }) => SalesReturn(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    updatedHlc: updatedHlc ?? this.updatedHlc,
+    number: number ?? this.number,
+    saleId: saleId.present ? saleId.value : this.saleId,
+    locationId: locationId ?? this.locationId,
+    refundMethod: refundMethod ?? this.refundMethod,
+    reason: reason.present ? reason.value : this.reason,
+    subtotalMinor: subtotalMinor ?? this.subtotalMinor,
+    taxTotalMinor: taxTotalMinor ?? this.taxTotalMinor,
+    totalMinor: totalMinor ?? this.totalMinor,
+  );
+  SalesReturn copyWithCompanion(SalesReturnsCompanion data) {
+    return SalesReturn(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      updatedHlc: data.updatedHlc.present
+          ? data.updatedHlc.value
+          : this.updatedHlc,
+      number: data.number.present ? data.number.value : this.number,
+      saleId: data.saleId.present ? data.saleId.value : this.saleId,
+      locationId: data.locationId.present
+          ? data.locationId.value
+          : this.locationId,
+      refundMethod: data.refundMethod.present
+          ? data.refundMethod.value
+          : this.refundMethod,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      subtotalMinor: data.subtotalMinor.present
+          ? data.subtotalMinor.value
+          : this.subtotalMinor,
+      taxTotalMinor: data.taxTotalMinor.present
+          ? data.taxTotalMinor.value
+          : this.taxTotalMinor,
+      totalMinor: data.totalMinor.present
+          ? data.totalMinor.value
+          : this.totalMinor,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SalesReturn(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('number: $number, ')
+          ..write('saleId: $saleId, ')
+          ..write('locationId: $locationId, ')
+          ..write('refundMethod: $refundMethod, ')
+          ..write('reason: $reason, ')
+          ..write('subtotalMinor: $subtotalMinor, ')
+          ..write('taxTotalMinor: $taxTotalMinor, ')
+          ..write('totalMinor: $totalMinor')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    number,
+    saleId,
+    locationId,
+    refundMethod,
+    reason,
+    subtotalMinor,
+    taxTotalMinor,
+    totalMinor,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SalesReturn &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.updatedHlc == this.updatedHlc &&
+          other.number == this.number &&
+          other.saleId == this.saleId &&
+          other.locationId == this.locationId &&
+          other.refundMethod == this.refundMethod &&
+          other.reason == this.reason &&
+          other.subtotalMinor == this.subtotalMinor &&
+          other.taxTotalMinor == this.taxTotalMinor &&
+          other.totalMinor == this.totalMinor);
+}
+
+class SalesReturnsCompanion extends UpdateCompanion<SalesReturn> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> updatedHlc;
+  final Value<String> number;
+  final Value<String?> saleId;
+  final Value<String> locationId;
+  final Value<String> refundMethod;
+  final Value<String?> reason;
+  final Value<int> subtotalMinor;
+  final Value<int> taxTotalMinor;
+  final Value<int> totalMinor;
+  final Value<int> rowid;
+  const SalesReturnsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.updatedHlc = const Value.absent(),
+    this.number = const Value.absent(),
+    this.saleId = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.refundMethod = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.subtotalMinor = const Value.absent(),
+    this.taxTotalMinor = const Value.absent(),
+    this.totalMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SalesReturnsCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String updatedHlc,
+    required String number,
+    this.saleId = const Value.absent(),
+    required String locationId,
+    this.refundMethod = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.subtotalMinor = const Value.absent(),
+    this.taxTotalMinor = const Value.absent(),
+    this.totalMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       updatedHlc = Value(updatedHlc),
+       number = Value(number),
+       locationId = Value(locationId);
+  static Insertable<SalesReturn> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? updatedHlc,
+    Expression<String>? number,
+    Expression<String>? saleId,
+    Expression<String>? locationId,
+    Expression<String>? refundMethod,
+    Expression<String>? reason,
+    Expression<int>? subtotalMinor,
+    Expression<int>? taxTotalMinor,
+    Expression<int>? totalMinor,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (updatedHlc != null) 'updated_hlc': updatedHlc,
+      if (number != null) 'number': number,
+      if (saleId != null) 'sale_id': saleId,
+      if (locationId != null) 'location_id': locationId,
+      if (refundMethod != null) 'refund_method': refundMethod,
+      if (reason != null) 'reason': reason,
+      if (subtotalMinor != null) 'subtotal_minor': subtotalMinor,
+      if (taxTotalMinor != null) 'tax_total_minor': taxTotalMinor,
+      if (totalMinor != null) 'total_minor': totalMinor,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SalesReturnsCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? updatedHlc,
+    Value<String>? number,
+    Value<String?>? saleId,
+    Value<String>? locationId,
+    Value<String>? refundMethod,
+    Value<String?>? reason,
+    Value<int>? subtotalMinor,
+    Value<int>? taxTotalMinor,
+    Value<int>? totalMinor,
+    Value<int>? rowid,
+  }) {
+    return SalesReturnsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      updatedHlc: updatedHlc ?? this.updatedHlc,
+      number: number ?? this.number,
+      saleId: saleId ?? this.saleId,
+      locationId: locationId ?? this.locationId,
+      refundMethod: refundMethod ?? this.refundMethod,
+      reason: reason ?? this.reason,
+      subtotalMinor: subtotalMinor ?? this.subtotalMinor,
+      taxTotalMinor: taxTotalMinor ?? this.taxTotalMinor,
+      totalMinor: totalMinor ?? this.totalMinor,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (updatedHlc.present) {
+      map['updated_hlc'] = Variable<String>(updatedHlc.value);
+    }
+    if (number.present) {
+      map['number'] = Variable<String>(number.value);
+    }
+    if (saleId.present) {
+      map['sale_id'] = Variable<String>(saleId.value);
+    }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
+    if (refundMethod.present) {
+      map['refund_method'] = Variable<String>(refundMethod.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (subtotalMinor.present) {
+      map['subtotal_minor'] = Variable<int>(subtotalMinor.value);
+    }
+    if (taxTotalMinor.present) {
+      map['tax_total_minor'] = Variable<int>(taxTotalMinor.value);
+    }
+    if (totalMinor.present) {
+      map['total_minor'] = Variable<int>(totalMinor.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SalesReturnsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('number: $number, ')
+          ..write('saleId: $saleId, ')
+          ..write('locationId: $locationId, ')
+          ..write('refundMethod: $refundMethod, ')
+          ..write('reason: $reason, ')
+          ..write('subtotalMinor: $subtotalMinor, ')
+          ..write('taxTotalMinor: $taxTotalMinor, ')
+          ..write('totalMinor: $totalMinor, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SalesReturnLinesTable extends SalesReturnLines
+    with TableInfo<$SalesReturnLinesTable, SalesReturnLine> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SalesReturnLinesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedHlcMeta = const VerificationMeta(
+    'updatedHlc',
+  );
+  @override
+  late final GeneratedColumn<String> updatedHlc = GeneratedColumn<String>(
+    'updated_hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _returnIdMeta = const VerificationMeta(
+    'returnId',
+  );
+  @override
+  late final GeneratedColumn<String> returnId = GeneratedColumn<String>(
+    'return_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _saleLineIdMeta = const VerificationMeta(
+    'saleLineId',
+  );
+  @override
+  late final GeneratedColumn<String> saleLineId = GeneratedColumn<String>(
+    'sale_line_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _variantIdMeta = const VerificationMeta(
+    'variantId',
+  );
+  @override
+  late final GeneratedColumn<String> variantId = GeneratedColumn<String>(
+    'variant_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
+  @override
+  late final GeneratedColumn<int> qty = GeneratedColumn<int>(
+    'qty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitPriceMinorMeta = const VerificationMeta(
+    'unitPriceMinor',
+  );
+  @override
+  late final GeneratedColumn<int> unitPriceMinor = GeneratedColumn<int>(
+    'unit_price_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taxMinorMeta = const VerificationMeta(
+    'taxMinor',
+  );
+  @override
+  late final GeneratedColumn<int> taxMinor = GeneratedColumn<int>(
+    'tax_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lineTotalMinorMeta = const VerificationMeta(
+    'lineTotalMinor',
+  );
+  @override
+  late final GeneratedColumn<int> lineTotalMinor = GeneratedColumn<int>(
+    'line_total_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitCostMinorMeta = const VerificationMeta(
+    'unitCostMinor',
+  );
+  @override
+  late final GeneratedColumn<int> unitCostMinor = GeneratedColumn<int>(
+    'unit_cost_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    returnId,
+    saleLineId,
+    variantId,
+    description,
+    qty,
+    unitPriceMinor,
+    taxMinor,
+    lineTotalMinor,
+    unitCostMinor,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sales_return_lines';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SalesReturnLine> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_hlc')) {
+      context.handle(
+        _updatedHlcMeta,
+        updatedHlc.isAcceptableOrUnknown(data['updated_hlc']!, _updatedHlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedHlcMeta);
+    }
+    if (data.containsKey('return_id')) {
+      context.handle(
+        _returnIdMeta,
+        returnId.isAcceptableOrUnknown(data['return_id']!, _returnIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_returnIdMeta);
+    }
+    if (data.containsKey('sale_line_id')) {
+      context.handle(
+        _saleLineIdMeta,
+        saleLineId.isAcceptableOrUnknown(
+          data['sale_line_id']!,
+          _saleLineIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('variant_id')) {
+      context.handle(
+        _variantIdMeta,
+        variantId.isAcceptableOrUnknown(data['variant_id']!, _variantIdMeta),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('qty')) {
+      context.handle(
+        _qtyMeta,
+        qty.isAcceptableOrUnknown(data['qty']!, _qtyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_qtyMeta);
+    }
+    if (data.containsKey('unit_price_minor')) {
+      context.handle(
+        _unitPriceMinorMeta,
+        unitPriceMinor.isAcceptableOrUnknown(
+          data['unit_price_minor']!,
+          _unitPriceMinorMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_unitPriceMinorMeta);
+    }
+    if (data.containsKey('tax_minor')) {
+      context.handle(
+        _taxMinorMeta,
+        taxMinor.isAcceptableOrUnknown(data['tax_minor']!, _taxMinorMeta),
+      );
+    }
+    if (data.containsKey('line_total_minor')) {
+      context.handle(
+        _lineTotalMinorMeta,
+        lineTotalMinor.isAcceptableOrUnknown(
+          data['line_total_minor']!,
+          _lineTotalMinorMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lineTotalMinorMeta);
+    }
+    if (data.containsKey('unit_cost_minor')) {
+      context.handle(
+        _unitCostMinorMeta,
+        unitCostMinor.isAcceptableOrUnknown(
+          data['unit_cost_minor']!,
+          _unitCostMinorMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SalesReturnLine map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SalesReturnLine(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      updatedHlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_hlc'],
+      )!,
+      returnId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_id'],
+      )!,
+      saleLineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sale_line_id'],
+      ),
+      variantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}variant_id'],
+      ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      qty: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}qty'],
+      )!,
+      unitPriceMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unit_price_minor'],
+      )!,
+      taxMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tax_minor'],
+      )!,
+      lineTotalMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}line_total_minor'],
+      )!,
+      unitCostMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unit_cost_minor'],
+      )!,
+    );
+  }
+
+  @override
+  $SalesReturnLinesTable createAlias(String alias) {
+    return $SalesReturnLinesTable(attachedDatabase, alias);
+  }
+}
+
+class SalesReturnLine extends DataClass implements Insertable<SalesReturnLine> {
+  /// UUID v7 string, generated client-side (never an autoincrement int).
+  final String id;
+
+  /// Epoch millis (UTC) the row was first created.
+  final int createdAt;
+
+  /// Epoch millis (UTC) of the most recent local or merged write.
+  final int updatedAt;
+
+  /// Tombstone: epoch millis when soft-deleted, or null while live.
+  final int? deletedAt;
+
+  /// Packed HLC of the last write — drives last-write-wins resolution.
+  final String updatedHlc;
+  final String returnId;
+  final String? saleLineId;
+  final String? variantId;
+  final String description;
+  final int qty;
+  final int unitPriceMinor;
+  final int taxMinor;
+  final int lineTotalMinor;
+  final int unitCostMinor;
+  const SalesReturnLine({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.updatedHlc,
+    required this.returnId,
+    this.saleLineId,
+    this.variantId,
+    required this.description,
+    required this.qty,
+    required this.unitPriceMinor,
+    required this.taxMinor,
+    required this.lineTotalMinor,
+    required this.unitCostMinor,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['updated_hlc'] = Variable<String>(updatedHlc);
+    map['return_id'] = Variable<String>(returnId);
+    if (!nullToAbsent || saleLineId != null) {
+      map['sale_line_id'] = Variable<String>(saleLineId);
+    }
+    if (!nullToAbsent || variantId != null) {
+      map['variant_id'] = Variable<String>(variantId);
+    }
+    map['description'] = Variable<String>(description);
+    map['qty'] = Variable<int>(qty);
+    map['unit_price_minor'] = Variable<int>(unitPriceMinor);
+    map['tax_minor'] = Variable<int>(taxMinor);
+    map['line_total_minor'] = Variable<int>(lineTotalMinor);
+    map['unit_cost_minor'] = Variable<int>(unitCostMinor);
+    return map;
+  }
+
+  SalesReturnLinesCompanion toCompanion(bool nullToAbsent) {
+    return SalesReturnLinesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      updatedHlc: Value(updatedHlc),
+      returnId: Value(returnId),
+      saleLineId: saleLineId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(saleLineId),
+      variantId: variantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(variantId),
+      description: Value(description),
+      qty: Value(qty),
+      unitPriceMinor: Value(unitPriceMinor),
+      taxMinor: Value(taxMinor),
+      lineTotalMinor: Value(lineTotalMinor),
+      unitCostMinor: Value(unitCostMinor),
+    );
+  }
+
+  factory SalesReturnLine.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SalesReturnLine(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
+      returnId: serializer.fromJson<String>(json['returnId']),
+      saleLineId: serializer.fromJson<String?>(json['saleLineId']),
+      variantId: serializer.fromJson<String?>(json['variantId']),
+      description: serializer.fromJson<String>(json['description']),
+      qty: serializer.fromJson<int>(json['qty']),
+      unitPriceMinor: serializer.fromJson<int>(json['unitPriceMinor']),
+      taxMinor: serializer.fromJson<int>(json['taxMinor']),
+      lineTotalMinor: serializer.fromJson<int>(json['lineTotalMinor']),
+      unitCostMinor: serializer.fromJson<int>(json['unitCostMinor']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'updatedHlc': serializer.toJson<String>(updatedHlc),
+      'returnId': serializer.toJson<String>(returnId),
+      'saleLineId': serializer.toJson<String?>(saleLineId),
+      'variantId': serializer.toJson<String?>(variantId),
+      'description': serializer.toJson<String>(description),
+      'qty': serializer.toJson<int>(qty),
+      'unitPriceMinor': serializer.toJson<int>(unitPriceMinor),
+      'taxMinor': serializer.toJson<int>(taxMinor),
+      'lineTotalMinor': serializer.toJson<int>(lineTotalMinor),
+      'unitCostMinor': serializer.toJson<int>(unitCostMinor),
+    };
+  }
+
+  SalesReturnLine copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? updatedHlc,
+    String? returnId,
+    Value<String?> saleLineId = const Value.absent(),
+    Value<String?> variantId = const Value.absent(),
+    String? description,
+    int? qty,
+    int? unitPriceMinor,
+    int? taxMinor,
+    int? lineTotalMinor,
+    int? unitCostMinor,
+  }) => SalesReturnLine(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    updatedHlc: updatedHlc ?? this.updatedHlc,
+    returnId: returnId ?? this.returnId,
+    saleLineId: saleLineId.present ? saleLineId.value : this.saleLineId,
+    variantId: variantId.present ? variantId.value : this.variantId,
+    description: description ?? this.description,
+    qty: qty ?? this.qty,
+    unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
+    taxMinor: taxMinor ?? this.taxMinor,
+    lineTotalMinor: lineTotalMinor ?? this.lineTotalMinor,
+    unitCostMinor: unitCostMinor ?? this.unitCostMinor,
+  );
+  SalesReturnLine copyWithCompanion(SalesReturnLinesCompanion data) {
+    return SalesReturnLine(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      updatedHlc: data.updatedHlc.present
+          ? data.updatedHlc.value
+          : this.updatedHlc,
+      returnId: data.returnId.present ? data.returnId.value : this.returnId,
+      saleLineId: data.saleLineId.present
+          ? data.saleLineId.value
+          : this.saleLineId,
+      variantId: data.variantId.present ? data.variantId.value : this.variantId,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      unitPriceMinor: data.unitPriceMinor.present
+          ? data.unitPriceMinor.value
+          : this.unitPriceMinor,
+      taxMinor: data.taxMinor.present ? data.taxMinor.value : this.taxMinor,
+      lineTotalMinor: data.lineTotalMinor.present
+          ? data.lineTotalMinor.value
+          : this.lineTotalMinor,
+      unitCostMinor: data.unitCostMinor.present
+          ? data.unitCostMinor.value
+          : this.unitCostMinor,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SalesReturnLine(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('returnId: $returnId, ')
+          ..write('saleLineId: $saleLineId, ')
+          ..write('variantId: $variantId, ')
+          ..write('description: $description, ')
+          ..write('qty: $qty, ')
+          ..write('unitPriceMinor: $unitPriceMinor, ')
+          ..write('taxMinor: $taxMinor, ')
+          ..write('lineTotalMinor: $lineTotalMinor, ')
+          ..write('unitCostMinor: $unitCostMinor')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    updatedHlc,
+    returnId,
+    saleLineId,
+    variantId,
+    description,
+    qty,
+    unitPriceMinor,
+    taxMinor,
+    lineTotalMinor,
+    unitCostMinor,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SalesReturnLine &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.updatedHlc == this.updatedHlc &&
+          other.returnId == this.returnId &&
+          other.saleLineId == this.saleLineId &&
+          other.variantId == this.variantId &&
+          other.description == this.description &&
+          other.qty == this.qty &&
+          other.unitPriceMinor == this.unitPriceMinor &&
+          other.taxMinor == this.taxMinor &&
+          other.lineTotalMinor == this.lineTotalMinor &&
+          other.unitCostMinor == this.unitCostMinor);
+}
+
+class SalesReturnLinesCompanion extends UpdateCompanion<SalesReturnLine> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> updatedHlc;
+  final Value<String> returnId;
+  final Value<String?> saleLineId;
+  final Value<String?> variantId;
+  final Value<String> description;
+  final Value<int> qty;
+  final Value<int> unitPriceMinor;
+  final Value<int> taxMinor;
+  final Value<int> lineTotalMinor;
+  final Value<int> unitCostMinor;
+  final Value<int> rowid;
+  const SalesReturnLinesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.updatedHlc = const Value.absent(),
+    this.returnId = const Value.absent(),
+    this.saleLineId = const Value.absent(),
+    this.variantId = const Value.absent(),
+    this.description = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.unitPriceMinor = const Value.absent(),
+    this.taxMinor = const Value.absent(),
+    this.lineTotalMinor = const Value.absent(),
+    this.unitCostMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SalesReturnLinesCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String updatedHlc,
+    required String returnId,
+    this.saleLineId = const Value.absent(),
+    this.variantId = const Value.absent(),
+    required String description,
+    required int qty,
+    required int unitPriceMinor,
+    this.taxMinor = const Value.absent(),
+    required int lineTotalMinor,
+    this.unitCostMinor = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       updatedHlc = Value(updatedHlc),
+       returnId = Value(returnId),
+       description = Value(description),
+       qty = Value(qty),
+       unitPriceMinor = Value(unitPriceMinor),
+       lineTotalMinor = Value(lineTotalMinor);
+  static Insertable<SalesReturnLine> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? updatedHlc,
+    Expression<String>? returnId,
+    Expression<String>? saleLineId,
+    Expression<String>? variantId,
+    Expression<String>? description,
+    Expression<int>? qty,
+    Expression<int>? unitPriceMinor,
+    Expression<int>? taxMinor,
+    Expression<int>? lineTotalMinor,
+    Expression<int>? unitCostMinor,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (updatedHlc != null) 'updated_hlc': updatedHlc,
+      if (returnId != null) 'return_id': returnId,
+      if (saleLineId != null) 'sale_line_id': saleLineId,
+      if (variantId != null) 'variant_id': variantId,
+      if (description != null) 'description': description,
+      if (qty != null) 'qty': qty,
+      if (unitPriceMinor != null) 'unit_price_minor': unitPriceMinor,
+      if (taxMinor != null) 'tax_minor': taxMinor,
+      if (lineTotalMinor != null) 'line_total_minor': lineTotalMinor,
+      if (unitCostMinor != null) 'unit_cost_minor': unitCostMinor,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SalesReturnLinesCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? updatedHlc,
+    Value<String>? returnId,
+    Value<String?>? saleLineId,
+    Value<String?>? variantId,
+    Value<String>? description,
+    Value<int>? qty,
+    Value<int>? unitPriceMinor,
+    Value<int>? taxMinor,
+    Value<int>? lineTotalMinor,
+    Value<int>? unitCostMinor,
+    Value<int>? rowid,
+  }) {
+    return SalesReturnLinesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      updatedHlc: updatedHlc ?? this.updatedHlc,
+      returnId: returnId ?? this.returnId,
+      saleLineId: saleLineId ?? this.saleLineId,
+      variantId: variantId ?? this.variantId,
+      description: description ?? this.description,
+      qty: qty ?? this.qty,
+      unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
+      taxMinor: taxMinor ?? this.taxMinor,
+      lineTotalMinor: lineTotalMinor ?? this.lineTotalMinor,
+      unitCostMinor: unitCostMinor ?? this.unitCostMinor,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (updatedHlc.present) {
+      map['updated_hlc'] = Variable<String>(updatedHlc.value);
+    }
+    if (returnId.present) {
+      map['return_id'] = Variable<String>(returnId.value);
+    }
+    if (saleLineId.present) {
+      map['sale_line_id'] = Variable<String>(saleLineId.value);
+    }
+    if (variantId.present) {
+      map['variant_id'] = Variable<String>(variantId.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<int>(qty.value);
+    }
+    if (unitPriceMinor.present) {
+      map['unit_price_minor'] = Variable<int>(unitPriceMinor.value);
+    }
+    if (taxMinor.present) {
+      map['tax_minor'] = Variable<int>(taxMinor.value);
+    }
+    if (lineTotalMinor.present) {
+      map['line_total_minor'] = Variable<int>(lineTotalMinor.value);
+    }
+    if (unitCostMinor.present) {
+      map['unit_cost_minor'] = Variable<int>(unitCostMinor.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SalesReturnLinesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('updatedHlc: $updatedHlc, ')
+          ..write('returnId: $returnId, ')
+          ..write('saleLineId: $saleLineId, ')
+          ..write('variantId: $variantId, ')
+          ..write('description: $description, ')
+          ..write('qty: $qty, ')
+          ..write('unitPriceMinor: $unitPriceMinor, ')
+          ..write('taxMinor: $taxMinor, ')
+          ..write('lineTotalMinor: $lineTotalMinor, ')
+          ..write('unitCostMinor: $unitCostMinor, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -18581,6 +20187,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SalesTable sales = $SalesTable(this);
   late final $SaleLinesTable saleLines = $SaleLinesTable(this);
   late final $PaymentsTable payments = $PaymentsTable(this);
+  late final $SalesReturnsTable salesReturns = $SalesReturnsTable(this);
+  late final $SalesReturnLinesTable salesReturnLines = $SalesReturnLinesTable(
+    this,
+  );
   late final $AccountsTable accounts = $AccountsTable(this);
   late final $TaxRatesTable taxRates = $TaxRatesTable(this);
   late final $JournalsTable journals = $JournalsTable(this);
@@ -18647,6 +20257,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_payment_sale',
     'CREATE INDEX idx_payment_sale ON payments (sale_id)',
   );
+  late final Index idxReturnSale = Index(
+    'idx_return_sale',
+    'CREATE INDEX idx_return_sale ON sales_returns (sale_id)',
+  );
+  late final Index idxReturnlineReturn = Index(
+    'idx_returnline_return',
+    'CREATE INDEX idx_returnline_return ON sales_return_lines (return_id)',
+  );
   late final Index idxJournalRef = Index(
     'idx_journal_ref',
     'CREATE INDEX idx_journal_ref ON journals (ref_type, ref_id)',
@@ -18710,6 +20328,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sales,
     saleLines,
     payments,
+    salesReturns,
+    salesReturnLines,
     accounts,
     taxRates,
     journals,
@@ -18733,6 +20353,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxMovementLocation,
     idxSalelineSale,
     idxPaymentSale,
+    idxReturnSale,
+    idxReturnlineReturn,
     idxJournalRef,
     idxJlineJournal,
     idxJlineAccount,
@@ -24132,6 +25754,759 @@ typedef $$PaymentsTableProcessedTableManager =
       Payment,
       PrefetchHooks Function()
     >;
+typedef $$SalesReturnsTableCreateCompanionBuilder =
+    SalesReturnsCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String updatedHlc,
+      required String number,
+      Value<String?> saleId,
+      required String locationId,
+      Value<String> refundMethod,
+      Value<String?> reason,
+      Value<int> subtotalMinor,
+      Value<int> taxTotalMinor,
+      Value<int> totalMinor,
+      Value<int> rowid,
+    });
+typedef $$SalesReturnsTableUpdateCompanionBuilder =
+    SalesReturnsCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> updatedHlc,
+      Value<String> number,
+      Value<String?> saleId,
+      Value<String> locationId,
+      Value<String> refundMethod,
+      Value<String?> reason,
+      Value<int> subtotalMinor,
+      Value<int> taxTotalMinor,
+      Value<int> totalMinor,
+      Value<int> rowid,
+    });
+
+class $$SalesReturnsTableFilterComposer
+    extends Composer<_$AppDatabase, $SalesReturnsTable> {
+  $$SalesReturnsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get saleId => $composableBuilder(
+    column: $table.saleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refundMethod => $composableBuilder(
+    column: $table.refundMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get subtotalMinor => $composableBuilder(
+    column: $table.subtotalMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taxTotalMinor => $composableBuilder(
+    column: $table.taxTotalMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalMinor => $composableBuilder(
+    column: $table.totalMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SalesReturnsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SalesReturnsTable> {
+  $$SalesReturnsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get saleId => $composableBuilder(
+    column: $table.saleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refundMethod => $composableBuilder(
+    column: $table.refundMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get subtotalMinor => $composableBuilder(
+    column: $table.subtotalMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taxTotalMinor => $composableBuilder(
+    column: $table.taxTotalMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalMinor => $composableBuilder(
+    column: $table.totalMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SalesReturnsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SalesReturnsTable> {
+  $$SalesReturnsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get number =>
+      $composableBuilder(column: $table.number, builder: (column) => column);
+
+  GeneratedColumn<String> get saleId =>
+      $composableBuilder(column: $table.saleId, builder: (column) => column);
+
+  GeneratedColumn<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get refundMethod => $composableBuilder(
+    column: $table.refundMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<int> get subtotalMinor => $composableBuilder(
+    column: $table.subtotalMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get taxTotalMinor => $composableBuilder(
+    column: $table.taxTotalMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get totalMinor => $composableBuilder(
+    column: $table.totalMinor,
+    builder: (column) => column,
+  );
+}
+
+class $$SalesReturnsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SalesReturnsTable,
+          SalesReturn,
+          $$SalesReturnsTableFilterComposer,
+          $$SalesReturnsTableOrderingComposer,
+          $$SalesReturnsTableAnnotationComposer,
+          $$SalesReturnsTableCreateCompanionBuilder,
+          $$SalesReturnsTableUpdateCompanionBuilder,
+          (
+            SalesReturn,
+            BaseReferences<_$AppDatabase, $SalesReturnsTable, SalesReturn>,
+          ),
+          SalesReturn,
+          PrefetchHooks Function()
+        > {
+  $$SalesReturnsTableTableManager(_$AppDatabase db, $SalesReturnsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SalesReturnsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SalesReturnsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SalesReturnsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> updatedHlc = const Value.absent(),
+                Value<String> number = const Value.absent(),
+                Value<String?> saleId = const Value.absent(),
+                Value<String> locationId = const Value.absent(),
+                Value<String> refundMethod = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<int> subtotalMinor = const Value.absent(),
+                Value<int> taxTotalMinor = const Value.absent(),
+                Value<int> totalMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SalesReturnsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                number: number,
+                saleId: saleId,
+                locationId: locationId,
+                refundMethod: refundMethod,
+                reason: reason,
+                subtotalMinor: subtotalMinor,
+                taxTotalMinor: taxTotalMinor,
+                totalMinor: totalMinor,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String updatedHlc,
+                required String number,
+                Value<String?> saleId = const Value.absent(),
+                required String locationId,
+                Value<String> refundMethod = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<int> subtotalMinor = const Value.absent(),
+                Value<int> taxTotalMinor = const Value.absent(),
+                Value<int> totalMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SalesReturnsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                number: number,
+                saleId: saleId,
+                locationId: locationId,
+                refundMethod: refundMethod,
+                reason: reason,
+                subtotalMinor: subtotalMinor,
+                taxTotalMinor: taxTotalMinor,
+                totalMinor: totalMinor,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SalesReturnsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SalesReturnsTable,
+      SalesReturn,
+      $$SalesReturnsTableFilterComposer,
+      $$SalesReturnsTableOrderingComposer,
+      $$SalesReturnsTableAnnotationComposer,
+      $$SalesReturnsTableCreateCompanionBuilder,
+      $$SalesReturnsTableUpdateCompanionBuilder,
+      (
+        SalesReturn,
+        BaseReferences<_$AppDatabase, $SalesReturnsTable, SalesReturn>,
+      ),
+      SalesReturn,
+      PrefetchHooks Function()
+    >;
+typedef $$SalesReturnLinesTableCreateCompanionBuilder =
+    SalesReturnLinesCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String updatedHlc,
+      required String returnId,
+      Value<String?> saleLineId,
+      Value<String?> variantId,
+      required String description,
+      required int qty,
+      required int unitPriceMinor,
+      Value<int> taxMinor,
+      required int lineTotalMinor,
+      Value<int> unitCostMinor,
+      Value<int> rowid,
+    });
+typedef $$SalesReturnLinesTableUpdateCompanionBuilder =
+    SalesReturnLinesCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> updatedHlc,
+      Value<String> returnId,
+      Value<String?> saleLineId,
+      Value<String?> variantId,
+      Value<String> description,
+      Value<int> qty,
+      Value<int> unitPriceMinor,
+      Value<int> taxMinor,
+      Value<int> lineTotalMinor,
+      Value<int> unitCostMinor,
+      Value<int> rowid,
+    });
+
+class $$SalesReturnLinesTableFilterComposer
+    extends Composer<_$AppDatabase, $SalesReturnLinesTable> {
+  $$SalesReturnLinesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnId => $composableBuilder(
+    column: $table.returnId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get saleLineId => $composableBuilder(
+    column: $table.saleLineId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get unitPriceMinor => $composableBuilder(
+    column: $table.unitPriceMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taxMinor => $composableBuilder(
+    column: $table.taxMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lineTotalMinor => $composableBuilder(
+    column: $table.lineTotalMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SalesReturnLinesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SalesReturnLinesTable> {
+  $$SalesReturnLinesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnId => $composableBuilder(
+    column: $table.returnId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get saleLineId => $composableBuilder(
+    column: $table.saleLineId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get qty => $composableBuilder(
+    column: $table.qty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unitPriceMinor => $composableBuilder(
+    column: $table.unitPriceMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taxMinor => $composableBuilder(
+    column: $table.taxMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lineTotalMinor => $composableBuilder(
+    column: $table.lineTotalMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SalesReturnLinesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SalesReturnLinesTable> {
+  $$SalesReturnLinesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedHlc => $composableBuilder(
+    column: $table.updatedHlc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get returnId =>
+      $composableBuilder(column: $table.returnId, builder: (column) => column);
+
+  GeneratedColumn<String> get saleLineId => $composableBuilder(
+    column: $table.saleLineId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get variantId =>
+      $composableBuilder(column: $table.variantId, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumn<int> get unitPriceMinor => $composableBuilder(
+    column: $table.unitPriceMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get taxMinor =>
+      $composableBuilder(column: $table.taxMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get lineTotalMinor => $composableBuilder(
+    column: $table.lineTotalMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get unitCostMinor => $composableBuilder(
+    column: $table.unitCostMinor,
+    builder: (column) => column,
+  );
+}
+
+class $$SalesReturnLinesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SalesReturnLinesTable,
+          SalesReturnLine,
+          $$SalesReturnLinesTableFilterComposer,
+          $$SalesReturnLinesTableOrderingComposer,
+          $$SalesReturnLinesTableAnnotationComposer,
+          $$SalesReturnLinesTableCreateCompanionBuilder,
+          $$SalesReturnLinesTableUpdateCompanionBuilder,
+          (
+            SalesReturnLine,
+            BaseReferences<
+              _$AppDatabase,
+              $SalesReturnLinesTable,
+              SalesReturnLine
+            >,
+          ),
+          SalesReturnLine,
+          PrefetchHooks Function()
+        > {
+  $$SalesReturnLinesTableTableManager(
+    _$AppDatabase db,
+    $SalesReturnLinesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SalesReturnLinesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SalesReturnLinesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SalesReturnLinesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> updatedHlc = const Value.absent(),
+                Value<String> returnId = const Value.absent(),
+                Value<String?> saleLineId = const Value.absent(),
+                Value<String?> variantId = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<int> qty = const Value.absent(),
+                Value<int> unitPriceMinor = const Value.absent(),
+                Value<int> taxMinor = const Value.absent(),
+                Value<int> lineTotalMinor = const Value.absent(),
+                Value<int> unitCostMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SalesReturnLinesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                returnId: returnId,
+                saleLineId: saleLineId,
+                variantId: variantId,
+                description: description,
+                qty: qty,
+                unitPriceMinor: unitPriceMinor,
+                taxMinor: taxMinor,
+                lineTotalMinor: lineTotalMinor,
+                unitCostMinor: unitCostMinor,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String updatedHlc,
+                required String returnId,
+                Value<String?> saleLineId = const Value.absent(),
+                Value<String?> variantId = const Value.absent(),
+                required String description,
+                required int qty,
+                required int unitPriceMinor,
+                Value<int> taxMinor = const Value.absent(),
+                required int lineTotalMinor,
+                Value<int> unitCostMinor = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SalesReturnLinesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                updatedHlc: updatedHlc,
+                returnId: returnId,
+                saleLineId: saleLineId,
+                variantId: variantId,
+                description: description,
+                qty: qty,
+                unitPriceMinor: unitPriceMinor,
+                taxMinor: taxMinor,
+                lineTotalMinor: lineTotalMinor,
+                unitCostMinor: unitCostMinor,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SalesReturnLinesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SalesReturnLinesTable,
+      SalesReturnLine,
+      $$SalesReturnLinesTableFilterComposer,
+      $$SalesReturnLinesTableOrderingComposer,
+      $$SalesReturnLinesTableAnnotationComposer,
+      $$SalesReturnLinesTableCreateCompanionBuilder,
+      $$SalesReturnLinesTableUpdateCompanionBuilder,
+      (
+        SalesReturnLine,
+        BaseReferences<_$AppDatabase, $SalesReturnLinesTable, SalesReturnLine>,
+      ),
+      SalesReturnLine,
+      PrefetchHooks Function()
+    >;
 typedef $$AccountsTableCreateCompanionBuilder =
     AccountsCompanion Function({
       required String id,
@@ -27655,6 +30030,10 @@ class $AppDatabaseManager {
       $$SaleLinesTableTableManager(_db, _db.saleLines);
   $$PaymentsTableTableManager get payments =>
       $$PaymentsTableTableManager(_db, _db.payments);
+  $$SalesReturnsTableTableManager get salesReturns =>
+      $$SalesReturnsTableTableManager(_db, _db.salesReturns);
+  $$SalesReturnLinesTableTableManager get salesReturnLines =>
+      $$SalesReturnLinesTableTableManager(_db, _db.salesReturnLines);
   $$AccountsTableTableManager get accounts =>
       $$AccountsTableTableManager(_db, _db.accounts);
   $$TaxRatesTableTableManager get taxRates =>

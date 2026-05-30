@@ -92,6 +92,8 @@ void main() {
       expect(await db.select(db.purchaseOrders).get(), isEmpty);
       expect(await db.select(db.accounts).get(), isEmpty);
       expect(await db.select(db.stockMovements).get(), isEmpty);
+      expect(await db.select(db.salesReturns).get(), isEmpty);
+      expect(await db.select(db.salesReturnLines).get(), isEmpty);
 
       // Columns added by later migrations exist (querying company_settings would
       // fail if isPkp/taxInclusive/defaultTaxRateId were missing).

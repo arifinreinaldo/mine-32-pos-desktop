@@ -9,6 +9,7 @@ import '../../../shared/widgets/section_placeholder.dart';
 import '../../settings/presentation/settings_controller.dart';
 import '../data/receipt_builder.dart';
 import '../data/receipt_pdf.dart';
+import 'return_dialog.dart';
 import 'sales_history_controller.dart';
 
 class SalesHistoryScreen extends ConsumerWidget {
@@ -166,6 +167,19 @@ class _SaleDetailPanel extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  OutlinedButton.icon(
+                    onPressed: () => ReturnDialog.show(
+                      context,
+                      saleId: sale.id,
+                      saleNumber: sale.number,
+                    ),
+                    icon: const Icon(
+                      Icons.assignment_return_outlined,
+                      size: 18,
+                    ),
+                    label: const Text('Return / refund'),
+                  ),
+                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: () => _print(ref, sale, d.lines),
                     icon: const Icon(Icons.print_outlined, size: 18),

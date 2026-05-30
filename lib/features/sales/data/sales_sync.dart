@@ -28,4 +28,20 @@ void registerSalesSyncEntities(SyncRegistry registry) {
       fromJson: Payment.fromJson,
     ),
   );
+  registry.register(
+    SyncEntity<SalesReturn>(
+      name: 'sales_returns',
+      kind: SyncKind.event,
+      tableOf: (db) => db.salesReturns,
+      fromJson: SalesReturn.fromJson,
+    ),
+  );
+  registry.register(
+    SyncEntity<SalesReturnLine>(
+      name: 'sales_return_lines',
+      kind: SyncKind.event,
+      tableOf: (db) => db.salesReturnLines,
+      fromJson: SalesReturnLine.fromJson,
+    ),
+  );
 }
