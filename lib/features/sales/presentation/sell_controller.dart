@@ -89,3 +89,14 @@ final sellResultsProvider = StreamProvider.autoDispose<List<CatalogItem>>((
   }
   return ref.watch(catalogRepositoryProvider).watch(query: query);
 });
+
+/// Customer attached to the in-progress sale (null = walk-in).
+class SellCustomer extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void select(String? id) => state = id;
+}
+
+final sellCustomerProvider = NotifierProvider<SellCustomer, String?>(
+  SellCustomer.new,
+);

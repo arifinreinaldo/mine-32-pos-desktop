@@ -15,16 +15,24 @@ import 'sell_controller.dart';
 class PaymentDialog extends ConsumerStatefulWidget {
   final List<CartLine> lines;
   final Money total;
-  const PaymentDialog({super.key, required this.lines, required this.total});
+  final String? customerId;
+  const PaymentDialog({
+    super.key,
+    required this.lines,
+    required this.total,
+    this.customerId,
+  });
 
   static Future<SaleResult?> show(
     BuildContext context, {
     required List<CartLine> lines,
     required Money total,
+    String? customerId,
   }) {
     return showDialog<SaleResult>(
       context: context,
-      builder: (_) => PaymentDialog(lines: lines, total: total),
+      builder: (_) =>
+          PaymentDialog(lines: lines, total: total, customerId: customerId),
     );
   }
 
@@ -92,6 +100,8 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           locationId: locationId,
           tendered: _tenderedMoney,
           method: _method,
+          onAccount: _method == 'account',
+          customerId: widget.customerId,
           taxBasisPoints: rate?.basisPoints ?? 0,
           taxInclusive: rate?.inclusive ?? true,
         );
@@ -158,10 +168,12 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
               _taxBreakdown(money, theme),
             const SizedBox(height: 16),
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'cash', label: Text('Cash')),
-                ButtonSegment(value: 'card', label: Text('Card')),
-                ButtonSegment(value: 'transfer', label: Text('Transfer')),
+              segments: [
+                const ButtonSegment(value: 'cash', label: Text('Cash')),
+                const ButtonSegment(value: 'card', label: Text('Card')),
+                const ButtonSegment(value: 'transfer', label: Text('Transfer')),
+                if (widget.customerId != null)
+                  const ButtonSegment(value: 'account', label: Text('Account')),
               ],
               selected: {_method},
               onSelectionChanged: (s) => setState(() => _method = s.first),

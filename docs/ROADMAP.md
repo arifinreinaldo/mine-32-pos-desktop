@@ -64,9 +64,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] CoreTax XML faktur; P&L + Balance Sheet statements; journal browser; manual journal; tax-rate editor
 
 ## M6 — Customers & Purchasing
-- [ ] customers + customer_vehicles; AR balance; credit limit; price tiers
-- [ ] suppliers, purchase_orders, goods_receipts; AP; receiving emits stock+journals
-- [ ] UI + tests for both
+- [x] customers + customer_vehicles; AR balance (watch); credit limit
+- [x] On-account (credit) sales: paid=0, journal debits Accounts Receivable
+- [x] Customers UI (master-detail: info, AR, vehicles, purchase history) + checkout customer picker + Account tender
+- [x] Tests: customer CRUD/search/vehicles/sync + on-account→AR + balanced journal
+- [ ] Receive payment / settle AR (allocate receipts; Dr Cash Cr AR); price tiers
+- [ ] suppliers, purchase_orders, goods_receipts; AP; receiving emits stock+journals + UI + tests
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine

@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 
 import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
+import '../../customers/presentation/customers_controller.dart';
 import '../../settings/presentation/settings_controller.dart';
 import '../data/receipt_pdf.dart';
 import '../domain/cart.dart';
@@ -138,6 +139,7 @@ class _CartPanel extends ConsumerWidget {
                   ),
               ],
             ),
+            _CustomerSelector(onPick: () => _pickCustomer(context, ref)),
             const Divider(),
             Expanded(
               child: cart.isEmpty
@@ -183,6 +185,7 @@ class _CartPanel extends ConsumerWidget {
       context,
       lines: cart.lines,
       total: cart.total,
+      customerId: ref.read(sellCustomerProvider),
     );
     if (result == null || !context.mounted) return;
     ref.read(cartProvider.notifier).clear();
@@ -237,6 +240,85 @@ class _CartPanel extends ConsumerWidget {
       footer: settings?.receiptFooter,
     );
     await Printing.layoutPdf(onLayout: (_) => buildReceiptPdf(data));
+  }
+
+  Future<void> _pickCustomer(BuildContext context, WidgetRef ref) async {
+    final selected = await showDialog<String?>(
+      context: context,
+      builder: (_) => const _CustomerPickerDialog(),
+    );
+    // A sentinel '' means "Walk-in (clear)".
+    if (selected != null) {
+      ref
+          .read(sellCustomerProvider.notifier)
+          .select(selected.isEmpty ? null : selected);
+    }
+  }
+}
+
+class _CustomerSelector extends ConsumerWidget {
+  final VoidCallback onPick;
+  const _CustomerSelector({required this.onPick});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = ref.watch(sellCustomerProvider);
+    final customers = ref.watch(customersProvider).value ?? const [];
+    final name = id == null
+        ? 'Walk-in customer'
+        : customers.where((c) => c.id == id).map((c) => c.name).firstOrNull ??
+              'Customer';
+    return InkWell(
+      onTap: onPick,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            const Icon(Icons.person_outline, size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text(name, overflow: TextOverflow.ellipsis)),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomerPickerDialog extends ConsumerWidget {
+  const _CustomerPickerDialog();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customers = ref.watch(customersProvider);
+    return AlertDialog(
+      title: const Text('Choose customer'),
+      content: SizedBox(
+        width: 360,
+        height: 380,
+        child: customers.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+          data: (list) => ListView(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person_off_outlined),
+                title: const Text('Walk-in (no customer)'),
+                onTap: () => Navigator.of(context).pop(''),
+              ),
+              const Divider(height: 1),
+              for (final c in list)
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: Text(c.name),
+                  subtitle: Text(c.phone ?? c.email ?? '—'),
+                  onTap: () => Navigator.of(context).pop(c.id),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'tables/accounting_tables.dart';
 import 'tables/catalog_tables.dart';
+import 'tables/customers_tables.dart';
 import 'tables/inventory_tables.dart';
 import 'tables/sales_tables.dart';
 import 'tables/settings_tables.dart';
@@ -46,6 +47,9 @@ part 'app_database.g.dart';
     TaxRates,
     Journals,
     JournalLines,
+    // Customers
+    Customers,
+    CustomerVehicles,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -54,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -99,6 +103,11 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(sales, sales.buyerName);
         await m.addColumn(sales, sales.buyerNpwp);
         await m.addColumn(sales, sales.fakturNumber);
+      }
+      // v6 -> v7: customers.
+      if (from < 7) {
+        await m.createTable(customers);
+        await m.createTable(customerVehicles);
       }
     },
     beforeOpen: (details) async {

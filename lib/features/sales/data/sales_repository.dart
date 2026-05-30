@@ -39,6 +39,7 @@ class SalesRepository extends SyncRepository {
     required Money tendered,
     String? customerId,
     String method = 'cash',
+    bool onAccount = false,
     int taxBasisPoints = 0,
     bool taxInclusive = true,
     String? buyerName,
@@ -96,7 +97,7 @@ class SalesRepository extends SyncRepository {
           discountMinor: discountMinor,
           taxTotalMinor: ppnMinor,
           totalMinor: totalMinor,
-          paidTotalMinor: totalMinor,
+          paidTotalMinor: onAccount ? 0 : totalMinor,
           postedAt: now,
           buyerName: buyerName,
           buyerNpwp: buyerNpwp,
@@ -140,29 +141,33 @@ class SalesRepository extends SyncRepository {
 
       final tenderedMinor = tendered.minorUnits;
       final changeMinor = tenderedMinor - totalMinor;
-      final paymentId = _uuid.v7();
-      await writeSyncable<Payment>(
-        entityTable: 'payments',
-        table: db.payments,
-        rowId: paymentId,
-        build: (hlc, n) => Payment(
-          id: paymentId,
-          createdAt: now,
-          updatedAt: n,
-          updatedHlc: hlc.pack(),
-          saleId: saleId,
-          method: method,
-          amountMinor: totalMinor,
-          tenderedMinor: tenderedMinor,
-          changeMinor: changeMinor < 0 ? 0 : changeMinor,
-        ),
-      );
+      // On-account (credit) sales record no payment now — they create AR.
+      if (!onAccount) {
+        final paymentId = _uuid.v7();
+        await writeSyncable<Payment>(
+          entityTable: 'payments',
+          table: db.payments,
+          rowId: paymentId,
+          build: (hlc, n) => Payment(
+            id: paymentId,
+            createdAt: now,
+            updatedAt: n,
+            updatedHlc: hlc.pack(),
+            saleId: saleId,
+            method: method,
+            amountMinor: totalMinor,
+            tenderedMinor: tenderedMinor,
+            changeMinor: changeMinor < 0 ? 0 : changeMinor,
+          ),
+        );
+      }
 
-      // Post the accounting journal (revenue, PPN, COGS) if wired.
+      // Post the accounting journal (revenue, PPN, COGS) if wired. On-account
+      // sales debit Accounts Receivable instead of Cash/Bank.
       await accounting?.postSaleJournal(
         saleId: saleId,
         date: now,
-        method: method,
+        method: onAccount ? 'account' : method,
         totalMinor: totalMinor,
         dppMinor: dppMinor,
         ppnMinor: ppnMinor,

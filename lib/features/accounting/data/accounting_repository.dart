@@ -164,7 +164,8 @@ class AccountingRepository extends SyncRepository {
     });
   }
 
-  /// Posts the standard cash/credit sale journal (revenue, PPN, COGS).
+  /// Posts the standard sale journal (revenue, PPN, COGS). The debit side is
+  /// Cash, Bank or — for on-account/credit sales — Accounts Receivable.
   Future<void> postSaleJournal({
     required String saleId,
     required int date,
@@ -174,9 +175,12 @@ class AccountingRepository extends SyncRepository {
     required int ppnMinor,
     required int cogsMinor,
   }) async {
-    final pay = await accountByCode(
-      method == 'cash' ? AccountCode.cash : AccountCode.bank,
-    );
+    final debitCode = switch (method) {
+      'account' => AccountCode.receivable,
+      'cash' => AccountCode.cash,
+      _ => AccountCode.bank,
+    };
+    final pay = await accountByCode(debitCode);
     final salesAcc = await accountByCode(AccountCode.salesRevenue);
     final ppnAcc = await accountByCode(AccountCode.ppnOutput);
     final cogsAcc = await accountByCode(AccountCode.cogs);

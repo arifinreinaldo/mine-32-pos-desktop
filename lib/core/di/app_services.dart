@@ -1,6 +1,7 @@
 import '../../features/accounting/data/accounting_repository.dart';
 import '../../features/accounting/data/accounting_sync.dart';
 import '../../features/catalog/data/catalog_sync.dart';
+import '../../features/customers/data/customers_sync.dart';
 import '../../features/inventory/data/inventory_sync.dart';
 import '../../features/sales/data/sales_sync.dart';
 import '../../features/settings/data/settings_repository.dart';
@@ -57,6 +58,7 @@ class AppServices {
     registerInventorySyncEntities(registry);
     registerSalesSyncEntities(registry);
     registerAccountingSyncEntities(registry);
+    registerCustomerSyncEntities(registry);
     // Feature modules register their entities here as they are added.
 
     // Seed the chart of accounts + default PPN rate (idempotent).
