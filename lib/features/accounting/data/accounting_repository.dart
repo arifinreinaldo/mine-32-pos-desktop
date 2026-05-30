@@ -238,6 +238,38 @@ class AccountingRepository extends SyncRepository {
     );
   }
 
+  /// Goods-receipt journal for a received purchase order:
+  /// Dr Inventory · Cr Accounts Payable.
+  Future<void> postPurchaseJournal({
+    required String poId,
+    required int date,
+    required int totalMinor,
+  }) async {
+    if (totalMinor <= 0) return;
+    final inv = await accountByCode(AccountCode.inventory);
+    final ap = await accountByCode(AccountCode.accountsPayable);
+    if (inv == null || ap == null) return;
+    await postJournal(
+      date: date,
+      source: 'purchase',
+      refType: 'purchase_order',
+      refId: poId,
+      memo: 'Goods receipt',
+      lines: [
+        JournalLineInput(
+          accountId: inv.id,
+          debitMinor: totalMinor,
+          description: 'Inventory',
+        ),
+        JournalLineInput(
+          accountId: ap.id,
+          creditMinor: totalMinor,
+          description: 'Accounts payable',
+        ),
+      ],
+    );
+  }
+
   // --- Reports ---
 
   Stream<List<TrialBalanceRow>> watchTrialBalance() {

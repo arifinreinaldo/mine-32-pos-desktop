@@ -9,6 +9,7 @@ import 'tables/accounting_tables.dart';
 import 'tables/catalog_tables.dart';
 import 'tables/customers_tables.dart';
 import 'tables/inventory_tables.dart';
+import 'tables/purchasing_tables.dart';
 import 'tables/sales_tables.dart';
 import 'tables/settings_tables.dart';
 import 'tables/sync_tables.dart';
@@ -50,6 +51,10 @@ part 'app_database.g.dart';
     // Customers
     Customers,
     CustomerVehicles,
+    // Purchasing
+    Suppliers,
+    PurchaseOrders,
+    PurchaseOrderLines,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -58,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -108,6 +113,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         await m.createTable(customers);
         await m.createTable(customerVehicles);
+      }
+      // v7 -> v8: purchasing.
+      if (from < 8) {
+        await m.createTable(suppliers);
+        await m.createTable(purchaseOrders);
+        await m.createTable(purchaseOrderLines);
       }
     },
     beforeOpen: (details) async {

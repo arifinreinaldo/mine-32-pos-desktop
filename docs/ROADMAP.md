@@ -68,8 +68,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] On-account (credit) sales: paid=0, journal debits Accounts Receivable
 - [x] Customers UI (master-detail: info, AR, vehicles, purchase history) + checkout customer picker + Account tender
 - [x] Tests: customer CRUD/search/vehicles/sync + on-account→AR + balanced journal
-- [ ] Receive payment / settle AR (allocate receipts; Dr Cash Cr AR); price tiers
-- [ ] suppliers, purchase_orders, goods_receipts; AP; receiving emits stock+journals + UI + tests
+- [x] suppliers + purchase_orders + lines; create PO; **receive → +stock + Dr Inventory / Cr AP journal**; AP balance; idempotent receive
+- [x] Purchasing UI (tabbed: suppliers list/editor + POs list with New-PO dialog + Receive) + tests
+- [ ] Settle AR/AP (receipts/payments allocation); price tiers; partial receipts; input-PPN on purchases
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine
