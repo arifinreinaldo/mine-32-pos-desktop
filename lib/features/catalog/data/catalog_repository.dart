@@ -98,6 +98,18 @@ class CatalogRepository extends SyncRepository {
     );
   }
 
+  /// Load a part by its SKU (the first non-deleted match), or null. Used by
+  /// CSV import to update an existing part rather than create a duplicate.
+  Future<PartDraft?> getPartBySku(String sku) async {
+    final variant =
+        await (db.select(db.productVariants)
+              ..where((t) => t.sku.equals(sku) & t.deletedAt.isNull())
+              ..limit(1))
+            .getSingleOrNull();
+    if (variant == null) return null;
+    return getPart(variant.id);
+  }
+
   /// Create or update a simple part (product + default variant, optional brand)
   /// atomically. Returns the variant id.
   Future<String> savePart(PartDraft draft) async {

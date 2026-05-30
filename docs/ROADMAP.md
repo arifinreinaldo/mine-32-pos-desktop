@@ -32,7 +32,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Auto-parts data: vehicles (YMME), fitments, cross_references, supersessions + repository + number-lookup + tests
 - [x] Auto-parts UI: fitment/cross-ref editor on the part screen (vehicle picker w/ dedupe; add/remove fitment + interchange)
 - [x] Sample data seeder (Settings → Load sample data: 10 parts + stock + supplier + customer + fitment)
-- [ ] Seed/import: CSV import of parts
+- [x] Seed/import: CSV import of parts (header-aliased, upsert-by-SKU, scale-aware, per-line errors; template + Settings UI)
 - [ ] Multi-variant editing (a product with several variants)
 
 ## M3 — Inventory [Shopify multi-location]

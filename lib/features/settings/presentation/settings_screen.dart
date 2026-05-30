@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/di/providers.dart';
+import '../../catalog/data/parts_csv_import.dart';
 import '../../catalog/presentation/catalog_controller.dart';
 import '../../customers/presentation/customers_controller.dart';
 import '../../inventory/presentation/inventory_controller.dart';
@@ -130,6 +136,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _importPartsCsv() async {
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: 'Import parts from CSV',
+      type: FileType.custom,
+      allowedExtensions: const ['csv'],
+      withData: true,
+    );
+    final bytes = picked?.files.firstOrNull?.bytes;
+    if (bytes == null) return;
+    final importer = PartsCsvImporter(
+      catalog: ref.read(catalogRepositoryProvider),
+      scale: ref.read(currencyScaleProvider),
+    );
+    final result = await importer.import(
+      utf8.decode(bytes, allowMalformed: true),
+    );
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Import parts'),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(result.summary()),
+              if (result.hasErrors) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '${result.errors.length} problem(s):',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 4),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: SingleChildScrollView(
+                    child: Text(result.errors.join('\n')),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _downloadCsvTemplate() async {
+    final path = await FilePicker.saveFile(
+      dialogTitle: 'Save parts CSV template',
+      fileName: 'parts-template.csv',
+      bytes: Uint8List.fromList(utf8.encode(PartsCsvImporter.template())),
+    );
+    if (mounted && path != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Template saved')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -217,14 +291,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       _field(_receiptHeader, 'Receipt header'),
                       _field(_receiptFooter, 'Receipt footer'),
                       const SizedBox(height: 16),
-                      _section(theme, 'Demo data'),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: _loadSampleData,
-                          icon: const Icon(Icons.dataset_outlined),
-                          label: const Text('Load sample data'),
-                        ),
+                      _section(theme, 'Data'),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _importPartsCsv,
+                            icon: const Icon(Icons.upload_file_outlined),
+                            label: const Text('Import parts (CSV)'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _downloadCsvTemplate,
+                            icon: const Icon(Icons.download_outlined),
+                            label: const Text('CSV template'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _loadSampleData,
+                            icon: const Icon(Icons.dataset_outlined),
+                            label: const Text('Load sample data'),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       Align(
