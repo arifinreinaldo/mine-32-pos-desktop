@@ -58,4 +58,35 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 500));
   });
+
+  testWidgets('tax rates tab shows the seeded PPN rate', (tester) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final services = await AppServices.initialize(
+      database: AppDatabase(NativeDatabase.memory()),
+      clock: MutableClock(1000),
+    );
+    addTearDown(services.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appServicesProvider.overrideWithValue(services)],
+        child: const MaterialApp(home: Scaffold(body: AccountingScreen())),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.text('Tax rates'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('PPN 11%'), findsOneWidget);
+    expect(find.textContaining('11% · inclusive'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 500));
+  });
 }

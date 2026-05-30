@@ -37,3 +37,8 @@ final journalsProvider = StreamProvider.autoDispose<List<JournalSummary>>((
 final accountsListProvider = FutureProvider.autoDispose<List<Account>>((ref) {
   return ref.watch(accountingRepositoryProvider).listAccounts();
 });
+
+/// All tax rates (default first), for the tax-rate editor.
+final taxRatesProvider = StreamProvider.autoDispose<List<TaxRate>>((ref) {
+  return ref.watch(accountingRepositoryProvider).watchTaxRates();
+});

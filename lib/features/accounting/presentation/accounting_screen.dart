@@ -7,6 +7,7 @@ import '../../../shared/widgets/section_placeholder.dart';
 import '../domain/accounting_models.dart';
 import 'accounting_controller.dart';
 import 'manual_journal_dialog.dart';
+import 'tax_rate_editor_dialog.dart';
 
 class AccountingScreen extends ConsumerWidget {
   const AccountingScreen({super.key});
@@ -15,7 +16,7 @@ class AccountingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -27,11 +28,16 @@ class AccountingScreen extends ConsumerWidget {
               tabs: [
                 Tab(text: 'Chart of accounts'),
                 Tab(text: 'Journals'),
+                Tab(text: 'Tax rates'),
               ],
             ),
             const Expanded(
               child: TabBarView(
-                children: [_ChartOfAccountsTab(), _JournalsTab()],
+                children: [
+                  _ChartOfAccountsTab(),
+                  _JournalsTab(),
+                  _TaxRatesTab(),
+                ],
               ),
             ),
           ],
@@ -308,5 +314,118 @@ class _JournalTile extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+class _TaxRatesTab extends ConsumerWidget {
+  const _TaxRatesTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final rates = ref.watch(taxRatesProvider);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: () => TaxRateEditorDialog.show(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Add rate'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: rates.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Failed to load: $e')),
+              data: (rows) {
+                if (rows.isEmpty) {
+                  return const SectionPlaceholder(
+                    title: 'No tax rates',
+                    icon: Icons.percent_outlined,
+                    message: 'Add a tax rate (e.g. PPN 11%).',
+                  );
+                }
+                return ListView.separated(
+                  itemCount: rows.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, i) {
+                    final r = rows[i];
+                    final subtitle = [
+                      '${formatBasisPoints(r.basisPoints)}%',
+                      r.inclusive ? 'inclusive' : 'exclusive',
+                      r.taxType,
+                    ].join(' · ');
+                    return ListTile(
+                      title: Row(
+                        children: [
+                          Text(r.name),
+                          if (r.isDefault) ...[
+                            const SizedBox(width: 8),
+                            Chip(
+                              label: const Text('Default'),
+                              visualDensity: VisualDensity.compact,
+                              labelStyle: theme.textTheme.labelSmall,
+                            ),
+                          ],
+                        ],
+                      ),
+                      subtitle: Text(subtitle),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: 'Edit',
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            onPressed: () =>
+                                TaxRateEditorDialog.show(context, initial: r),
+                          ),
+                          IconButton(
+                            tooltip: 'Delete',
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            onPressed: () => _confirmDelete(context, ref, r.id),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete tax rate?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(accountingRepositoryProvider).deleteTaxRate(id);
+    }
   }
 }

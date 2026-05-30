@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_repository.dart';
 import '../../../core/money/money.dart';
+import '../../../core/sync/change_record.dart';
 import '../domain/accounting_models.dart';
 import '../domain/coretax_csv.dart';
 
@@ -80,6 +81,91 @@ class AccountingRepository extends SyncRepository {
         inclusive: true,
         isDefault: true,
         taxType: 'PPN',
+      ),
+    );
+  }
+
+  /// All tax rates (newest-relevant first: default, then by name).
+  Stream<List<TaxRate>> watchTaxRates() {
+    return (db.select(db.taxRates)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.isDefault),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
+        .watch();
+  }
+
+  /// Creates or updates a tax rate. When [isDefault] is set, the flag is cleared
+  /// on every other rate so exactly one default exists.
+  Future<String> saveTaxRate({
+    String? id,
+    required String name,
+    required int basisPoints,
+    bool inclusive = true,
+    bool isDefault = false,
+    String taxType = 'PPN',
+  }) async {
+    final rateId = id ?? _uuid.v7();
+    final createdAt = id == null
+        ? clock.nowMillis()
+        : await existingCreatedAt(db.taxRates, rateId) ?? clock.nowMillis();
+
+    if (isDefault) {
+      final others = await (db.select(
+        db.taxRates,
+      )..where((t) => t.isDefault.equals(true) & t.deletedAt.isNull())).get();
+      for (final o in others) {
+        if (o.id == rateId) continue;
+        await writeSyncable<TaxRate>(
+          entityTable: 'tax_rates',
+          table: db.taxRates,
+          rowId: o.id,
+          build: (hlc, now) => o.copyWith(
+            isDefault: false,
+            updatedAt: now,
+            updatedHlc: hlc.pack(),
+          ),
+        );
+      }
+    }
+
+    await writeSyncable<TaxRate>(
+      entityTable: 'tax_rates',
+      table: db.taxRates,
+      rowId: rateId,
+      build: (hlc, now) => TaxRate(
+        id: rateId,
+        createdAt: createdAt,
+        updatedAt: now,
+        updatedHlc: hlc.pack(),
+        name: name,
+        basisPoints: basisPoints,
+        inclusive: inclusive,
+        isDefault: isDefault,
+        taxType: taxType,
+      ),
+    );
+    return rateId;
+  }
+
+  /// Tombstones a tax rate so the deletion replicates.
+  Future<void> deleteTaxRate(String id) async {
+    final row =
+        await (db.select(db.taxRates)
+              ..where((t) => t.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) return;
+    await writeSyncable<TaxRate>(
+      entityTable: 'tax_rates',
+      table: db.taxRates,
+      rowId: id,
+      op: ChangeOp.delete,
+      build: (hlc, now) => row.copyWith(
+        deletedAt: Value(now),
+        updatedAt: now,
+        updatedHlc: hlc.pack(),
       ),
     );
   }

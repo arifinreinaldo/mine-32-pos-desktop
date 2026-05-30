@@ -128,6 +128,52 @@ void main() {
       await db.close();
     });
 
+    test('tax-rate CRUD: save, switch default, delete', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final repo = _acct(db);
+      await repo.hlcService.load();
+      await repo.seedDefaults();
+
+      // Seeded with a single default PPN 11%.
+      var rates = await repo.watchTaxRates().first;
+      expect(rates, hasLength(1));
+      expect(rates.first.name, 'PPN 11%');
+      expect(rates.first.isDefault, isTrue);
+      final ppn11 = rates.first;
+
+      // Add a new default rate; the old one loses the default flag.
+      final id0 = await repo.saveTaxRate(
+        name: 'PPN 0% (export)',
+        basisPoints: 0,
+        isDefault: true,
+      );
+      rates = await repo.watchTaxRates().first;
+      expect(rates, hasLength(2));
+      expect((await repo.defaultTaxRate())!.id, id0);
+      expect(rates.firstWhere((r) => r.id == ppn11.id).isDefault, isFalse);
+
+      // Edit keeps identity.
+      await repo.saveTaxRate(
+        id: ppn11.id,
+        name: 'PPN 11% (standard)',
+        basisPoints: 1100,
+      );
+      rates = await repo.watchTaxRates().first;
+      expect(rates, hasLength(2));
+      expect(
+        rates.firstWhere((r) => r.id == ppn11.id).name,
+        'PPN 11% (standard)',
+      );
+
+      // Delete tombstones.
+      await repo.deleteTaxRate(ppn11.id);
+      rates = await repo.watchTaxRates().first;
+      expect(rates, hasLength(1));
+      expect(rates.first.id, id0);
+
+      await db.close();
+    });
+
     test('postSaleJournal produces a balanced trial balance', () async {
       final db = AppDatabase(NativeDatabase.memory());
       final repo = _acct(db);
