@@ -63,3 +63,58 @@ class TaxSummary {
     required this.grandTotal,
   });
 }
+
+/// One account line on a financial statement (amount shown as a positive value
+/// of its natural sign).
+class StatementLine {
+  final String code;
+  final String name;
+  final Money amount;
+  const StatementLine({
+    required this.code,
+    required this.name,
+    required this.amount,
+  });
+}
+
+/// Profit & Loss (income statement) for a period.
+class ProfitAndLoss {
+  final List<StatementLine> income;
+  final List<StatementLine> expense;
+  final Money totalIncome;
+  final Money totalExpense;
+  const ProfitAndLoss({
+    required this.income,
+    required this.expense,
+    required this.totalIncome,
+    required this.totalExpense,
+  });
+
+  Money get netProfit => totalIncome - totalExpense;
+}
+
+/// Balance sheet as of a point in time. `equity` already includes retained
+/// earnings (net income to date).
+class BalanceSheet {
+  final List<StatementLine> assets;
+  final List<StatementLine> liabilities;
+  final List<StatementLine> equity;
+  final Money totalAssets;
+  final Money totalLiabilities;
+  final Money totalEquity;
+  final Money retainedEarnings;
+  const BalanceSheet({
+    required this.assets,
+    required this.liabilities,
+    required this.equity,
+    required this.totalAssets,
+    required this.totalLiabilities,
+    required this.totalEquity,
+    required this.retainedEarnings,
+  });
+
+  /// Assets should equal liabilities + equity.
+  bool get balanced =>
+      totalAssets.minorUnits ==
+      totalLiabilities.minorUnits + totalEquity.minorUnits;
+}

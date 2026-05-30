@@ -163,10 +163,126 @@ class _ReportBody extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _Panel(title: 'Profit & Loss', child: _PlBody()),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: _Panel(
+                  title: 'Balance sheet',
+                  child: _BalanceSheetBody(),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
+
+class _PlBody extends ConsumerWidget {
+  const _PlBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pl = ref.watch(plReportProvider);
+    final money = ref.watch(moneyFormatProvider);
+    final theme = Theme.of(context);
+    return pl.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text('Error: $e'),
+      data: (r) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final l in r.income) _kv(l.name, money.format(l.amount)),
+          _kv('Total income', money.format(r.totalIncome), bold: true),
+          const SizedBox(height: 8),
+          for (final l in r.expense) _kv(l.name, money.format(l.amount)),
+          _kv('Total expenses', money.format(r.totalExpense), bold: true),
+          const Divider(),
+          _kv(
+            'Net profit',
+            money.format(r.netProfit),
+            bold: true,
+            color: r.netProfit.isNegative ? theme.colorScheme.error : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceSheetBody extends ConsumerWidget {
+  const _BalanceSheetBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bs = ref.watch(balanceSheetProvider);
+    final money = ref.watch(moneyFormatProvider);
+    final theme = Theme.of(context);
+    return bs.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text('Error: $e'),
+      data: (r) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Assets', style: theme.textTheme.labelLarge),
+          for (final l in r.assets) _kv(l.name, money.format(l.amount)),
+          _kv('Total assets', money.format(r.totalAssets), bold: true),
+          const SizedBox(height: 8),
+          Text('Liabilities', style: theme.textTheme.labelLarge),
+          for (final l in r.liabilities) _kv(l.name, money.format(l.amount)),
+          _kv(
+            'Total liabilities',
+            money.format(r.totalLiabilities),
+            bold: true,
+          ),
+          const SizedBox(height: 8),
+          Text('Equity', style: theme.textTheme.labelLarge),
+          for (final l in r.equity) _kv(l.name, money.format(l.amount)),
+          _kv('Total equity', money.format(r.totalEquity), bold: true),
+          const Divider(),
+          Row(
+            children: [
+              Icon(
+                r.balanced ? Icons.check_circle_outline : Icons.error_outline,
+                size: 16,
+                color: r.balanced ? Colors.green : theme.colorScheme.error,
+              ),
+              const SizedBox(width: 6),
+              Text(r.balanced ? 'Balanced' : 'Out of balance'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _kv(String k, String v, {bool bold = false, Color? color}) {
+  return Builder(
+    builder: (context) {
+      final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontWeight: bold ? FontWeight.bold : null,
+        color: color,
+      );
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(child: Text(k, style: style)),
+            Text(v, style: style),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _StatCard extends StatelessWidget {

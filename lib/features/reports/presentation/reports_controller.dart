@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../accounting/domain/accounting_models.dart';
+import '../../accounting/presentation/accounting_controller.dart';
 import '../data/reports_repository.dart';
 
 class DateRange {
@@ -71,4 +73,18 @@ final reportDataProvider = FutureProvider.autoDispose<ReportData>((ref) {
   return ref
       .watch(reportsRepositoryProvider)
       .loadReport(fromMs: range.fromMs, toMs: range.toMs);
+});
+
+final plReportProvider = FutureProvider.autoDispose<ProfitAndLoss>((ref) {
+  final range = ref.watch(reportRangeProvider);
+  return ref
+      .watch(accountingRepositoryProvider)
+      .profitAndLoss(fromMs: range.fromMs, toMs: range.toMs);
+});
+
+final balanceSheetProvider = FutureProvider.autoDispose<BalanceSheet>((ref) {
+  final range = ref.watch(reportRangeProvider);
+  return ref
+      .watch(accountingRepositoryProvider)
+      .balanceSheet(asOfMs: range.toMs);
 });

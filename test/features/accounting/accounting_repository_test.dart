@@ -176,5 +176,80 @@ void main() {
 
       await db.close();
     });
+
+    test('P&L and balance sheet reflect a sale', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final clock = MutableClock(1000);
+      final hlc = HlcService(db, clock, 'dev');
+      await hlc.load();
+      final changeLog = ChangeLogWriter(db, 'dev');
+      final accounting = AccountingRepository(
+        db: db,
+        changeLog: changeLog,
+        hlcService: hlc,
+        clock: clock,
+      );
+      await accounting.seedDefaults();
+      final catalog = CatalogRepository(
+        db: db,
+        changeLog: changeLog,
+        hlcService: hlc,
+        clock: clock,
+      );
+      final inventory = InventoryRepository(
+        db: db,
+        changeLog: changeLog,
+        hlcService: hlc,
+        clock: clock,
+      );
+      final sales = SalesRepository(
+        db: db,
+        changeLog: changeLog,
+        hlcService: hlc,
+        clock: clock,
+        inventory: inventory,
+        accounting: accounting,
+      );
+      final variantId = await catalog.savePart(
+        const PartDraft(
+          name: 'Brake Pad',
+          sku: 'BP-1',
+          price: Money(11100),
+          cost: Money(6000),
+          coreCharge: Money(0),
+        ),
+      );
+      await inventory.addMovement(
+        variantId: variantId,
+        locationId: 'L1',
+        qty: 10,
+        reason: MovementReason.purchase,
+      );
+      await sales.completeSale(
+        lines: [
+          CartLine(
+            variantId: variantId,
+            sku: 'BP-1',
+            name: 'Brake Pad',
+            unitPrice: const Money(11100),
+            unitCost: const Money(6000),
+          ),
+        ],
+        locationId: 'L1',
+        tendered: const Money(11100),
+        taxBasisPoints: 1100,
+      );
+
+      final pl = await accounting.profitAndLoss();
+      expect(pl.totalIncome, const Money(10000)); // sales DPP
+      expect(pl.totalExpense, const Money(6000)); // COGS
+      expect(pl.netProfit, const Money(4000));
+
+      final bs = await accounting.balanceSheet();
+      expect(bs.balanced, isTrue); // assets == liabilities + equity
+      expect(bs.retainedEarnings, const Money(4000));
+
+      await db.close();
+    });
   });
 }

@@ -61,7 +61,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] UI: Accounting screen (chart of accounts + balances); Reports screen (range filter, stat cards, fl_chart sales trend, top parts, trial balance, PPN summary)
 - [x] Tests: tax math, balanced posting, sale→journal, PPN tax summary, reports & accounting screens
 - [x] CoreTax PPN CSV export (Reports → "PPN CSV"; faktur rows with DPP/PPN/buyer/NPWP)
-- [ ] CoreTax XML faktur; P&L + Balance Sheet statements; journal browser; manual journal; tax-rate editor
+- [x] P&L + Balance Sheet statements (Reports screen, period-filtered)
+- [ ] CoreTax XML faktur; journal browser; manual journal; tax-rate editor
 
 ## M6 — Customers & Purchasing
 - [x] customers + customer_vehicles; AR balance (watch); credit limit

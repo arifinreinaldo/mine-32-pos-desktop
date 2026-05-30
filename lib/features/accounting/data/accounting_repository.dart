@@ -434,4 +434,150 @@ class AccountingRepository extends SyncRepository {
         ),
     ];
   }
+
+  // --- Financial statements ---
+
+  /// Sum of journal-line debits/credits per account (filtered by account type
+  /// and an optional journal-date window), joined to account code/name/type.
+  Future<List<({String code, String name, String type, int debit, int credit})>>
+  _accountTotals({required List<String> types, int? fromMs, int? toMs}) async {
+    final jl = db.journalLines;
+    final j = db.journals;
+    final a = db.accounts;
+    final debit = jl.debitMinor.sum();
+    final credit = jl.creditMinor.sum();
+
+    var predicate =
+        jl.deletedAt.isNull() &
+        j.deletedAt.isNull() &
+        a.deletedAt.isNull() &
+        a.type.isIn(types);
+    if (fromMs != null) {
+      predicate = predicate & j.date.isBiggerOrEqualValue(fromMs);
+    }
+    if (toMs != null) {
+      predicate = predicate & j.date.isSmallerThanValue(toMs);
+    }
+
+    final statement =
+        db.select(jl).join([
+            innerJoin(j, j.id.equalsExp(jl.journalId)),
+            innerJoin(a, a.id.equalsExp(jl.accountId)),
+          ])
+          ..addColumns([debit, credit])
+          ..where(predicate)
+          ..groupBy([a.id])
+          ..orderBy([OrderingTerm.asc(a.code)]);
+
+    final rows = await statement.get();
+    return [
+      for (final r in rows)
+        (
+          code: r.readTable(a).code,
+          name: r.readTable(a).name,
+          type: r.readTable(a).type,
+          debit: r.read(debit) ?? 0,
+          credit: r.read(credit) ?? 0,
+        ),
+    ];
+  }
+
+  /// Profit & Loss for a period.
+  Future<ProfitAndLoss> profitAndLoss({int? fromMs, int? toMs}) async {
+    final rows = await _accountTotals(
+      types: const ['income', 'expense'],
+      fromMs: fromMs,
+      toMs: toMs,
+    );
+    final income = <StatementLine>[];
+    final expense = <StatementLine>[];
+    var totalIncome = 0;
+    var totalExpense = 0;
+    for (final r in rows) {
+      if (r.type == 'income') {
+        final amount = r.credit - r.debit;
+        income.add(
+          StatementLine(code: r.code, name: r.name, amount: Money(amount)),
+        );
+        totalIncome += amount;
+      } else {
+        final amount = r.debit - r.credit;
+        expense.add(
+          StatementLine(code: r.code, name: r.name, amount: Money(amount)),
+        );
+        totalExpense += amount;
+      }
+    }
+    return ProfitAndLoss(
+      income: income,
+      expense: expense,
+      totalIncome: Money(totalIncome),
+      totalExpense: Money(totalExpense),
+    );
+  }
+
+  /// Balance sheet as of [asOfMs] (exclusive); null = all time.
+  Future<BalanceSheet> balanceSheet({int? asOfMs}) async {
+    final rows = await _accountTotals(
+      types: const ['asset', 'liability', 'equity'],
+      toMs: asOfMs,
+    );
+    final assets = <StatementLine>[];
+    final liabilities = <StatementLine>[];
+    final equity = <StatementLine>[];
+    var totalAssets = 0;
+    var totalLiabilities = 0;
+    var totalEquity = 0;
+    for (final r in rows) {
+      if (r.type == 'asset') {
+        final amount = r.debit - r.credit;
+        assets.add(
+          StatementLine(code: r.code, name: r.name, amount: Money(amount)),
+        );
+        totalAssets += amount;
+      } else if (r.type == 'liability') {
+        final amount = r.credit - r.debit;
+        liabilities.add(
+          StatementLine(code: r.code, name: r.name, amount: Money(amount)),
+        );
+        totalLiabilities += amount;
+      } else {
+        final amount = r.credit - r.debit;
+        equity.add(
+          StatementLine(code: r.code, name: r.name, amount: Money(amount)),
+        );
+        totalEquity += amount;
+      }
+    }
+
+    // Retained earnings = net income to date (income - expense), folded into equity.
+    final ie = await _accountTotals(
+      types: const ['income', 'expense'],
+      toMs: asOfMs,
+    );
+    var retained = 0;
+    for (final r in ie) {
+      retained += r.type == 'income'
+          ? (r.credit - r.debit)
+          : -(r.debit - r.credit);
+    }
+    equity.add(
+      StatementLine(
+        code: '',
+        name: 'Retained earnings',
+        amount: Money(retained),
+      ),
+    );
+    totalEquity += retained;
+
+    return BalanceSheet(
+      assets: assets,
+      liabilities: liabilities,
+      equity: equity,
+      totalAssets: Money(totalAssets),
+      totalLiabilities: Money(totalLiabilities),
+      totalEquity: Money(totalEquity),
+      retainedEarnings: Money(retained),
+    );
+  }
 }
