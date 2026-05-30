@@ -1,12 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../data/auto_parts_repository.dart';
 import '../data/catalog_repository.dart';
 import '../domain/catalog_item.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
   final services = ref.watch(appServicesProvider);
   return CatalogRepository(
+    db: services.db,
+    changeLog: services.changeLog,
+    hlcService: services.hlc,
+    clock: services.clock,
+  );
+});
+
+final autoPartsRepositoryProvider = Provider<AutoPartsRepository>((ref) {
+  final services = ref.watch(appServicesProvider);
+  return AutoPartsRepository(
     db: services.db,
     changeLog: services.changeLog,
     hlcService: services.hlc,

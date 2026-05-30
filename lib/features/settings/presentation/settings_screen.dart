@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../catalog/presentation/catalog_controller.dart';
+import '../../customers/presentation/customers_controller.dart';
+import '../../inventory/presentation/inventory_controller.dart';
+import '../../purchasing/presentation/purchasing_controller.dart';
+import '../data/sample_data.dart';
 import '../domain/settings_draft.dart';
 import 'settings_controller.dart';
 
@@ -104,6 +109,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _loadSampleData() async {
+    final count = await SampleData.load(
+      catalog: ref.read(catalogRepositoryProvider),
+      inventory: ref.read(inventoryRepositoryProvider),
+      autoParts: ref.read(autoPartsRepositoryProvider),
+      purchasing: ref.read(purchasingRepositoryProvider),
+      customers: ref.read(customersRepositoryProvider),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            count == 0
+                ? 'Sample data already present'
+                : 'Loaded $count sample parts (with stock, supplier & customer)',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -190,6 +216,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       _section(theme, 'Receipt'),
                       _field(_receiptHeader, 'Receipt header'),
                       _field(_receiptFooter, 'Receipt footer'),
+                      const SizedBox(height: 16),
+                      _section(theme, 'Demo data'),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: _loadSampleData,
+                          icon: const Icon(Icons.dataset_outlined),
+                          label: const Text('Load sample data'),
+                        ),
+                      ),
                       const SizedBox(height: 20),
                       Align(
                         alignment: Alignment.centerRight,
