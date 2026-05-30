@@ -86,7 +86,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] PDF receipt (80mm) + print via `printing`; "Print" action after a sale
 - [x] README with Windows build instructions (`flutter build windows`)
 - [ ] Backup/restore (DB copy + bundle export); global error presenter
-- [ ] DB migration tests; performance pass (50k SKU search)
+- [x] DB migration test (v1 -> current upgrade chain, data preserved) [caught + fixed a real upgrade crash]
+- [ ] performance pass (50k SKU search)
 - [ ] Optional: SQLCipher encryption; golden tests for receipts
 
 ---

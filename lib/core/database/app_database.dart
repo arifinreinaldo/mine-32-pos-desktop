@@ -106,12 +106,18 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(taxRates);
         await m.createTable(journals);
         await m.createTable(journalLines);
+        // company_settings predates v6, so always add the new columns.
         await m.addColumn(companySettings, companySettings.isPkp);
         await m.addColumn(companySettings, companySettings.taxInclusive);
         await m.addColumn(companySettings, companySettings.defaultTaxRateId);
-        await m.addColumn(sales, sales.buyerName);
-        await m.addColumn(sales, sales.buyerNpwp);
-        await m.addColumn(sales, sales.fakturNumber);
+        // The `sales` table only pre-exists (without these columns) when
+        // upgrading from v5; for from < 5 it was just created with the current
+        // schema (which already includes them), so don't re-add.
+        if (from >= 5) {
+          await m.addColumn(sales, sales.buyerName);
+          await m.addColumn(sales, sales.buyerNpwp);
+          await m.addColumn(sales, sales.fakturNumber);
+        }
       }
       // v6 -> v7: customers.
       if (from < 7) {
