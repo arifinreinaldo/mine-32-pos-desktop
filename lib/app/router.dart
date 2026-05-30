@@ -7,6 +7,7 @@ import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/inventory/presentation/inventory_screen.dart';
 import '../features/purchasing/presentation/purchasing_screen.dart';
 import '../features/reports/presentation/reports_screen.dart';
+import '../features/sales/presentation/sales_history_screen.dart';
 import '../features/sales/presentation/sell_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/sync/presentation/sync_screen.dart';
@@ -24,6 +25,10 @@ final appRouter = GoRouter(
           builder: (context, state) => const DashboardScreen(),
         ),
         GoRoute(path: '/sell', builder: (context, state) => const SellScreen()),
+        GoRoute(
+          path: '/sales',
+          builder: (context, state) => const SalesHistoryScreen(),
+        ),
         GoRoute(
           path: '/catalog',
           builder: (context, state) => const CatalogScreen(),

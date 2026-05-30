@@ -38,6 +38,7 @@ void main() {
     // nav label -> a piece of text expected on the destination screen
     const sections = <String, String>{
       'Sell': 'Current sale',
+      'Sales': 'Sales history',
       'Catalog': 'Catalog',
       'Stock': 'Stock',
       'Purchasing': 'Purchasing',

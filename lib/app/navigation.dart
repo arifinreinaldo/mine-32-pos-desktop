@@ -12,6 +12,7 @@ class NavItem {
 const navItems = <NavItem>[
   NavItem('/dashboard', 'Dashboard', Icons.dashboard_outlined),
   NavItem('/sell', 'Sell', Icons.point_of_sale_outlined),
+  NavItem('/sales', 'Sales', Icons.receipt_long_outlined),
   NavItem('/catalog', 'Catalog', Icons.inventory_2_outlined),
   NavItem('/inventory', 'Stock', Icons.warehouse_outlined),
   NavItem('/purchasing', 'Purchasing', Icons.local_shipping_outlined),

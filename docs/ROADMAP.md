@@ -51,8 +51,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Barcode (keyboard-wedge): search + Enter adds first match
 - [x] Tests: cart math/controller, completeSale persist+stock+sync round-trip,
       full Sell-flow widget test (search→add→charge→complete)
-- [ ] Accounting journals on complete (lands in M5)
-- [ ] Receipt: PDF + print; returns/refunds; park/recall; void; line-discount UI
+- [x] Accounting journals on complete (lands in M5)
+- [x] Sales history screen ("Sales" section: list + master-detail with lines/totals + reprint receipt)
+- [ ] Returns/refunds; park/recall; void; line-discount UI
 
 ## M5 — Accounting + Tax (Xero rigor; Indonesia CoreTax) + Reporting
 - [x] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E); balances via trial balance
