@@ -191,6 +191,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Future<void> _backup() async {
+    final bytes = await ref.read(backupServiceProvider).exportBytes();
+    final now = DateTime.now();
+    final stamp =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final path = await FilePicker.saveFile(
+      dialogTitle: 'Save data backup',
+      fileName: 'mine32-backup-$stamp.json',
+      bytes: Uint8List.fromList(bytes),
+    );
+    if (mounted && path != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Backup saved')));
+    }
+  }
+
+  Future<void> _restore() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Restore from backup?'),
+        content: const Text(
+          'This merges the backup into the current data. Existing records are '
+          'updated by last-write-wins; nothing is deleted. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: 'Choose a backup file',
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      withData: true,
+    );
+    final bytes = picked?.files.firstOrNull?.bytes;
+    if (bytes == null) return;
+    try {
+      final result = await ref.read(backupServiceProvider).importBytes(bytes);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Restored ${result.rows} record(s) from ${result.tables} table(s)',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
+      }
+    }
+  }
+
   Future<void> _downloadCsvTemplate() async {
     final path = await FilePicker.saveFile(
       dialogTitle: 'Save parts CSV template',
@@ -310,6 +377,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onPressed: _loadSampleData,
                             icon: const Icon(Icons.dataset_outlined),
                             label: const Text('Load sample data'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _backup,
+                            icon: const Icon(Icons.backup_outlined),
+                            label: const Text('Back up data'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _restore,
+                            icon: const Icon(Icons.restore_outlined),
+                            label: const Text('Restore data'),
                           ),
                         ],
                       ),

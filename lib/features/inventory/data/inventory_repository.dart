@@ -59,8 +59,14 @@ class InventoryRepository extends SyncRepository {
               ..limit(1))
             .getSingleOrNull();
     if (existing != null) return existing.id;
+    // Deterministic id so two devices both seeding a default location converge
+    // to one row on sync/restore instead of duplicating it.
     return upsertLocation(
-      const LocationDraft(name: 'Main Store', isDefault: true),
+      const LocationDraft(
+        id: 'location:default',
+        name: 'Main Store',
+        isDefault: true,
+      ),
     );
   }
 

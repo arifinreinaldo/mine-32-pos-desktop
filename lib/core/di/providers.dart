@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/formatters/money_format.dart';
+import '../backup/backup_service.dart';
 import '../database/app_database.dart';
 import '../time/clock.dart';
 import 'app_services.dart';
@@ -21,6 +22,12 @@ final clockProvider = Provider<Clock>(
 final deviceIdProvider = Provider<String>(
   (ref) => ref.watch(appServicesProvider).deviceId,
 );
+
+/// Full-database backup & restore over the registered syncable entities.
+final backupServiceProvider = Provider<BackupService>((ref) {
+  final services = ref.watch(appServicesProvider);
+  return BackupService(db: services.db, registry: services.registry);
+});
 
 /// The single company-settings row (id = 'default'), reactive to edits/sync.
 final companySettingsStreamProvider = StreamProvider<CompanySetting?>((ref) {

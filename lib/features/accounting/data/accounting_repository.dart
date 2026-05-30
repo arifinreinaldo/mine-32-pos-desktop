@@ -44,7 +44,10 @@ class AccountingRepository extends SyncRepository {
       [AccountCode.inventoryAdjustment, 'Inventory Adjustments', 'expense'],
     ];
     for (final a in seed) {
-      final id = _uuid.v7();
+      // Deterministic id (stable across devices) so two devices seeding the
+      // same chart of accounts converge to one row per code on sync/restore
+      // instead of duplicating by code.
+      final id = 'account:${a[0]}';
       await writeSyncable<Account>(
         entityTable: 'accounts',
         table: db.accounts,
@@ -66,7 +69,8 @@ class AccountingRepository extends SyncRepository {
   Future<void> seedDefaultTaxRate() async {
     final count = await db.taxRates.count().getSingle();
     if (count > 0) return;
-    final id = _uuid.v7();
+    // Deterministic id so the seeded PPN rate converges across devices.
+    const id = 'taxrate:default';
     await writeSyncable<TaxRate>(
       entityTable: 'tax_rates',
       table: db.taxRates,
