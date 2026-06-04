@@ -70,5 +70,32 @@ void main() {
       ctrl.clear();
       expect(container.read(cartProvider).isEmpty, isTrue);
     });
+
+    test('setLineDiscount applies and clamps to the line gross', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final ctrl = container.read(cartProvider.notifier);
+
+      ctrl.addItem(_item('A', price: 1000)); // qty 1 → gross 1000
+      ctrl.setQty('A', 2); // gross 2000
+
+      ctrl.setLineDiscount('A', const Money(300));
+      expect(container.read(cartProvider).total, const Money(1700));
+
+      // Over-discount clamps to the gross (never negative total).
+      ctrl.setLineDiscount('A', const Money(99999));
+      expect(container.read(cartProvider).total, const Money(0));
+      expect(
+        container.read(cartProvider).lines.single.discount,
+        const Money(2000),
+      );
+
+      // Negative clamps to zero.
+      ctrl.setLineDiscount('A', const Money(-50));
+      expect(
+        container.read(cartProvider).lines.single.discount,
+        const Money(0),
+      );
+    });
   });
 }

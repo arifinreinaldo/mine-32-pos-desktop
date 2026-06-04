@@ -73,4 +73,62 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 500));
   });
+
+  testWidgets('sell: a per-line discount reduces the charge total', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1500, 950);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final services = await AppServices.initialize(
+      database: AppDatabase(NativeDatabase.memory()),
+      clock: MutableClock(1000),
+    );
+    addTearDown(services.dispose);
+
+    final catalog = CatalogRepository(
+      db: services.db,
+      changeLog: services.changeLog,
+      hlcService: services.hlc,
+      clock: services.clock,
+    );
+    await catalog.savePart(
+      const PartDraft(
+        name: 'Brake Pad Set',
+        sku: 'BP-100',
+        price: Money(2500),
+        cost: Money(1500),
+        coreCharge: Money(0),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appServicesProvider.overrideWithValue(services)],
+        child: const MaterialApp(home: Scaffold(body: SellScreen())),
+      ),
+    );
+    await _settle(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'BP-100');
+    await _settle(tester);
+    await tester.tap(find.text('Brake Pad Set'));
+    await _settle(tester);
+
+    // Open the per-line discount dialog and apply $5 off.
+    await tester.tap(find.byTooltip('Discount'));
+    await _settle(tester);
+    await tester.enterText(find.byType(TextField).last, '5');
+    await tester.tap(find.widgetWithText(FilledButton, 'Apply'));
+    await _settle(tester);
+
+    // Charge drops from $25.00 to $20.00 and the discount is shown.
+    expect(find.textContaining(r'Charge $20.00'), findsOneWidget);
+    expect(find.textContaining(r'−$5.00'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 500));
+  });
 }

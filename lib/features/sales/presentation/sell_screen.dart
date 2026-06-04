@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/money/money.dart';
 import '../../customers/presentation/customers_controller.dart';
 import '../../settings/presentation/settings_controller.dart';
 import '../data/receipt_builder.dart';
@@ -307,8 +308,10 @@ class _CartLineRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final money = ref.watch(moneyFormatProvider);
     final notifier = ref.read(cartProvider.notifier);
+    final hasDiscount = line.discount.minorUnits > 0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -319,11 +322,25 @@ class _CartLineRow extends ConsumerWidget {
               children: [
                 Text(line.name, overflow: TextOverflow.ellipsis),
                 Text(
-                  '${line.sku} • ${money.format(line.unitPrice)}',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  hasDiscount
+                      ? '${line.sku} • ${money.format(line.unitPrice)} • −${money.format(line.discount)}'
+                      : '${line.sku} • ${money.format(line.unitPrice)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: hasDiscount ? theme.colorScheme.tertiary : null,
+                  ),
                 ),
               ],
             ),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: 'Discount',
+            icon: Icon(
+              hasDiscount ? Icons.local_offer : Icons.local_offer_outlined,
+              size: 18,
+              color: hasDiscount ? theme.colorScheme.tertiary : null,
+            ),
+            onPressed: () => _editDiscount(context, ref),
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
@@ -342,6 +359,107 @@ class _CartLineRow extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _editDiscount(BuildContext context, WidgetRef ref) async {
+    final result = await showDialog<Money>(
+      context: context,
+      builder: (_) => _LineDiscountDialog(line: line),
+    );
+    if (result != null) {
+      ref.read(cartProvider.notifier).setLineDiscount(line.variantId, result);
+    }
+  }
+}
+
+/// Enter an absolute per-line discount (clamped to the line's gross by the
+/// controller). Returns the chosen [Money], or `Money(0)` to clear.
+class _LineDiscountDialog extends ConsumerStatefulWidget {
+  final CartLine line;
+  const _LineDiscountDialog({required this.line});
+
+  @override
+  ConsumerState<_LineDiscountDialog> createState() =>
+      _LineDiscountDialogState();
+}
+
+class _LineDiscountDialogState extends ConsumerState<_LineDiscountDialog> {
+  late final TextEditingController _amount;
+  late final int _scale;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _scale = ref.read(currencyScaleProvider);
+    final d = widget.line.discount;
+    _amount = TextEditingController(
+      text: d.minorUnits == 0 ? '' : d.toMajorString(scale: _scale),
+    );
+  }
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  void _apply() {
+    final text = _amount.text.trim();
+    if (text.isEmpty) {
+      Navigator.of(context).pop(const Money(0));
+      return;
+    }
+    try {
+      Navigator.of(context).pop(Money.fromMajor(text, scale: _scale));
+    } on FormatException {
+      setState(() => _error = 'Enter a number');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final money = ref.watch(moneyFormatProvider);
+    return AlertDialog(
+      title: Text('Discount — ${widget.line.name}'),
+      content: SizedBox(
+        width: 320,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Line total ${money.format(widget.line.gross)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _amount,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: 'Discount amount',
+                errorText: _error,
+              ),
+              onSubmitted: (_) => _apply(),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(const Money(0)),
+          child: const Text('Remove'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _apply, child: const Text('Apply')),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/money/money.dart';
 import '../../accounting/presentation/accounting_controller.dart';
 import '../../catalog/domain/catalog_item.dart';
 import '../../catalog/presentation/catalog_controller.dart';
@@ -62,6 +63,19 @@ class CartController extends Notifier<Cart> {
   void removeLine(String variantId) {
     state = Cart(
       lines: state.lines.where((l) => l.variantId != variantId).toList(),
+    );
+  }
+
+  /// Set an absolute per-line discount, clamped to `[0, gross]`.
+  void setLineDiscount(String variantId, Money discount) {
+    state = Cart(
+      lines: state.lines.map((l) {
+        if (l.variantId != variantId) return l;
+        final clamped = discount.minorUnits < 0
+            ? const Money(0)
+            : (discount.minorUnits > l.gross.minorUnits ? l.gross : discount);
+        return l.copyWith(discount: clamped);
+      }).toList(),
     );
   }
 
