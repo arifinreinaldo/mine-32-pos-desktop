@@ -7,9 +7,13 @@ import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'core/di/app_services.dart';
 import 'core/di/providers.dart';
+import 'core/errors/app_error_reporter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Route uncaught framework/platform errors to a user-facing snackbar.
+  final errorReporter = AppErrorReporter()..install();
 
   if (_isDesktop) {
     await windowManager.ensureInitialized();
@@ -30,7 +34,10 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      overrides: [appServicesProvider.overrideWithValue(services)],
+      overrides: [
+        appServicesProvider.overrideWithValue(services),
+        errorReporterProvider.overrideWithValue(errorReporter),
+      ],
       child: const MineApp(),
     ),
   );

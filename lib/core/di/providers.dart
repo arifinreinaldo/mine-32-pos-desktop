@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/formatters/money_format.dart';
 import '../backup/backup_service.dart';
 import '../database/app_database.dart';
+import '../errors/app_error_reporter.dart';
 import '../time/clock.dart';
 import 'app_services.dart';
 
@@ -28,6 +29,19 @@ final deviceIdProvider = Provider<String>(
 final backupServiceProvider = Provider<BackupService>((ref) {
   final services = ref.watch(appServicesProvider);
   return BackupService(db: services.db, registry: services.registry);
+});
+
+/// App-wide error sink. Overridden in `main()` with the installed singleton so
+/// uncaught errors reach the UI; defaults to a standalone reporter otherwise.
+final errorReporterProvider = Provider<AppErrorReporter>((ref) {
+  final reporter = AppErrorReporter();
+  ref.onDispose(reporter.dispose);
+  return reporter;
+});
+
+/// Stream of user-facing error messages, listened to by the app shell.
+final errorMessagesProvider = StreamProvider<String>((ref) {
+  return ref.watch(errorReporterProvider).messages;
 });
 
 /// Live count of local changes not yet exported to a sync bundle. Drives the

@@ -92,7 +92,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] PDF receipt (80mm) + print via `printing`; "Print" action after a sale
 - [x] README with Windows build instructions (`flutter build windows`)
 - [x] Backup/restore (full JSON snapshot of all syncable tables; merge-restore via entity conflict rules; Settings UI) — also fixed latent duplicate-on-sync of seeded accounts/locations via deterministic seed ids
-- [ ] Global error presenter
+- [x] Global error presenter (uncaught Flutter/platform errors → snackbar; friendly-message mapping)
 - [x] DB migration test (v1 -> current upgrade chain, data preserved) [caught + fixed a real upgrade crash]
 - [ ] performance pass (50k SKU search)
 - [ ] Optional: SQLCipher encryption; golden tests for receipts
