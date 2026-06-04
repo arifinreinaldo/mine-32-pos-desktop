@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/formatters/money_format.dart';
@@ -27,6 +28,17 @@ final deviceIdProvider = Provider<String>(
 final backupServiceProvider = Provider<BackupService>((ref) {
   final services = ref.watch(appServicesProvider);
   return BackupService(db: services.db, registry: services.registry);
+});
+
+/// Live count of local changes not yet exported to a sync bundle. Drives the
+/// sync status badge in the navigation shell.
+final pendingChangesProvider = StreamProvider<int>((ref) {
+  final db = ref.watch(databaseProvider);
+  final countExpr = db.changeLog.id.count();
+  final query = db.selectOnly(db.changeLog)
+    ..addColumns([countExpr])
+    ..where(db.changeLog.exported.equals(false));
+  return query.map((row) => row.read(countExpr) ?? 0).watchSingle();
 });
 
 /// The single company-settings row (id = 'default'), reactive to edits/sync.

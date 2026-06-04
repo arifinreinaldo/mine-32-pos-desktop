@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/navigation.dart';
+import '../../core/di/providers.dart';
 
 /// Persistent desktop chrome: a scrollable side navigation rail plus the routed
 /// body. Used as the `ShellRoute` builder.
@@ -72,9 +74,38 @@ class _SideNav extends StatelessWidget {
                 },
               ),
             ),
+            const Divider(height: 1),
+            const _SyncStatus(),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Bottom-of-rail sync indicator: reflects the live count of un-synced local
+/// changes and links to the Sync screen.
+class _SyncStatus extends ConsumerWidget {
+  const _SyncStatus();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final pending = ref.watch(pendingChangesProvider).asData?.value ?? 0;
+    final synced = pending == 0;
+    return ListTile(
+      dense: true,
+      leading: Icon(
+        synced ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
+        size: 20,
+        color: synced ? theme.colorScheme.primary : theme.colorScheme.tertiary,
+      ),
+      title: Text(
+        synced ? 'Up to date' : '$pending to sync',
+        style: theme.textTheme.bodySmall,
+      ),
+      trailing: const Icon(Icons.chevron_right, size: 18),
+      onTap: () => context.go('/sync'),
     );
   }
 }

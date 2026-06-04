@@ -83,7 +83,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine
 - [x] SyncService + controller; **real shared-folder round-trip test** (replicates via files, no server)
 - [x] Dashboard: today's sales + revenue, low-stock count/list, parts count, recent sales
-- [ ] Background timer + folder watcher; sync status badge in the shell; sync history / conflict-override audit log
+- [x] Sync status badge in the shell (live un-synced change count at the bottom of the nav, links to Sync)
+- [ ] Background timer + folder watcher; sync history / conflict-override audit log
 
 ## M8 — Polish & hardening
 - [x] Settings screen: company profile, currency (USD/IDR/… → reactive money format), NPWP + PKP, tax-inclusive, receipt header/footer
