@@ -56,7 +56,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Sales history screen ("Sales" section: list + master-detail with lines/totals + reprint receipt)
 - [x] Returns/refunds: event tables (v10), restock + reversing revenue/PPN/COGS journal, over-return guard, dialog on the sale detail
 - [x] Line-discount UI (per-line discount dialog on the cart, clamped to gross; reduces the charge total)
-- [ ] park/recall; void
+- [x] Void sale (full return of remaining items to the original tender, tagged 'void'; confirm dialog on the sale detail; re-void rejected)
+- [ ] park/recall
 
 ## M5 — Accounting + Tax (Xero rigor; Indonesia CoreTax) + Reporting
 - [x] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E); balances via trial balance

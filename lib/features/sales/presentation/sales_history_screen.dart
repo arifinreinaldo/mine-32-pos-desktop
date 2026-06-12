@@ -10,6 +10,7 @@ import '../../settings/presentation/settings_controller.dart';
 import '../data/receipt_builder.dart';
 import '../data/receipt_pdf.dart';
 import 'return_dialog.dart';
+import 'returns_controller.dart';
 import 'sales_history_controller.dart';
 
 class SalesHistoryScreen extends ConsumerWidget {
@@ -109,6 +110,48 @@ class _SalesList extends ConsumerWidget {
 class _SaleDetailPanel extends ConsumerWidget {
   const _SaleDetailPanel();
 
+  Future<void> _void(BuildContext context, WidgetRef ref, Sale sale) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Void ${sale.number}?'),
+        content: const Text(
+          'All remaining items are returned to stock and the full amount is '
+          'refunded. This is recorded as a return and cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Void sale'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final result = await ref
+          .read(returnsRepositoryProvider)
+          .voidSale(sale.id);
+      ref.invalidate(saleDetailProvider(sale.id));
+      ref.invalidate(returnableLinesProvider(sale.id));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Voided as ${result.number}')));
+      }
+    } on StateError catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   Future<void> _print(WidgetRef ref, Sale sale, List<SaleLine> lines) async {
     final settings = await ref.read(settingsRepositoryProvider).get();
     final money = ref.read(moneyFormatProvider);
@@ -167,6 +210,12 @@ class _SaleDetailPanel extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  OutlinedButton.icon(
+                    onPressed: () => _void(context, ref, sale),
+                    icon: const Icon(Icons.block_outlined, size: 18),
+                    label: const Text('Void'),
+                  ),
+                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: () => ReturnDialog.show(
                       context,

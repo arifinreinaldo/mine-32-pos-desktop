@@ -191,6 +191,60 @@ void main() {
     await h.db.close();
   });
 
+  test('voidSale returns everything to the original tender, once', () async {
+    final h = await _Harness.create();
+    final variantId = await h.catalog.savePart(
+      const PartDraft(
+        name: 'Clutch Kit',
+        sku: 'CK-1',
+        price: Money(11100),
+        cost: Money(7000),
+        coreCharge: Money(0),
+      ),
+    );
+    await h.inventory.addMovement(
+      variantId: variantId,
+      locationId: 'L1',
+      qty: 5,
+      reason: MovementReason.purchase,
+    );
+    final sale = await h.sales.completeSale(
+      lines: [
+        CartLine(
+          variantId: variantId,
+          sku: 'CK-1',
+          name: 'Clutch Kit',
+          unitPrice: const Money(11100),
+          unitCost: const Money(7000),
+          qty: 3,
+        ),
+      ],
+      locationId: 'L1',
+      tendered: const Money(33300),
+      taxBasisPoints: 1100,
+      method: 'card', // non-cash → refund posts against Bank
+    );
+    expect(await h.inventory.onHand(variantId, 'L1'), 2);
+
+    final result = await h.returns.voidSale(sale.saleId);
+    expect(result.total, const Money(33300));
+
+    // Stock fully restored; books net to zero on the bank side too.
+    expect(await h.inventory.onHand(variantId, 'L1'), 5);
+    final tb = await h.accounting.watchTrialBalance().first;
+    Money bal(String code) => tb.firstWhere((r) => r.code == code).balance;
+    expect(bal(AccountCode.bank), const Money(0));
+    expect(bal(AccountCode.salesRevenue), const Money(0));
+    expect(bal(AccountCode.inventory), const Money(0));
+
+    // The return is tagged as a void and a second void is rejected.
+    final returns = await h.returns.returnsForSale(sale.saleId);
+    expect(returns.single.reason, 'void');
+    await expectLater(h.returns.voidSale(sale.saleId), throwsStateError);
+
+    await h.db.close();
+  });
+
   test('returning more than remaining throws', () async {
     final h = await _Harness.create();
     final variantId = await h.catalog.savePart(

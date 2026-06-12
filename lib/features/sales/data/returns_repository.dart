@@ -77,6 +77,33 @@ class ReturnsRepository extends SyncRepository {
         .get();
   }
 
+  /// Voids a sale: returns every remaining line quantity in one pass,
+  /// refunding to the original tender (cash payments → cash, anything else →
+  /// bank). Throws if the sale has nothing left to void (already fully
+  /// returned/voided).
+  Future<ReturnResult> voidSale(String saleId, {String? reason}) async {
+    final remaining = await returnableLines(saleId);
+    if (remaining.isEmpty) {
+      throw StateError('Nothing left to void on this sale');
+    }
+    final payment =
+        await (db.select(db.payments)
+              ..where((t) => t.saleId.equals(saleId) & t.deletedAt.isNull())
+              ..limit(1))
+            .getSingleOrNull();
+    final refundMethod = (payment == null || payment.method == 'cash')
+        ? 'cash'
+        : 'bank';
+    return createReturn(
+      saleId: saleId,
+      quantitiesBySaleLineId: {
+        for (final l in remaining) l.line.id: l.remaining,
+      },
+      refundMethod: refundMethod,
+      reason: reason ?? 'void',
+    );
+  }
+
   /// Returns goods from [saleId]. [quantitiesBySaleLineId] maps a sale-line id
   /// to the quantity returned (1..remaining). Refund is paid from cash/bank.
   Future<ReturnResult> createReturn({
