@@ -160,15 +160,15 @@ class _SyncBody extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             TextButton(onPressed: onRefresh, child: const Text('Refresh')),
-            if (!info.configured) ...[
-              const SizedBox(width: 12),
-              Text(
-                'Choose a shared folder to enable sync.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+            const SizedBox(width: 12),
+            Text(
+              info.configured
+                  ? 'Auto-sync runs every 5 minutes.'
+                  : 'Choose a shared folder to enable sync.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            ],
+            ),
           ],
         ),
       ],

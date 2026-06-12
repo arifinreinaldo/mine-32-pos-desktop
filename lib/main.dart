@@ -8,6 +8,8 @@ import 'app/app.dart';
 import 'core/di/app_services.dart';
 import 'core/di/providers.dart';
 import 'core/errors/app_error_reporter.dart';
+import 'features/sync/data/sync_scheduler.dart';
+import 'features/sync/data/sync_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,14 @@ Future<void> main() async {
   }
 
   final services = await AppServices.initialize();
+
+  // Background sync: every 5 minutes (and once at launch) export/import via
+  // the shared folder, when one is configured on the Sync screen.
+  final syncService = SyncService(services);
+  SyncScheduler(
+    shouldRun: () async => ((await syncService.folderPath()) ?? '').isNotEmpty,
+    run: syncService.syncNow,
+  ).start();
 
   runApp(
     ProviderScope(
