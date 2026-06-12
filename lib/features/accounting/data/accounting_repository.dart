@@ -7,6 +7,7 @@ import '../../../core/money/money.dart';
 import '../../../core/sync/change_record.dart';
 import '../domain/accounting_models.dart';
 import '../domain/coretax_csv.dart';
+import '../domain/coretax_xml.dart';
 
 /// Double-entry accounting: chart of accounts, balanced journals, posting rules,
 /// trial balance and the PPN (VAT) summary used for Indonesian CoreTax.
@@ -685,6 +686,41 @@ class AccountingRepository extends SyncRepository {
           totalMinor: s.totalMinor,
         ),
     ];
+  }
+
+  /// Invoices with goods-line detail for the CoreTax XML export: each completed
+  /// sale in the period becomes one TaxInvoice; each sale line one GoodService
+  /// (line DPP = line total − line PPN, both stored at sale time).
+  Future<List<FakturXmlInvoice>> fakturXmlInvoicesForPeriod({
+    int? fromMs,
+    int? toMs,
+  }) async {
+    final sales = await salesForTaxPeriod(fromMs: fromMs, toMs: toMs);
+    final out = <FakturXmlInvoice>[];
+    for (final s in sales) {
+      final lines = await (db.select(
+        db.saleLines,
+      )..where((t) => t.saleId.equals(s.id) & t.deletedAt.isNull())).get();
+      out.add(
+        FakturXmlInvoice(
+          dateMs: s.createdAt,
+          refNumber: s.number,
+          buyerName: s.buyerName,
+          buyerNpwp: s.buyerNpwp,
+          lines: [
+            for (final l in lines)
+              FakturXmlLine(
+                name: l.description,
+                qty: l.qty,
+                unitPriceMinor: l.unitPriceMinor,
+                dppMinor: l.lineTotalMinor - l.taxMinor,
+                ppnMinor: l.taxMinor,
+              ),
+          ],
+        ),
+      );
+    }
+    return out;
   }
 
   // --- Financial statements ---

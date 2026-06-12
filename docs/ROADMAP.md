@@ -69,7 +69,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] P&L + Balance Sheet statements (Reports screen, period-filtered)
 - [x] Journal browser (Accounting → Journals tab: list + expandable legs) + manual journal entry (balanced-only Post)
 - [x] Tax-rate editor (Accounting → Tax rates tab: CRUD, single-default invariant, inclusive/exclusive, % entry)
-- [ ] CoreTax XML faktur
+- [x] CoreTax XML faktur export (TaxInvoiceBulk structure with per-line GoodService detail; Reports → "CoreTax XML"; validate against current DJP schema before filing)
 
 ## M6 — Customers & Purchasing
 - [x] customers + customer_vehicles; AR balance (watch); credit limit

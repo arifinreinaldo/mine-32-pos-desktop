@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
 import '../../accounting/domain/coretax_csv.dart';
+import '../../accounting/domain/coretax_xml.dart';
 import '../../accounting/presentation/accounting_controller.dart';
+import '../../settings/presentation/settings_controller.dart';
 import '../data/reports_repository.dart';
 import 'reports_controller.dart';
 
@@ -42,6 +44,36 @@ class ReportsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _exportPpnXml(BuildContext context, WidgetRef ref) async {
+    final range = ref.read(reportRangeProvider);
+    final settings = await ref.read(settingsRepositoryProvider).get();
+    final invoices = await ref
+        .read(accountingRepositoryProvider)
+        .fakturXmlInvoicesForPeriod(fromMs: range.fromMs, toMs: range.toMs);
+    final scale = ref.read(moneyFormatProvider).scale;
+    final xml = buildCoreTaxXml(
+      sellerTin: settings?.taxNumber ?? '',
+      invoices: invoices,
+      scale: scale,
+    );
+    final path = await FilePicker.saveFile(
+      dialogTitle: 'Export CoreTax XML',
+      fileName: 'coretax-${range.label.toLowerCase().replaceAll(' ', '-')}.xml',
+      bytes: Uint8List.fromList(utf8.encode(xml)),
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            path == null
+                ? 'Export cancelled'
+                : 'Exported ${invoices.length} tax invoice(s)',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -61,6 +93,12 @@ class ReportsScreen extends ConsumerWidget {
                 onPressed: () => _exportPpnCsv(context, ref),
                 icon: const Icon(Icons.download_outlined),
                 label: const Text('PPN CSV'),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () => _exportPpnXml(context, ref),
+                icon: const Icon(Icons.code_outlined),
+                label: const Text('CoreTax XML'),
               ),
               const SizedBox(width: 12),
               SegmentedButton<String>(
