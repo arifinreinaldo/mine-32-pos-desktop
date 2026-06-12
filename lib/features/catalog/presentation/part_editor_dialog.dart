@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
 import '../../../core/money/money.dart';
+import '../domain/catalog_item.dart';
 import '../domain/part_draft.dart';
 import 'catalog_controller.dart';
 import 'fitment_editor_dialog.dart';
@@ -36,12 +37,18 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
   late bool _isActive;
   late final int _scale;
   bool _saving = false;
+  Future<List<CatalogItem>>? _siblings;
 
   @override
   void initState() {
     super.initState();
     _scale = ref.read(currencyScaleProvider);
     final d = widget.initial;
+    if (d.productId != null) {
+      _siblings = ref
+          .read(catalogRepositoryProvider)
+          .itemsForProduct(d.productId!);
+    }
     _name = TextEditingController(text: d.name);
     _sku = TextEditingController(text: d.sku);
     _barcode = TextEditingController(text: d.barcode ?? '');
@@ -213,6 +220,8 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
                       label: const Text('Vehicle fitment & cross-references'),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  _variantsSection(context),
                 ],
               ],
             ),
@@ -227,6 +236,233 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
         FilledButton(
           onPressed: _saving ? null : _save,
           child: Text(_saving ? 'Saving…' : 'Save'),
+        ),
+      ],
+    );
+  }
+
+  /// Sibling variants of this product (shown when editing): each is its own
+  /// sellable catalog row; add more via 'Add variant'.
+  Widget _variantsSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final money = ref.watch(moneyFormatProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.layers_outlined,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text('Variants', style: theme.textTheme.titleSmall),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: _addVariant,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Add variant'),
+            ),
+          ],
+        ),
+        FutureBuilder<List<CatalogItem>>(
+          future: _siblings,
+          builder: (context, snap) {
+            final items = snap.data;
+            if (items == null) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: LinearProgressIndicator(),
+              );
+            }
+            return Column(
+              children: [
+                for (final v in items)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      v.variantId == widget.initial.variantId
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      size: 18,
+                    ),
+                    title: Text('${v.variantName} · ${v.sku}'),
+                    trailing: Text(money.format(v.price)),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _addVariant() async {
+    final added = await showDialog<bool>(
+      context: context,
+      builder: (_) => _AddVariantDialog(parent: widget.initial),
+    );
+    if (added == true && mounted) {
+      setState(() {
+        _siblings = ref
+            .read(catalogRepositoryProvider)
+            .itemsForProduct(widget.initial.productId!);
+      });
+    }
+  }
+}
+
+/// Add another sellable variant to an existing product (own name, SKU,
+/// barcode and prices; shares the product's name/brand/description).
+class _AddVariantDialog extends ConsumerStatefulWidget {
+  final PartDraft parent;
+  const _AddVariantDialog({required this.parent});
+
+  @override
+  ConsumerState<_AddVariantDialog> createState() => _AddVariantDialogState();
+}
+
+class _AddVariantDialogState extends ConsumerState<_AddVariantDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _variantName = TextEditingController();
+  final _sku = TextEditingController();
+  final _barcode = TextEditingController();
+  late final TextEditingController _price;
+  late final TextEditingController _cost;
+  late final int _scale;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scale = ref.read(currencyScaleProvider);
+    // Prefill prices from the variant being edited — usually close.
+    _price = TextEditingController(
+      text: widget.parent.price.toMajorString(scale: _scale),
+    );
+    _cost = TextEditingController(
+      text: widget.parent.cost.toMajorString(scale: _scale),
+    );
+  }
+
+  @override
+  void dispose() {
+    for (final c in [_variantName, _sku, _barcode, _price, _cost]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  String? _required(String? v) =>
+      (v == null || v.trim().isEmpty) ? 'Required' : null;
+
+  Money _toMoney(TextEditingController c) {
+    final t = c.text.trim();
+    if (t.isEmpty) return const Money(0);
+    try {
+      return Money.fromMajor(t, scale: _scale);
+    } on FormatException {
+      return const Money(0);
+    }
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    await ref
+        .read(catalogRepositoryProvider)
+        .savePart(
+          PartDraft(
+            productId: widget.parent.productId,
+            name: widget.parent.name,
+            brandName: widget.parent.brandName,
+            description: widget.parent.description,
+            variantName: _variantName.text.trim(),
+            sku: _sku.text.trim(),
+            barcode: _barcode.text.trim().isEmpty ? null : _barcode.text.trim(),
+            price: _toMoney(_price),
+            cost: _toMoney(_cost),
+            coreCharge: const Money(0),
+          ),
+        );
+    if (mounted) Navigator.of(context).pop(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Add variant — ${widget.parent.name}'),
+      content: SizedBox(
+        width: 420,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _variantName,
+                      decoration: const InputDecoration(
+                        labelText: 'Variant name',
+                        hintText: 'e.g. Rear, Ceramic',
+                      ),
+                      validator: _required,
+                      autofocus: true,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _sku,
+                      decoration: const InputDecoration(labelText: 'SKU'),
+                      validator: _required,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _price,
+                      decoration: const InputDecoration(labelText: 'Price'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _cost,
+                      decoration: const InputDecoration(labelText: 'Cost'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _barcode,
+                      decoration: const InputDecoration(labelText: 'Barcode'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : _save,
+          child: Text(_saving ? 'Saving…' : 'Add'),
         ),
       ],
     );

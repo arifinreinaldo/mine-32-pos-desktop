@@ -154,7 +154,9 @@ class _ItemRow extends ConsumerWidget {
                     ),
                   Flexible(
                     child: Text(
-                      item.productName,
+                      item.variantName == 'Default'
+                          ? item.productName
+                          : '${item.productName} — ${item.variantName}',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

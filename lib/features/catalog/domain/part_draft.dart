@@ -16,6 +16,10 @@ class PartDraft {
   final String unit;
   final bool isActive;
 
+  /// Display name of this variant within its product (e.g. 'Front', 'Ceramic').
+  /// Single-variant parts keep the conventional 'Default'.
+  final String variantName;
+
   const PartDraft({
     this.variantId,
     this.productId,
@@ -29,6 +33,7 @@ class PartDraft {
     required this.coreCharge,
     this.unit = 'each',
     this.isActive = true,
+    this.variantName = 'Default',
   });
 
   bool get isNew => variantId == null;
@@ -52,6 +57,7 @@ class PartDraft {
     Money? coreCharge,
     String? unit,
     bool? isActive,
+    String? variantName,
   }) {
     return PartDraft(
       variantId: variantId,
@@ -66,6 +72,7 @@ class PartDraft {
       coreCharge: coreCharge ?? this.coreCharge,
       unit: unit ?? this.unit,
       isActive: isActive ?? this.isActive,
+      variantName: variantName ?? this.variantName,
     );
   }
 }

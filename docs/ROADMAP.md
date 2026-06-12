@@ -33,7 +33,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Auto-parts UI: fitment/cross-ref editor on the part screen (vehicle picker w/ dedupe; add/remove fitment + interchange)
 - [x] Sample data seeder (Settings → Load sample data: 10 parts + stock + supplier + customer + fitment)
 - [x] Seed/import: CSV import of parts (header-aliased, upsert-by-SKU, scale-aware, per-line errors; template + Settings UI)
-- [ ] Multi-variant editing (a product with several variants)
+- [x] Multi-variant editing (variant name on drafts; Variants section + Add-variant dialog in the part editor; per-variant rows labelled "Product — Variant" in the list)
 
 ## M3 — Inventory [Shopify multi-location]
 - [x] Tables: locations (M), stock_movements (E, append-only ledger)

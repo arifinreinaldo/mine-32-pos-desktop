@@ -90,6 +90,57 @@ void main() {
       expect(items.first.price, const Money(2500));
     });
 
+    test('a product can carry several variants, each sellable by SKU', () async {
+      final repo = await singleRepo();
+      final frontId = await repo.savePart(
+        const PartDraft(
+          name: 'Brake Pad Set',
+          sku: 'BP-F',
+          brandName: 'Bosch',
+          variantName: 'Front',
+          price: Money(2500),
+          cost: Money(1500),
+          coreCharge: Money(0),
+        ),
+      );
+      final front = (await repo.getPart(frontId))!;
+      expect(front.variantName, 'Front');
+
+      // Second variant on the SAME product (own SKU/price, shared name/brand).
+      final rearId = await repo.savePart(
+        PartDraft(
+          productId: front.productId,
+          name: front.name,
+          brandName: front.brandName,
+          variantName: 'Rear',
+          sku: 'BP-R',
+          price: const Money(2200),
+          cost: const Money(1300),
+          coreCharge: const Money(0),
+        ),
+      );
+      expect(rearId, isNot(frontId));
+
+      // Both are catalog rows of one product, searchable by either SKU.
+      final items = await repo.watch().first;
+      expect(items, hasLength(2));
+      expect(items.map((i) => i.productId).toSet(), hasLength(1));
+      expect(
+        (await repo.watch(query: 'BP-R').first).single.variantName,
+        'Rear',
+      );
+
+      // itemsForProduct lists the siblings (ordered by variant name).
+      final siblings = await repo.itemsForProduct(front.productId!);
+      expect(siblings.map((v) => v.variantName).toList(), ['Front', 'Rear']);
+
+      // Deleting one variant leaves the other sellable.
+      await repo.deletePart(rearId);
+      expect(await repo.itemsForProduct(front.productId!), hasLength(1));
+
+      await repo.db.close();
+    });
+
     test('savePart updates an existing part in place', () async {
       final repo = await singleRepo();
       final id = await repo.savePart(

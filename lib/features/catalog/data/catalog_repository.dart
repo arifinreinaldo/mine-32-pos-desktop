@@ -95,7 +95,33 @@ class CatalogRepository extends SyncRepository {
       coreCharge: Money(variant.coreChargeMinor),
       unit: product?.unit ?? 'each',
       isActive: variant.isActive,
+      variantName: variant.name,
     );
+  }
+
+  /// All non-deleted variants of one product, as display rows (for the
+  /// variants section of the part editor).
+  Future<List<CatalogItem>> itemsForProduct(String productId) async {
+    final v = db.productVariants;
+    final p = db.products;
+    final b = db.brands;
+    final rows =
+        await (db.select(v).join([
+                innerJoin(p, p.id.equalsExp(v.productId)),
+                leftOuterJoin(b, b.id.equalsExp(p.brandId)),
+              ])
+              ..where(v.productId.equals(productId) & v.deletedAt.isNull())
+              ..orderBy([OrderingTerm.asc(v.name)]))
+            .get();
+    return rows
+        .map(
+          (row) => _toItem(
+            row.readTable(v),
+            row.readTable(p),
+            row.readTableOrNull(b),
+          ),
+        )
+        .toList();
   }
 
   /// Load a part by its SKU (the first non-deleted match), or null. Used by
@@ -161,7 +187,7 @@ class CatalogRepository extends SyncRepository {
           productId: productId,
           sku: draft.sku,
           barcode: draft.barcode,
-          name: 'Default',
+          name: draft.variantName,
           priceMinor: draft.price.minorUnits,
           costMinor: draft.cost.minorUnits,
           coreChargeMinor: draft.coreCharge.minorUnits,
