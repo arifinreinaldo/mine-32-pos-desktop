@@ -86,6 +86,63 @@ void main() {
       await n.close();
     });
 
+    test(
+      'transfer moves stock between locations, conserving the total',
+      () async {
+        final n = await InvNode.create('solo', InMemoryFolder(), 1000);
+        await n.repo.addMovement(
+          variantId: 'V1',
+          locationId: 'A',
+          qty: 10,
+          reason: MovementReason.purchase,
+        );
+        await n.repo.transfer(
+          variantId: 'V1',
+          fromLocationId: 'A',
+          toLocationId: 'B',
+          qty: 4,
+        );
+        expect(await n.repo.onHand('V1', 'A'), 6);
+        expect(await n.repo.onHand('V1', 'B'), 4);
+        // Total across locations is unchanged.
+        final byLoc = await n.repo.onHandByLocation('V1');
+        expect(byLoc['A']! + byLoc['B']!, 10);
+        await n.close();
+      },
+    );
+
+    test('transfer rejects over-stock and same-location', () async {
+      final n = await InvNode.create('solo', InMemoryFolder(), 1000);
+      await n.repo.addMovement(
+        variantId: 'V1',
+        locationId: 'A',
+        qty: 3,
+        reason: MovementReason.purchase,
+      );
+      await expectLater(
+        n.repo.transfer(
+          variantId: 'V1',
+          fromLocationId: 'A',
+          toLocationId: 'B',
+          qty: 5,
+        ),
+        throwsStateError,
+      );
+      await expectLater(
+        n.repo.transfer(
+          variantId: 'V1',
+          fromLocationId: 'A',
+          toLocationId: 'A',
+          qty: 1,
+        ),
+        throwsStateError,
+      );
+      // Failed transfers left stock untouched.
+      expect(await n.repo.onHand('V1', 'A'), 3);
+      expect(await n.repo.onHand('V1', 'B'), 0);
+      await n.close();
+    });
+
     test('ensureDefaultLocation is idempotent', () async {
       final n = await InvNode.create('solo', InMemoryFolder(), 1000);
       final a = await n.repo.ensureDefaultLocation();

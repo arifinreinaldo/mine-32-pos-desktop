@@ -29,6 +29,16 @@ class InventoryRepository extends SyncRepository {
         .watch();
   }
 
+  /// One-shot snapshot of locations (same ordering as [watchLocations]).
+  /// Prefer this in dialogs — subscribing to a watch stream just to take the
+  /// first emission leaks a stream-close timer and stalls under fake async.
+  Future<List<Location>> listLocations() {
+    return (db.select(db.locations)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .get();
+  }
+
   Future<String> upsertLocation(LocationDraft draft) async {
     final id = draft.id ?? _uuid.v7();
     final createdAt = draft.id == null
@@ -130,6 +140,63 @@ class InventoryRepository extends SyncRepository {
           ))
         .watchSingleOrNull()
         .map((row) => row?.read(total) ?? 0);
+  }
+
+  /// On-hand quantity per location for a variant (location id → qty).
+  Future<Map<String, int>> onHandByLocation(String variantId) async {
+    final loc = db.stockMovements.locationId;
+    final total = db.stockMovements.qty.sum();
+    final rows =
+        await (db.selectOnly(db.stockMovements)
+              ..addColumns([loc, total])
+              ..where(
+                db.stockMovements.variantId.equals(variantId) &
+                    db.stockMovements.deletedAt.isNull(),
+              )
+              ..groupBy([loc]))
+            .get();
+    return {for (final r in rows) r.read(loc)!: r.read(total) ?? 0};
+  }
+
+  /// Move [qty] of a variant between locations as two conflict-free movements
+  /// (transfer-out + transfer-in) in one transaction. Throws on bad input or
+  /// insufficient stock at the source.
+  Future<void> transfer({
+    required String variantId,
+    required String fromLocationId,
+    required String toLocationId,
+    required int qty,
+    int unitCostMinor = 0,
+  }) async {
+    if (qty <= 0) throw StateError('Transfer quantity must be positive');
+    if (fromLocationId == toLocationId) {
+      throw StateError('Choose two different locations');
+    }
+    final available = await onHand(variantId, fromLocationId);
+    if (qty > available) {
+      throw StateError('Only $available in stock at the source location');
+    }
+    final transferId = _uuid.v7();
+    await db.transaction(() async {
+      await addMovement(
+        variantId: variantId,
+        locationId: fromLocationId,
+        qty: -qty,
+        reason: MovementReason.transferOut,
+        refType: 'transfer',
+        refId: transferId,
+        unitCostMinor: unitCostMinor,
+      );
+      await addMovement(
+        variantId: variantId,
+        locationId: toLocationId,
+        qty: qty,
+        reason: MovementReason.transferIn,
+        refType: 'transfer',
+        refId: transferId,
+        unitCostMinor: unitCostMinor,
+      );
+    });
   }
 
   /// Adjust on-hand to [targetQty] by appending the difference (used by counts).

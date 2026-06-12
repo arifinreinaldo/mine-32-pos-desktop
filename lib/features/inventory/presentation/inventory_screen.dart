@@ -5,6 +5,39 @@ import '../../../shared/widgets/section_placeholder.dart';
 import '../domain/stock_models.dart';
 import 'inventory_controller.dart';
 import 'stock_adjust_dialog.dart';
+import 'stock_transfer_dialog.dart';
+
+/// Prompt for a name and create a new stock location.
+Future<void> promptNewLocation(BuildContext context, WidgetRef ref) async {
+  final controller = TextEditingController();
+  final name = await showDialog<String>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('New location'),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        decoration: const InputDecoration(labelText: 'Location name'),
+        onSubmitted: (v) => Navigator.of(context).pop(v.trim()),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+          child: const Text('Add'),
+        ),
+      ],
+    ),
+  );
+  controller.dispose();
+  if (name == null || name.isEmpty) return;
+  await ref
+      .read(inventoryRepositoryProvider)
+      .upsertLocation(LocationDraft(name: name));
+}
 
 class InventoryScreen extends ConsumerWidget {
   const InventoryScreen({super.key});
@@ -33,6 +66,12 @@ class InventoryScreen extends ConsumerWidget {
                   onChanged: (v) =>
                       ref.read(inventoryQueryProvider.notifier).update(v),
                 ),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () => promptNewLocation(context, ref),
+                icon: const Icon(Icons.add_location_alt_outlined),
+                label: const Text('New location'),
               ),
             ],
           ),
@@ -81,7 +120,7 @@ class _StockTable extends StatelessWidget {
                   textAlign: TextAlign.right,
                 ),
               ),
-              const SizedBox(width: 110),
+              const SizedBox(width: 190),
             ],
           ),
         ),
@@ -134,17 +173,29 @@ class _StockRow extends ConsumerWidget {
             ),
           ),
           SizedBox(
-            width: 110,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: () => StockAdjustDialog.show(
-                  context,
-                  variantId: item.variantId,
-                  label: item.sku,
+            width: 190,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  tooltip: 'Transfer between locations',
+                  icon: const Icon(Icons.swap_horiz, size: 20),
+                  onPressed: () => StockTransferDialog.show(
+                    context,
+                    variantId: item.variantId,
+                    label: item.sku,
+                  ),
                 ),
-                child: const Text('Adjust'),
-              ),
+                const SizedBox(width: 4),
+                OutlinedButton(
+                  onPressed: () => StockAdjustDialog.show(
+                    context,
+                    variantId: item.variantId,
+                    label: item.sku,
+                  ),
+                  child: const Text('Adjust'),
+                ),
+              ],
             ),
           ),
         ],

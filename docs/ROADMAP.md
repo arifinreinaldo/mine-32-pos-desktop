@@ -40,7 +40,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] On-hand via SUM-of-movements projection (computed; conflict-free, no reproject needed)
 - [x] UI: stock list (search) + count-style adjust dialog (pick location, set new count)
 - [x] Tests: on-hand/adjustTo correctness + **NO-LOST-STOCK** concurrent-movement convergence + location replication
-- [ ] bins, stock_counts session, transfers, committed/incoming quantities + UI
+- [x] Location management (New location) + stock transfers between locations (conflict-free out/in movements; transfer dialog) + per-location on-hand
+- [ ] bins, stock_counts session, committed/incoming quantities
 - [ ] Materialised inventory_levels projection (perf optimisation at scale)
 
 ## M4 — Sales / Checkout [Shopify POS]

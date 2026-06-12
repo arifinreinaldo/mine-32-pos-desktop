@@ -47,7 +47,7 @@ class _StockAdjustDialogState extends ConsumerState<StockAdjustDialog> {
   Future<void> _load() async {
     final repo = ref.read(inventoryRepositoryProvider);
     await repo.ensureDefaultLocation();
-    final locations = await repo.watchLocations().first;
+    final locations = await repo.listLocations();
     final locationId = locations.isNotEmpty ? locations.first.id : null;
     final current = locationId == null
         ? 0
