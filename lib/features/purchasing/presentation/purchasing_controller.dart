@@ -43,3 +43,10 @@ final purchaseOrdersProvider = StreamProvider.autoDispose<List<PurchaseOrder>>((
 final supplierApProvider = FutureProvider.autoDispose.family<int, String>(
   (ref, id) => ref.watch(purchasingRepositoryProvider).apBalance(id),
 );
+
+/// Units on the way per variant (open POs), for the inventory "Incoming" column.
+final incomingByVariantProvider = StreamProvider.autoDispose<Map<String, int>>((
+  ref,
+) {
+  return ref.watch(purchasingRepositoryProvider).watchIncomingByVariant();
+});

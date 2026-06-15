@@ -166,6 +166,48 @@ void main() {
       await n.close();
     });
 
+    test('incoming reflects open POs and clears once received', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      final supplierId = await n.purchasing.saveSupplier(
+        const SupplierDraft(name: 'PT Sumber Parts'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Oil Filter',
+          sku: 'OF-1',
+          price: Money(900),
+          cost: Money(500),
+          coreCharge: Money(0),
+        ),
+      );
+      expect(await n.purchasing.watchIncomingByVariant().first, isEmpty);
+
+      final poId = await n.purchasing.createPurchaseOrder(
+        supplierId: supplierId,
+        locationId: 'L1',
+        lines: [
+          PoLineInput(
+            variantId: variantId,
+            description: 'Oil Filter',
+            qty: 20,
+            unitCostMinor: 30000,
+          ),
+        ],
+      );
+      // 20 units on the way while the PO is open.
+      expect(
+        (await n.purchasing.watchIncomingByVariant().first)[variantId],
+        20,
+      );
+
+      // Once received the goods are on-hand, so nothing is incoming.
+      await n.purchasing.receivePurchaseOrder(poId);
+      expect(await n.purchasing.watchIncomingByVariant().first, isEmpty);
+      expect(await n.inventory.onHand(variantId, 'L1'), 20);
+
+      await n.close();
+    });
+
     test('paying a supplier reduces AP and posts Dr AP / Cr Cash', () async {
       final n = await Node.create('solo', InMemoryFolder(), 1000);
       final supplierId = await n.purchasing.saveSupplier(

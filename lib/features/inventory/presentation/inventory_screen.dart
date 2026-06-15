@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/widgets/section_placeholder.dart';
+import '../../purchasing/presentation/purchasing_controller.dart';
 import '../domain/stock_models.dart';
 import 'inventory_controller.dart';
 import 'stock_adjust_dialog.dart';
@@ -120,6 +121,14 @@ class _StockTable extends StatelessWidget {
                   textAlign: TextAlign.right,
                 ),
               ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Incoming',
+                  style: labelStyle,
+                  textAlign: TextAlign.right,
+                ),
+              ),
               const SizedBox(width: 190),
             ],
           ),
@@ -144,6 +153,8 @@ class _StockRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final incoming =
+        ref.watch(incomingByVariantProvider).asData?.value[item.variantId] ?? 0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: Row(
@@ -169,6 +180,18 @@ class _StockRow extends ConsumerWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: item.isLow ? theme.colorScheme.error : null,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              incoming == 0 ? '—' : '+$incoming',
+              textAlign: TextAlign.right,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: incoming > 0
+                    ? theme.colorScheme.tertiary
+                    : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),

@@ -173,6 +173,34 @@ class PurchasingRepository extends SyncRepository {
     )..where((t) => t.poId.equals(poId) & t.deletedAt.isNull())).get();
   }
 
+  /// Units on the way per variant: the outstanding (ordered − received)
+  /// quantity across open POs (status ordered/draft). Reactive — the inventory
+  /// screen shows it next to on-hand so reorder decisions account for stock in
+  /// transit.
+  Stream<Map<String, int>> watchIncomingByVariant() {
+    final pol = db.purchaseOrderLines;
+    final po = db.purchaseOrders;
+    final remaining = (pol.qtyOrdered - pol.qtyReceived).sum();
+    final statement =
+        db.select(pol).join([innerJoin(po, po.id.equalsExp(pol.poId))])
+          ..addColumns([remaining, pol.variantId])
+          ..where(
+            pol.deletedAt.isNull() &
+                po.deletedAt.isNull() &
+                po.status.isIn(['ordered', 'draft']),
+          )
+          ..groupBy([pol.variantId]);
+    return statement.watch().map((rows) {
+      final out = <String, int>{};
+      for (final r in rows) {
+        final variantId = r.read(pol.variantId);
+        final qty = r.read(remaining) ?? 0;
+        if (variantId != null && qty > 0) out[variantId] = qty;
+      }
+      return out;
+    });
+  }
+
   Future<String> createPurchaseOrder({
     required String supplierId,
     required String locationId,
