@@ -171,8 +171,42 @@ class _SyncBody extends StatelessWidget {
             ),
           ],
         ),
+        if (info.history.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text('Recent syncs', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          for (final run in info.history.take(10))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 160,
+                    child: Text(
+                      _runTime(run.ranAtMs),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    run.exported == 0 && run.imported == 0
+                        ? 'up to date'
+                        : '↑ ${run.exported} sent · ↓ ${run.imported} received',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+        ],
       ],
     );
+  }
+
+  static String _runTime(int ms) {
+    final d = DateTime.fromMillisecondsSinceEpoch(ms);
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}';
   }
 
   Widget _row(ThemeData theme, String label, String value) {

@@ -6,6 +6,7 @@ import 'package:mine32_pos/core/database/app_database.dart';
 import 'package:mine32_pos/core/di/app_services.dart';
 import 'package:mine32_pos/core/money/money.dart';
 import 'package:mine32_pos/core/time/clock.dart';
+import 'package:mine32_pos/core/sync/sync_engine.dart';
 import 'package:mine32_pos/features/catalog/data/catalog_repository.dart';
 import 'package:mine32_pos/features/catalog/domain/part_draft.dart';
 import 'package:mine32_pos/features/sync/data/sync_service.dart';
@@ -69,8 +70,32 @@ void main() {
       expect(onB.length, 1);
       expect(onB.first.brandName, 'Exedy');
 
+      // The pass was recorded in the local history (newest first).
+      final histA = await syncA.recentRuns();
+      expect(histA, isNotEmpty);
+      expect(histA.first.exported, exportResult.exported);
+
       await servicesA.dispose();
       await servicesB.dispose();
     },
   );
+
+  test('recordRun keeps a newest-first history, capped at 20', () async {
+    final (services, sync) = await _node('solo', 1000);
+    addTearDown(services.dispose);
+
+    expect(await sync.recentRuns(), isEmpty);
+
+    for (var i = 1; i <= 25; i++) {
+      await sync.recordRun(
+        SyncResult(exported: i, imported: 0),
+        at: DateTime.fromMillisecondsSinceEpoch(i * 1000),
+      );
+    }
+
+    final runs = await sync.recentRuns();
+    expect(runs, hasLength(20)); // capped
+    expect(runs.first.exported, 25); // newest first
+    expect(runs.last.exported, 6); // oldest kept (25 - 20 + 1)
+  });
 }

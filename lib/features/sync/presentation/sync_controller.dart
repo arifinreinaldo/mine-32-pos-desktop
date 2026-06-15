@@ -8,11 +8,13 @@ class SyncInfo {
   final String? folder;
   final int pending;
   final String? lastRun;
+  final List<SyncRun> history;
   const SyncInfo({
     required this.deviceId,
     required this.folder,
     required this.pending,
     required this.lastRun,
+    this.history = const [],
   });
 
   bool get configured => folder != null && folder!.isNotEmpty;
@@ -34,6 +36,7 @@ class SyncController extends AsyncNotifier<SyncInfo> {
       folder: await _service.folderPath(),
       pending: await _service.pendingCount(),
       lastRun: await _service.lastRun(),
+      history: await _service.recentRuns(),
     );
   }
 
