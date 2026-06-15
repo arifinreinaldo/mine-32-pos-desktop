@@ -2,6 +2,10 @@
 
 Guidance for any agent (and humans) working in this repo. Read this first.
 
+> **New here?** [`docs/LLM_WIKI.md`](docs/LLM_WIKI.md) is the agent-facing
+> codebase map: where every feature lives, the invariants, and "where do I
+> change X" recipes. Start there to orient, then come back here for the rules.
+
 ## What this is
 
 **Mine32 POS** is an **offline-first** Point of Sale desktop application for an
