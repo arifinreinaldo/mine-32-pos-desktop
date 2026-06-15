@@ -57,7 +57,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Returns/refunds: event tables (v10), restock + reversing revenue/PPN/COGS journal, over-return guard, dialog on the sale detail
 - [x] Line-discount UI (per-line discount dialog on the cart, clamped to gross; reduces the charge total)
 - [x] Void sale (full return of remaining items to the original tender, tagged 'void'; confirm dialog on the sale detail; re-void rejected)
-- [ ] park/recall
+- [x] Park/recall (Park sets the cart+customer aside in memory; Parked(n) menu recalls into an empty cart; drafts are device-local and not synced)
 
 ## M5 — Accounting + Tax (Xero rigor; Indonesia CoreTax) + Reporting
 - [x] Tables: accounts (seeded COA), tax_rates, journals (E), journal_lines (E); balances via trial balance

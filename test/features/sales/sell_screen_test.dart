@@ -74,6 +74,67 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   });
 
+  testWidgets('sell: park empties the cart and recall restores it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1500, 950);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final services = await AppServices.initialize(
+      database: AppDatabase(NativeDatabase.memory()),
+      clock: MutableClock(1000),
+    );
+    addTearDown(services.dispose);
+
+    final catalog = CatalogRepository(
+      db: services.db,
+      changeLog: services.changeLog,
+      hlcService: services.hlc,
+      clock: services.clock,
+    );
+    await catalog.savePart(
+      const PartDraft(
+        name: 'Brake Pad Set',
+        sku: 'BP-100',
+        price: Money(2500),
+        cost: Money(1500),
+        coreCharge: Money(0),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appServicesProvider.overrideWithValue(services)],
+        child: const MaterialApp(home: Scaffold(body: SellScreen())),
+      ),
+    );
+    await _settle(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'BP-100');
+    await _settle(tester);
+    await tester.tap(find.text('Brake Pad Set'));
+    await _settle(tester);
+
+    // Park: cart empties and a recall chip appears.
+    await tester.tap(find.byTooltip('Park sale'));
+    await _settle(tester);
+    expect(find.text('No items yet'), findsOneWidget);
+    expect(find.text('Parked (1)'), findsOneWidget);
+
+    // Recall from the menu: the cart is restored.
+    await tester.tap(find.text('Parked (1)'));
+    await _settle(tester);
+    await tester.tap(find.textContaining('item(s)'));
+    await _settle(tester);
+    expect(find.textContaining(r'Charge $25.00'), findsOneWidget);
+    expect(find.text('Parked (1)'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 500));
+  });
+
   testWidgets('sell: a per-line discount reduces the charge total', (
     tester,
   ) async {

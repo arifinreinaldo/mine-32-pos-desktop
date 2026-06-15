@@ -115,10 +115,37 @@ class _SearchPanelState extends ConsumerState<_SearchPanel> {
 class _CartPanel extends ConsumerWidget {
   const _CartPanel();
 
+  void _park(WidgetRef ref) {
+    ref
+        .read(parkedSalesProvider.notifier)
+        .park(
+          ref.read(cartProvider),
+          customerId: ref.read(sellCustomerProvider),
+        );
+    ref.read(cartProvider.notifier).clear();
+    ref.read(sellCustomerProvider.notifier).select(null);
+  }
+
+  void _recall(BuildContext context, WidgetRef ref, int index) {
+    if (ref.read(cartProvider).isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Park or clear the current sale before recalling'),
+        ),
+      );
+      return;
+    }
+    final sale = ref.read(parkedSalesProvider.notifier).recallAt(index);
+    if (sale == null) return;
+    ref.read(cartProvider.notifier).replace(sale.cart);
+    ref.read(sellCustomerProvider.notifier).select(sale.customerId);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
     final money = ref.watch(moneyFormatProvider);
+    final parked = ref.watch(parkedSalesProvider);
     final theme = Theme.of(context);
 
     return Card(
@@ -129,14 +156,45 @@ class _CartPanel extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Text('Current sale', style: theme.textTheme.titleMedium),
-                const Spacer(),
-                if (cart.isNotEmpty)
-                  TextButton.icon(
-                    onPressed: () => ref.read(cartProvider.notifier).clear(),
-                    icon: const Icon(Icons.clear_all, size: 18),
-                    label: const Text('Clear'),
+                Expanded(
+                  child: Text(
+                    'Current sale',
+                    style: theme.textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                if (parked.isNotEmpty)
+                  PopupMenuButton<int>(
+                    tooltip: 'Recall a parked sale',
+                    onSelected: (i) => _recall(context, ref, i),
+                    itemBuilder: (_) => [
+                      for (var i = 0; i < parked.length; i++)
+                        PopupMenuItem(value: i, child: Text(parked[i].label)),
+                    ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'Parked (${parked.length})',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (cart.isNotEmpty) ...[
+                  IconButton(
+                    tooltip: 'Park sale',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.pause_circle_outline, size: 20),
+                    onPressed: () => _park(ref),
+                  ),
+                  IconButton(
+                    tooltip: 'Clear',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.clear_all, size: 20),
+                    onPressed: () => ref.read(cartProvider.notifier).clear(),
+                  ),
+                ],
               ],
             ),
             _CustomerSelector(onPick: () => _pickCustomer(context, ref)),

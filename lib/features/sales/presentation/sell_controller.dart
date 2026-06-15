@@ -80,9 +80,59 @@ class CartController extends Notifier<Cart> {
   }
 
   void clear() => state = const Cart();
+
+  /// Replace the whole cart (used by recall of a parked sale).
+  void replace(Cart cart) => state = cart;
 }
 
 final cartProvider = NotifierProvider<CartController, Cart>(CartController.new);
+
+/// A sale set aside mid-checkout (kept in memory on this device only — parked
+/// drafts are mutable and deliberately not synced; they're lost on app exit).
+class ParkedSale {
+  final Cart cart;
+  final String? customerId;
+  final DateTime parkedAt;
+  const ParkedSale({
+    required this.cart,
+    required this.parkedAt,
+    this.customerId,
+  });
+
+  String get label {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${cart.itemCount} item(s) · ${two(parkedAt.hour)}:${two(parkedAt.minute)}';
+  }
+}
+
+class ParkedSales extends Notifier<List<ParkedSale>> {
+  @override
+  List<ParkedSale> build() => const [];
+
+  void park(Cart cart, {String? customerId, DateTime? at}) {
+    if (cart.isEmpty) return;
+    state = [
+      ...state,
+      ParkedSale(
+        cart: cart,
+        customerId: customerId,
+        parkedAt: at ?? DateTime.now(),
+      ),
+    ];
+  }
+
+  /// Remove and return the parked sale at [index] (null if out of range).
+  ParkedSale? recallAt(int index) {
+    if (index < 0 || index >= state.length) return null;
+    final sale = state[index];
+    state = [...state]..removeAt(index);
+    return sale;
+  }
+}
+
+final parkedSalesProvider = NotifierProvider<ParkedSales, List<ParkedSale>>(
+  ParkedSales.new,
+);
 
 /// Search text for the Sell screen's part lookup.
 class SellSearch extends Notifier<String> {

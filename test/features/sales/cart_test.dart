@@ -71,6 +71,41 @@ void main() {
       expect(container.read(cartProvider).isEmpty, isTrue);
     });
 
+    test('park stores the cart and recall returns it once', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final cartCtrl = container.read(cartProvider.notifier);
+      final parkedCtrl = container.read(parkedSalesProvider.notifier);
+
+      cartCtrl.addItem(_item('A'));
+      cartCtrl.addItem(_item('B'));
+      final parkedCart = container.read(cartProvider);
+
+      parkedCtrl.park(
+        parkedCart,
+        customerId: 'cust-1',
+        at: DateTime(2026, 6, 12, 9, 30),
+      );
+      cartCtrl.clear();
+      expect(container.read(parkedSalesProvider), hasLength(1));
+      expect(
+        container.read(parkedSalesProvider).single.label,
+        '2 item(s) · 09:30',
+      );
+
+      // Recall restores the exact cart + customer and consumes the slot.
+      final recalled = parkedCtrl.recallAt(0)!;
+      expect(recalled.customerId, 'cust-1');
+      cartCtrl.replace(recalled.cart);
+      expect(container.read(cartProvider).itemCount, 2);
+      expect(container.read(parkedSalesProvider), isEmpty);
+
+      // Out-of-range recall is null; parking an empty cart is a no-op.
+      expect(parkedCtrl.recallAt(0), isNull);
+      parkedCtrl.park(const Cart());
+      expect(container.read(parkedSalesProvider), isEmpty);
+    });
+
     test('setLineDiscount applies and clamps to the line gross', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
