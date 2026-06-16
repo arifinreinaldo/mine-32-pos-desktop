@@ -82,7 +82,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] suppliers + purchase_orders + lines; create PO; **receive → +stock + Dr Inventory / Cr AP journal**; AP balance; idempotent receive
 - [x] Purchasing UI (tabbed: suppliers list/editor + POs list with New-PO dialog + Receive) + tests
 - [x] Settle AR (customer receipts) + AP (supplier payments): event-sourced ledger + balanced journals (Dr Cash/Cr AR; Dr AP/Cr Cash) + UI (Receive payment / Pay)
-- [ ] price tiers; partial receipts; input-PPN on purchases; receipt allocation per invoice
+- [x] Input-PPN on purchases: PKP goods-receipt splits recoverable VAT (Dr Inventory net · Dr PPN Input · Cr AP gross); auto from company PKP flag + default rate; bp=0 unchanged
+- [ ] price tiers; partial receipts; receipt allocation per invoice
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine

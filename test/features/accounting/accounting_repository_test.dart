@@ -37,7 +37,7 @@ void main() {
         await repo.seedDefaults();
         await repo.seedDefaults(); // idempotent
 
-        expect((await db.select(db.accounts).get()).length, 10);
+        expect((await db.select(db.accounts).get()).length, 11);
         expect((await db.select(db.taxRates).get()).length, 1);
         final rate = await repo.defaultTaxRate();
         expect(rate!.basisPoints, 1100);
@@ -101,7 +101,7 @@ void main() {
 
       // listAccounts returns the seeded accounts, ordered by code.
       final accounts = await repo.listAccounts();
-      expect(accounts, hasLength(10));
+      expect(accounts, hasLength(11));
       final codes = accounts.map((a) => a.code).toList();
       expect(codes, [...codes]..sort());
 

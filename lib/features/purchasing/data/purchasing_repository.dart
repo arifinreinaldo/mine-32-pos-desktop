@@ -5,6 +5,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_repository.dart';
 import '../../../core/sync/change_record.dart';
 import '../../accounting/data/accounting_repository.dart';
+import '../../accounting/domain/tax_math.dart';
 import '../../inventory/data/inventory_repository.dart';
 import '../../inventory/domain/movement_reason.dart';
 import '../domain/purchasing_models.dart';
@@ -258,10 +259,27 @@ class PurchasingRepository extends SyncRepository {
     });
   }
 
+  /// Whether to split recoverable input-PPN on goods receipt: only for a
+  /// VAT-registered (PKP) company, using the default tax rate. Returns
+  /// (basisPoints, inclusive); (0, true) means no input tax.
+  Future<(int, bool)> _purchaseTax() async {
+    final settings =
+        await (db.select(db.companySettings)
+              ..where((t) => t.id.equals('default'))
+              ..limit(1))
+            .getSingleOrNull();
+    if (settings?.isPkp != true) return (0, true);
+    final rate = await accounting.defaultTaxRate();
+    if (rate == null) return (0, true);
+    return (rate.basisPoints, rate.inclusive);
+  }
+
   /// Receive all outstanding quantity on a PO: append +stock movements, mark the
-  /// lines/PO received, and post the goods-receipt journal. Idempotent per PO
+  /// lines/PO received, and post the goods-receipt journal. For a PKP company
+  /// the recoverable input-PPN is split out of the cost. Idempotent per PO
   /// (does nothing if already received).
   Future<void> receivePurchaseOrder(String poId) async {
+    final (taxBp, taxInclusive) = await _purchaseTax();
     await db.transaction(() async {
       final po = await getPurchaseOrder(poId);
       if (po == null || po.status == 'received') return;
@@ -304,10 +322,16 @@ class PurchasingRepository extends SyncRepository {
         ),
       );
 
+      final split = TaxMath.split(
+        amountMinor: totalCost,
+        basisPoints: taxBp,
+        inclusive: taxInclusive,
+      );
       await accounting.postPurchaseJournal(
         poId: poId,
         date: now,
-        totalMinor: totalCost,
+        totalMinor: split.totalMinor,
+        ppnMinor: split.taxMinor,
       );
     });
   }

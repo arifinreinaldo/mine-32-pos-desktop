@@ -5,6 +5,7 @@ abstract final class AccountCode {
   static const String cash = '1-1000';
   static const String bank = '1-1100';
   static const String receivable = '1-1200';
+  static const String ppnInput = '1-1300'; // PPN Masukan (recoverable VAT)
   static const String inventory = '1-1400';
   static const String accountsPayable = '2-2000';
   static const String ppnOutput = '2-2100'; // PPN Keluaran (VAT payable)

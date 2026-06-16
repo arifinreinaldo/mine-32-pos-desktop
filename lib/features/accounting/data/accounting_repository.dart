@@ -36,6 +36,7 @@ class AccountingRepository extends SyncRepository {
       [AccountCode.cash, 'Cash', 'asset'],
       [AccountCode.bank, 'Bank', 'asset'],
       [AccountCode.receivable, 'Accounts Receivable', 'asset'],
+      [AccountCode.ppnInput, 'PPN Input (VAT Receivable)', 'asset'],
       [AccountCode.inventory, 'Inventory', 'asset'],
       [AccountCode.accountsPayable, 'Accounts Payable', 'liability'],
       [AccountCode.ppnOutput, 'PPN Output (VAT Payable)', 'liability'],
@@ -493,15 +494,24 @@ class AccountingRepository extends SyncRepository {
 
   /// Goods-receipt journal for a received purchase order:
   /// Dr Inventory · Cr Accounts Payable.
+  /// Goods-receipt journal. [totalMinor] is the gross payable to the supplier
+  /// (= Accounts Payable). When [ppnMinor] > 0 (a PKP buying taxable goods) the
+  /// recoverable input VAT is split out: Dr Inventory (net) · Dr PPN Input (VAT)
+  /// · Cr AP (gross). Otherwise it's the plain Dr Inventory · Cr AP.
   Future<void> postPurchaseJournal({
     required String poId,
     required int date,
     required int totalMinor,
+    int ppnMinor = 0,
   }) async {
     if (totalMinor <= 0) return;
     final inv = await accountByCode(AccountCode.inventory);
     final ap = await accountByCode(AccountCode.accountsPayable);
     if (inv == null || ap == null) return;
+    final ppnIn = ppnMinor > 0
+        ? await accountByCode(AccountCode.ppnInput)
+        : null;
+    final invDebit = ppnIn != null ? totalMinor - ppnMinor : totalMinor;
     await postJournal(
       date: date,
       source: 'purchase',
@@ -511,9 +521,15 @@ class AccountingRepository extends SyncRepository {
       lines: [
         JournalLineInput(
           accountId: inv.id,
-          debitMinor: totalMinor,
+          debitMinor: invDebit,
           description: 'Inventory',
         ),
+        if (ppnIn != null)
+          JournalLineInput(
+            accountId: ppnIn.id,
+            debitMinor: ppnMinor,
+            description: 'PPN input',
+          ),
         JournalLineInput(
           accountId: ap.id,
           creditMinor: totalMinor,

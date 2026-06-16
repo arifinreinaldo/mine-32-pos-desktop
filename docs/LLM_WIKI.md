@@ -154,16 +154,16 @@ Root/cross-cutting providers are in `lib/core/di/providers.dart`
 ## 8. Accounting posting rules
 
 Account codes (`accounting_models.dart::AccountCode`): cash `1-1000`, bank
-`1-1100`, receivable `1-1200`, inventory `1-1400`, accountsPayable `2-2000`,
-ppnOutput `2-2100`, ownerEquity `3-3000`, salesRevenue `4-4000`, cogs `5-5000`,
-inventoryAdjustment `5-9000`.
+`1-1100`, receivable `1-1200`, ppnInput `1-1300`, inventory `1-1400`,
+accountsPayable `2-2000`, ppnOutput `2-2100`, ownerEquity `3-3000`,
+salesRevenue `4-4000`, cogs `5-5000`, inventoryAdjustment `5-9000`. (11 seeded.)
 
 | Event | Journal (Dr / Cr) | Posted by |
 |---|---|---|
-| Sale (cash/bank) | Dr Cash/Bank (total) · Cr Revenue (DPP) · Cr PPN (PPN); Dr COGS · Cr Inventory | `postSaleJournal` |
+| Sale (cash/bank) | Dr Cash/Bank (total) · Cr Revenue (DPP) · Cr PPN Output (PPN); Dr COGS · Cr Inventory | `postSaleJournal` |
 | On-account sale | Dr **Receivable** instead of Cash | `postSaleJournal(method:'account')` |
 | Return / void | reverse of the sale; Cr Cash/Bank refund | `postReturnJournal` |
-| Goods receipt (PO) | Dr Inventory · Cr Accounts Payable | `postPurchaseJournal` |
+| Goods receipt (PO) | Dr Inventory (net) · [Dr PPN Input (recoverable VAT, PKP only)] · Cr Accounts Payable (gross) | `postPurchaseJournal` |
 | Customer receipt | Dr Cash/Bank · Cr Receivable | `postReceiptJournal` |
 | Supplier payment | Dr Accounts Payable · Cr Cash/Bank | `postSupplierPaymentJournal` |
 | Manual journal | user-entered, balanced | `postManualJournal` |

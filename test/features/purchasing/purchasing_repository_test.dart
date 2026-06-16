@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mine32_pos/core/database/app_database.dart';
@@ -162,6 +163,61 @@ void main() {
       // Receiving again is a no-op (no double stock).
       await n.purchasing.receivePurchaseOrder(poId);
       expect(await n.inventory.onHand(variantId, 'L1'), 20);
+
+      await n.close();
+    });
+
+    test('a PKP company splits recoverable input-PPN on receipt', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      // Mark the company VAT-registered; the default PPN 11% rate is seeded.
+      await n.db
+          .into(n.db.companySettings)
+          .insert(
+            CompanySettingsCompanion.insert(
+              id: 'default',
+              createdAt: 0,
+              updatedAt: 0,
+              updatedHlc: '0',
+              isPkp: const Value(true),
+            ),
+          );
+      final supplierId = await n.purchasing.saveSupplier(
+        const SupplierDraft(name: 'PT Sumber Parts'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Oil Filter',
+          sku: 'OF-1',
+          price: Money(900),
+          cost: Money(500),
+          coreCharge: Money(0),
+        ),
+      );
+      final poId = await n.purchasing.createPurchaseOrder(
+        supplierId: supplierId,
+        locationId: 'L1',
+        lines: [
+          PoLineInput(
+            variantId: variantId,
+            description: 'Oil Filter',
+            qty: 1,
+            unitCostMinor: 11100, // tax-inclusive
+          ),
+        ],
+      );
+      await n.purchasing.receivePurchaseOrder(poId);
+
+      // 11100 incl 11% → DPP 10000 (Inventory) + input PPN 1100; AP gross 11100.
+      final tb = await n.accounting.watchTrialBalance().first;
+      Money bal(String code) => tb.firstWhere((r) => r.code == code).balance;
+      expect(bal(AccountCode.inventory), const Money(10000));
+      expect(bal(AccountCode.ppnInput), const Money(1100));
+      expect(bal(AccountCode.accountsPayable), const Money(-11100));
+      final td = tb.fold(0, (s, r) => s + r.debit.minorUnits);
+      final tc = tb.fold(0, (s, r) => s + r.credit.minorUnits);
+      expect(td, tc);
+      // AP balance stays gross (what's owed to the supplier).
+      expect(await n.purchasing.apBalance(supplierId), 11100);
 
       await n.close();
     });

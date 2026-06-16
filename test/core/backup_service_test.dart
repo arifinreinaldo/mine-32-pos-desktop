@@ -153,7 +153,7 @@ void main() {
     // The chart of accounts did NOT duplicate (deterministic seed ids), and the
     // restored journals keep the books balanced.
     final tb = await b.accounting.watchTrialBalance().first;
-    expect(tb, hasLength(10));
+    expect(tb, hasLength(11));
     final totalDebit = tb.fold(0, (s, r) => s + r.debit.minorUnits);
     final totalCredit = tb.fold(0, (s, r) => s + r.credit.minorUnits);
     expect(totalDebit, totalCredit);
@@ -164,7 +164,7 @@ void main() {
     await b.backup.importBytes(bytes);
     expect(await b.inventory.onHand(variantId, 'L1'), 8);
     expect((await b.catalog.watch().first), hasLength(1));
-    expect((await b.accounting.watchTrialBalance().first), hasLength(10));
+    expect((await b.accounting.watchTrialBalance().first), hasLength(11));
 
     await a.services.dispose();
     await b.services.dispose();
