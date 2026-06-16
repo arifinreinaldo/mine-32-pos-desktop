@@ -104,7 +104,9 @@ Root/cross-cutting providers are in `lib/core/di/providers.dart`
   a bundle; `import()` merges peers' bundles idempotently (dedup via
   `applied_changes`) and only advances a peer cursor through a *contiguous*
   fully-applied prefix. `SyncRegistry` maps table name → `SyncEntity` (master =
-  HLC last-write-wins, event = set-union). `SyncScheduler` runs it every 5 min.
+  HLC last-write-wins, event = set-union). `SyncEntity.apply` returns whether it
+  was a master LWW override → recorded to a `sync.conflicts` audit log (shown on
+  the Sync screen, with sync history). `SyncScheduler` runs it every 5 min.
 - **DI** (`core/di/app_services.dart`): `AppServices.initialize()` opens the DB,
   loads HLC/device id, registers all sync entities, and seeds the chart of
   accounts + default PPN rate + company settings (idempotent). Injected via

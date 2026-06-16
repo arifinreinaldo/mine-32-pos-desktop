@@ -177,6 +177,38 @@ void main() {
       },
     );
 
+    test('LWW overrides are recorded in the conflict audit log', () async {
+      final folder = InMemoryFolder();
+      final a = Node('device-a', folder, 5000); // newer
+      final b = Node('device-b', folder, 1000); // older
+      await a.init();
+      await b.init();
+
+      await a.company.upsert(id: 'default', name: 'From A (newer)');
+      await b.company.upsert(id: 'default', name: 'From B (older)');
+      await fullSync([a, b]);
+
+      Future<List<dynamic>> conflicts(Node n) async {
+        final row = await (n.db.select(
+          n.db.syncMeta,
+        )..where((t) => t.key.equals('sync.conflicts'))).getSingleOrNull();
+        return row == null ? const [] : jsonDecode(row.value) as List;
+      }
+
+      // B's older row was overridden by A's newer edit → audited on B.
+      final onB = await conflicts(b);
+      expect(onB, isNotEmpty);
+      expect((onB.first as Map)['table'], 'company_settings');
+      expect((onB.first as Map)['row'], 'default');
+      expect((onB.first as Map)['dev'], 'device-a');
+
+      // A kept its own newer row, so it recorded no override.
+      expect(await conflicts(a), isEmpty);
+
+      await a.close();
+      await b.close();
+    });
+
     test('order of bundle application does not affect the result', () async {
       // Apply B-then-A on one receiver and A-then-B on another; both converge.
       final folderForX = InMemoryFolder();

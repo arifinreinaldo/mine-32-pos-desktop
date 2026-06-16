@@ -21,6 +21,39 @@ class SyncResult {
   String toString() => 'SyncResult(exported: $exported, imported: $imported)';
 }
 
+/// An audit entry: an incoming change overrode a local master row by HLC
+/// last-write-wins (a real conflict resolution).
+class ConflictRecord {
+  final String entityTable;
+  final String rowId;
+  final String hlc;
+  final String deviceId;
+  final int at;
+  const ConflictRecord({
+    required this.entityTable,
+    required this.rowId,
+    required this.hlc,
+    required this.deviceId,
+    this.at = 0,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'table': entityTable,
+    'row': rowId,
+    'hlc': hlc,
+    'dev': deviceId,
+    'at': at,
+  };
+
+  factory ConflictRecord.fromJson(Map<String, dynamic> j) => ConflictRecord(
+    entityTable: j['table'] as String,
+    rowId: j['row'] as String,
+    hlc: j['hlc'] as String,
+    deviceId: j['dev'] as String,
+    at: (j['at'] as num?)?.toInt() ?? 0,
+  );
+}
+
 /// Orchestrates serverless sync: flush the local outbox to a bundle, import
 /// peers' bundles, merge deterministically, then rebuild projections. Fully
 /// optional to call — the app works identically if it never runs. See
@@ -109,6 +142,7 @@ class SyncEngine {
     }
 
     var applied = 0;
+    final conflicts = <ConflictRecord>[];
     for (final entry in byPeer.entries) {
       final cursorKey = 'sync.cursor.${entry.key}';
       final cursor = await _meta(cursorKey) ?? '';
@@ -135,7 +169,19 @@ class SyncEngine {
             fullyApplied = false; // unknown entity (e.g. newer schema)
             continue;
           }
-          if (await _applyOne(change, entity)) applied++;
+          final result = await _applyOne(change, entity);
+          if (result.applied) applied++;
+          if (result.overrode) {
+            conflicts.add(
+              ConflictRecord(
+                entityTable: change.entityTable,
+                rowId: change.rowId,
+                hlc: change.hlc.pack(),
+                deviceId: change.deviceId,
+                at: change.createdAt,
+              ),
+            );
+          }
         }
 
         if (fullyApplied && contiguous) {
@@ -148,6 +194,8 @@ class SyncEngine {
       if (newCursor != cursor) await _setMeta(cursorKey, newCursor);
     }
 
+    if (conflicts.isNotEmpty) await _recordConflicts(conflicts);
+
     if (applied > 0) {
       for (final reproject in reprojectors) {
         await reproject();
@@ -156,16 +204,20 @@ class SyncEngine {
     return applied;
   }
 
-  /// Applies a single change idempotently. Returns true if it was newly applied.
-  Future<bool> _applyOne(ChangeRecord change, SyncEntity entity) {
+  /// Applies a single change idempotently. `applied` is false for a duplicate;
+  /// `overrode` is true when it was a master last-write-wins conflict override.
+  Future<({bool applied, bool overrode})> _applyOne(
+    ChangeRecord change,
+    SyncEntity entity,
+  ) {
     return db.transaction(() async {
       final already = await (db.select(
         db.appliedChanges,
       )..where((t) => t.changeId.equals(change.id))).getSingleOrNull();
-      if (already != null) return false;
+      if (already != null) return (applied: false, overrode: false);
 
       await hlc.observe(change.hlc);
-      await entity.apply(db, change);
+      final overrode = await entity.apply(db, change);
       await db
           .into(db.appliedChanges)
           .insert(
@@ -175,8 +227,26 @@ class SyncEngine {
               appliedAt: change.createdAt,
             ),
           );
-      return true;
+      return (applied: true, overrode: overrode);
     });
+  }
+
+  /// Append LWW conflict overrides to a capped, device-local audit list in
+  /// `sync_meta` (newest first). Not itself synced.
+  Future<void> _recordConflicts(List<ConflictRecord> newConflicts) async {
+    const key = 'sync.conflicts';
+    const cap = 100;
+    final existing = <dynamic>[];
+    final raw = await _meta(key);
+    if (raw != null && raw.isNotEmpty) {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) existing.addAll(decoded);
+    }
+    final merged = [
+      ...newConflicts.reversed.map((c) => c.toJson()),
+      ...existing,
+    ].take(cap).toList();
+    await _setMeta(key, jsonEncode(merged));
   }
 
   Future<String?> _meta(String key) async {

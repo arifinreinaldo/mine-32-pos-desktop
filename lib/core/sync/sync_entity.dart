@@ -33,7 +33,9 @@ class SyncEntity<D extends DataClass> {
   });
 
   /// Merge a single incoming [change] into [db] per this entity's [kind].
-  Future<void> apply(AppDatabase db, ChangeRecord change) async {
+  /// Returns `true` only when this was a **master last-write-wins override** of
+  /// an already-present row (a real conflict resolution) — for the audit log.
+  Future<bool> apply(AppDatabase db, ChangeRecord change) async {
     final table = tableOf(db);
     // Drift data classes implement Insertable<D> at runtime; the generic bound
     // `DataClass` doesn't express that statically, hence the cast.
@@ -41,11 +43,18 @@ class SyncEntity<D extends DataClass> {
     switch (kind) {
       case SyncKind.master:
         final existing = await _existingHlc(db, table, change.rowId);
-        if (existing == null || change.hlc > existing) {
+        if (existing == null) {
           await db.into(table).insertOnConflictUpdate(row);
+          return false;
         }
+        if (change.hlc > existing) {
+          await db.into(table).insertOnConflictUpdate(row);
+          return true; // overwrote an existing row by HLC
+        }
+        return false; // older than what we have — ignored
       case SyncKind.event:
         await db.into(table).insert(row, mode: InsertMode.insertOrIgnore);
+        return false;
     }
   }
 

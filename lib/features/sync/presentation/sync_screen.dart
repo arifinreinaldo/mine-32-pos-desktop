@@ -199,6 +199,25 @@ class _SyncBody extends StatelessWidget {
               ),
             ),
         ],
+        if (info.conflicts.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            'Conflicts resolved (last write wins)',
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          for (final c in info.conflicts.take(10))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(
+                '${_runTime(c.at)} · ${c.entityTable} ${c.rowId} '
+                '(kept ${c.deviceId}\'s edit)',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/sync/sync_engine.dart';
 import '../data/sync_service.dart';
 
 class SyncInfo {
@@ -9,12 +10,14 @@ class SyncInfo {
   final int pending;
   final String? lastRun;
   final List<SyncRun> history;
+  final List<ConflictRecord> conflicts;
   const SyncInfo({
     required this.deviceId,
     required this.folder,
     required this.pending,
     required this.lastRun,
     this.history = const [],
+    this.conflicts = const [],
   });
 
   bool get configured => folder != null && folder!.isNotEmpty;
@@ -37,6 +40,7 @@ class SyncController extends AsyncNotifier<SyncInfo> {
       pending: await _service.pendingCount(),
       lastRun: await _service.lastRun(),
       history: await _service.recentRuns(),
+      conflicts: await _service.recentConflicts(),
     );
   }
 

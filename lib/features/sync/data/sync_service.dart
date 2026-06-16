@@ -106,6 +106,18 @@ class SyncService {
     ];
   }
 
+  /// LWW conflict overrides recorded during imports, newest first.
+  Future<List<ConflictRecord>> recentConflicts() async {
+    final raw = await _meta('sync.conflicts');
+    if (raw == null || raw.isEmpty) return const [];
+    final list = jsonDecode(raw);
+    if (list is! List) return const [];
+    return [
+      for (final e in list)
+        ConflictRecord.fromJson((e as Map).cast<String, dynamic>()),
+    ];
+  }
+
   Future<String?> _meta(String key) async {
     final row =
         await (_db.select(_db.syncMeta)

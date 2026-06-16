@@ -93,7 +93,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Sync status badge in the shell (live un-synced change count at the bottom of the nav, links to Sync)
 - [x] Background sync timer (SyncScheduler: immediate + every 5 min when a folder is set; re-entrancy-guarded, failure-tolerant). Polling chosen over a folder watcher — FS events are unreliable on cloud-synced shares
 - [x] Sync history (last 20 passes — time + sent/received counts — on the Sync screen; device-local in sync_meta)
-- [ ] Conflict-override audit log
+- [x] Conflict-override audit log (LWW overrides recorded during import — table/row/device/time — shown on the Sync screen; merge behaviour unchanged)
 
 ## M8 — Polish & hardening
 - [x] Settings screen: company profile, currency (USD/IDR/… → reactive money format), NPWP + PKP, tax-inclusive, receipt header/footer
