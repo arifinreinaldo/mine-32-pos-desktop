@@ -72,15 +72,15 @@ Each feature lives in `lib/features/<feature>/`. Route + nav label are in
 | Feature | Route | Screens / dialogs | Repository (data/) | Key domain types |
 |---|---|---|---|---|
 | **dashboard** | `/dashboard` | dashboard_screen | (reads via providers) | — |
-| **sales / checkout** | `/sell` | sell_screen, payment_dialog | sales_repository (`completeSale`) | cart (`Cart`/`CartLine`), `SaleResult` |
+| **sales / checkout** | `/sell` | sell_screen (cart line-discount, park/recall), payment_dialog | sales_repository (`completeSale`) | cart (`Cart`/`CartLine`), `SaleResult`, `ParkedSale` |
 | **sales history** | `/sales` | sales_history_screen, return_dialog | returns_repository (`createReturn`,`voidSale`) | receipt, `ReturnableLine` |
-| **catalog** | `/catalog` | catalog_screen, part_editor_dialog, fitment_editor_dialog | catalog_repository, auto_parts_repository, parts_csv_import | `PartDraft`, `CatalogItem`, auto_parts_models (`VehicleDraft`) |
-| **inventory** | `/inventory` | inventory_screen, stock_adjust_dialog, stock_transfer_dialog | inventory_repository (`addMovement`,`transfer`,`onHand`) | stock_models (`StockLevel`,`LocationDraft`), `MovementReason` |
-| **purchasing** | `/purchasing` | purchasing_screen, po_create_dialog, supplier_editor_dialog | purchasing_repository (`receivePurchaseOrder`,`paySupplier`) | purchasing_models (`SupplierDraft`) |
+| **catalog** | `/catalog` | catalog_screen, part_editor_dialog (multi-variant), fitment_editor_dialog | catalog_repository (`savePart`,`itemsForProduct`), auto_parts_repository, parts_csv_import | `PartDraft` (`variantName`), `CatalogItem`, auto_parts_models (`VehicleDraft`) |
+| **inventory** | `/inventory` | inventory_screen (incoming col), stock_adjust_dialog, stock_transfer_dialog, stock_count_dialog | inventory_repository (`addMovement`,`transfer`,`applyCount`,`onHand`,`stockAtLocation`) | stock_models (`StockLevel`,`LocationDraft`), `MovementReason` |
+| **purchasing** | `/purchasing` | purchasing_screen, po_create_dialog, supplier_editor_dialog | purchasing_repository (`receivePurchaseOrder`,`paySupplier`,`watchIncomingByVariant`) | purchasing_models (`SupplierDraft`) |
 | **customers** | `/customers` | customers_screen, customer_editor_dialog, customer_vehicle_dialog | customers_repository (`receivePayment`,`arBalance`) | `CustomerDraft` |
 | **accounting** | `/accounting` | accounting_screen (3 tabs), manual_journal_dialog, tax_rate_editor_dialog | accounting_repository (`postJournal`,`postSaleJournal`…) | accounting_models (`AccountCode`,`JournalLineInput`), tax_math, coretax_csv, coretax_xml |
-| **reports** | `/reports` | reports_screen | reports_repository | (P&L / Balance Sheet / PPN via accounting) |
-| **sync** | `/sync` | sync_screen | sync_service, sync_scheduler | `SyncInfo` |
+| **reports** | `/reports` | reports_screen (PPN CSV + CoreTax XML) | reports_repository | (P&L / Balance Sheet / PPN via accounting) |
+| **sync** | `/sync` | sync_screen (history) | sync_service, sync_scheduler | `SyncInfo`, `SyncRun` |
 | **settings** | `/settings` | settings_screen | settings_repository, sample_data | `SettingsDraft` |
 
 Riverpod providers per feature live in `presentation/<feature>_controller.dart`
@@ -203,8 +203,10 @@ upgrade chain — extend it when you add tables/columns.
   settles). Unmount (`pumpWidget(SizedBox.shrink())`) + `pump(500ms)` to flush
   Drift's stream-close timer.
 - **Dialogs that need a one-shot list**: call a `Future` query (e.g.
-  `listLocations()`), **not** `watchX().first` — awaiting a Drift watch stream in
-  a widget test hangs under fake async (this once stalled the whole suite).
+  `inventory.listLocations()`, `catalog.list()`), **not** `watchX().first` —
+  awaiting a Drift watch stream in a dialog `initState` hangs under widget-test
+  fake async (this stalled the whole suite twice). Reactive *screens* still use
+  the `watchX()` stream via a `StreamProvider`.
 - **Deterministic time**: pass `MutableClock(...)` into `AppServices.initialize`.
 
 ## 12. Deep docs

@@ -42,7 +42,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tests: on-hand/adjustTo correctness + **NO-LOST-STOCK** concurrent-movement convergence + location replication
 - [x] Location management (New location) + stock transfers between locations (conflict-free out/in movements; transfer dialog) + per-location on-hand
 - [x] Incoming quantities: units on open POs shown as an "Incoming" column on the Stock screen (reactive; clears on receipt)
-- [ ] bins, stock_counts session, committed quantities
+- [x] Stock-count session (Stock → Count stock: per-location stocktake; posts each variant's difference as a `count` adjustment in one transaction)
+- [ ] bins; committed quantities
 - [ ] Materialised inventory_levels projection (perf optimisation at scale)
 
 ## M4 — Sales / Checkout [Shopify POS]

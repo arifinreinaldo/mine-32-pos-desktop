@@ -143,6 +143,39 @@ void main() {
       await n.close();
     });
 
+    test('applyCount adjusts each variant to its counted on-hand', () async {
+      final n = await InvNode.create('solo', InMemoryFolder(), 1000);
+      await n.repo.addMovement(
+        variantId: 'V1',
+        locationId: 'L1',
+        qty: 10,
+        reason: MovementReason.purchase,
+      );
+      await n.repo.addMovement(
+        variantId: 'V2',
+        locationId: 'L1',
+        qty: 5,
+        reason: MovementReason.purchase,
+      );
+
+      expect(await n.repo.stockAtLocation('L1'), {'V1': 10, 'V2': 5});
+
+      // Count: V1 short by 2 (→8), V2 unchanged (→5), V3 found (→3).
+      final adjusted = await n.repo.applyCount(
+        locationId: 'L1',
+        counts: {'V1': 8, 'V2': 5, 'V3': 3},
+      );
+      expect(adjusted, 2); // only V1 and V3 changed
+
+      expect(await n.repo.onHand('V1', 'L1'), 8);
+      expect(await n.repo.onHand('V2', 'L1'), 5);
+      expect(await n.repo.onHand('V3', 'L1'), 3);
+      // The count is scoped to its location.
+      expect(await n.repo.onHand('V1', 'L2'), 0);
+
+      await n.close();
+    });
+
     test('ensureDefaultLocation is idempotent', () async {
       final n = await InvNode.create('solo', InMemoryFolder(), 1000);
       final a = await n.repo.ensureDefaultLocation();

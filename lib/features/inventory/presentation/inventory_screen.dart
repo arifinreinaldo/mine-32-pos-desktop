@@ -6,6 +6,7 @@ import '../../purchasing/presentation/purchasing_controller.dart';
 import '../domain/stock_models.dart';
 import 'inventory_controller.dart';
 import 'stock_adjust_dialog.dart';
+import 'stock_count_dialog.dart';
 import 'stock_transfer_dialog.dart';
 
 /// Prompt for a name and create a new stock location.
@@ -70,6 +71,12 @@ class InventoryScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               OutlinedButton.icon(
+                onPressed: () => _startCount(context),
+                icon: const Icon(Icons.fact_check_outlined),
+                label: const Text('Count stock'),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
                 onPressed: () => promptNewLocation(context, ref),
                 icon: const Icon(Icons.add_location_alt_outlined),
                 label: const Text('New location'),
@@ -94,6 +101,21 @@ class InventoryScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _startCount(BuildContext context) async {
+    final adjusted = await StockCountDialog.show(context);
+    if (adjusted != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            adjusted == 0
+                ? 'Count posted — no changes'
+                : 'Count posted — $adjusted line(s) adjusted',
+          ),
+        ),
+      );
+    }
   }
 }
 

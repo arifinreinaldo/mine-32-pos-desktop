@@ -158,6 +158,49 @@ class InventoryRepository extends SyncRepository {
     return {for (final r in rows) r.read(loc)!: r.read(total) ?? 0};
   }
 
+  /// On-hand for every variant that has stock at [locationId] (variant id →
+  /// qty). Used to seed a stock-count session.
+  Future<Map<String, int>> stockAtLocation(String locationId) async {
+    final variant = db.stockMovements.variantId;
+    final total = db.stockMovements.qty.sum();
+    final rows =
+        await (db.selectOnly(db.stockMovements)
+              ..addColumns([variant, total])
+              ..where(
+                db.stockMovements.locationId.equals(locationId) &
+                    db.stockMovements.deletedAt.isNull(),
+              )
+              ..groupBy([variant]))
+            .get();
+    return {for (final r in rows) r.read(variant)!: r.read(total) ?? 0};
+  }
+
+  /// Posts a stock-count: for each variant set on-hand at [locationId] to the
+  /// counted value by appending the difference (reason `count`). Returns how
+  /// many lines actually changed. One transaction.
+  Future<int> applyCount({
+    required String locationId,
+    required Map<String, int> counts,
+  }) async {
+    return db.transaction(() async {
+      var adjusted = 0;
+      for (final entry in counts.entries) {
+        final current = await onHand(entry.key, locationId);
+        if (entry.value != current) {
+          await addMovement(
+            variantId: entry.key,
+            locationId: locationId,
+            qty: entry.value - current,
+            reason: MovementReason.count,
+            refType: 'count',
+          );
+          adjusted++;
+        }
+      }
+      return adjusted;
+    });
+  }
+
   /// Move [qty] of a variant between locations as two conflict-free movements
   /// (transfer-out + transfer-in) in one transaction. Throws on bad input or
   /// insufficient stock at the source.

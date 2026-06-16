@@ -56,6 +56,39 @@ class CatalogRepository extends SyncRepository {
     );
   }
 
+  /// One-shot catalog list (same shape/order as [watch]). Prefer this in dialogs
+  /// — awaiting `watch().first` stalls under widget-test fake async.
+  Future<List<CatalogItem>> list({String query = ''}) async {
+    final v = db.productVariants;
+    final p = db.products;
+    final b = db.brands;
+    var predicate = v.deletedAt.isNull() & p.deletedAt.isNull();
+    final trimmed = query.trim();
+    if (trimmed.isNotEmpty) {
+      final like = '%$trimmed%';
+      predicate =
+          predicate &
+          (v.sku.like(like) | p.name.like(like) | v.barcode.like(like));
+    }
+    final rows =
+        await (db.select(v).join([
+                innerJoin(p, p.id.equalsExp(v.productId)),
+                leftOuterJoin(b, b.id.equalsExp(p.brandId)),
+              ])
+              ..where(predicate)
+              ..orderBy([OrderingTerm.asc(p.name)]))
+            .get();
+    return rows
+        .map(
+          (row) => _toItem(
+            row.readTable(v),
+            row.readTable(p),
+            row.readTableOrNull(b),
+          ),
+        )
+        .toList();
+  }
+
   /// Load a single part for editing.
   Future<PartDraft?> getPart(String variantId) async {
     final variant =
