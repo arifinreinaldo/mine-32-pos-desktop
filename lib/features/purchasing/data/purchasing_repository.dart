@@ -90,20 +90,25 @@ class PurchasingRepository extends SyncRepository {
     );
   }
 
-  /// Outstanding payable to a supplier: received-PO balances minus payments.
+  /// Outstanding payable to a supplier: the value of goods actually received
+  /// (Σ qtyReceived × unitCost, so partial receipts count their received part)
+  /// minus payments.
   Future<int> apBalance(String supplierId) async {
-    final p = db.purchaseOrders;
-    final outstanding = (p.totalMinor - p.paidTotalMinor).sum();
+    final pol = db.purchaseOrderLines;
+    final po = db.purchaseOrders;
+    final received = (pol.qtyReceived * pol.unitCostMinor).sum();
     final poRow =
-        await (db.selectOnly(p)
-              ..addColumns([outstanding])
+        await (db.selectOnly(pol).join([
+                innerJoin(po, po.id.equalsExp(pol.poId)),
+              ])
+              ..addColumns([received])
               ..where(
-                p.supplierId.equals(supplierId) &
-                    p.deletedAt.isNull() &
-                    p.status.equals('received'),
+                po.supplierId.equals(supplierId) &
+                    po.deletedAt.isNull() &
+                    pol.deletedAt.isNull(),
               ))
             .getSingleOrNull();
-    final fromPos = poRow?.read(outstanding) ?? 0;
+    final fromPos = poRow?.read(received) ?? 0;
 
     final sp = db.supplierPayments;
     final paySum = sp.amountMinor.sum();
@@ -188,7 +193,7 @@ class PurchasingRepository extends SyncRepository {
           ..where(
             pol.deletedAt.isNull() &
                 po.deletedAt.isNull() &
-                po.status.isIn(['ordered', 'draft']),
+                po.status.isIn(['ordered', 'draft', 'partial']),
           )
           ..groupBy([pol.variantId]);
     return statement.watch().map((rows) {
@@ -274,24 +279,31 @@ class PurchasingRepository extends SyncRepository {
     return (rate.basisPoints, rate.inclusive);
   }
 
-  /// Receive all outstanding quantity on a PO: append +stock movements, mark the
-  /// lines/PO received, and post the goods-receipt journal. For a PKP company
-  /// the recoverable input-PPN is split out of the cost. Idempotent per PO
-  /// (does nothing if already received).
-  Future<void> receivePurchaseOrder(String poId) async {
+  /// Receive specific quantities. [quantities] maps a PO-line id to the qty to
+  /// receive now (clamped to the line's outstanding). Appends +stock, bumps each
+  /// line's `qtyReceived`, sets the PO to `received` (all lines complete) or
+  /// `partial`, and posts the goods-receipt journal for the received value
+  /// (input-PPN split for a PKP company). One transaction.
+  Future<void> receiveLines(String poId, Map<String, int> quantities) async {
     final (taxBp, taxInclusive) = await _purchaseTax();
     await db.transaction(() async {
       final po = await getPurchaseOrder(poId);
       if (po == null || po.status == 'received') return;
       final lines = await linesForPo(poId);
       final now = clock.nowMillis();
-      var totalCost = 0;
+      var receivedValue = 0;
+      var anyReceived = false;
 
       for (final l in lines) {
+        final remaining = l.qtyOrdered - l.qtyReceived;
+        final want = quantities[l.id] ?? 0;
+        final take = want < 0 ? 0 : (want > remaining ? remaining : want);
+        if (take <= 0) continue;
+        anyReceived = true;
         await inventory.addMovement(
           variantId: l.variantId,
           locationId: po.locationId,
-          qty: l.qtyOrdered,
+          qty: take,
           reason: MovementReason.purchase,
           refType: 'purchase_order',
           refId: poId,
@@ -302,28 +314,31 @@ class PurchasingRepository extends SyncRepository {
           table: db.purchaseOrderLines,
           rowId: l.id,
           build: (hlc, n) => l.copyWith(
-            qtyReceived: l.qtyOrdered,
+            qtyReceived: l.qtyReceived + take,
             updatedAt: n,
             updatedHlc: hlc.pack(),
           ),
         );
-        totalCost += l.qtyOrdered * l.unitCostMinor;
+        receivedValue += take * l.unitCostMinor;
       }
+      if (!anyReceived) return;
 
+      final fresh = await linesForPo(poId);
+      final fullyReceived = fresh.every((l) => l.qtyReceived >= l.qtyOrdered);
       await writeSyncable<PurchaseOrder>(
         entityTable: 'purchase_orders',
         table: db.purchaseOrders,
         rowId: poId,
         build: (hlc, n) => po.copyWith(
-          status: 'received',
-          receivedAt: Value(now),
+          status: fullyReceived ? 'received' : 'partial',
+          receivedAt: fullyReceived ? Value(now) : Value(po.receivedAt),
           updatedAt: n,
           updatedHlc: hlc.pack(),
         ),
       );
 
       final split = TaxMath.split(
-        amountMinor: totalCost,
+        amountMinor: receivedValue,
         basisPoints: taxBp,
         inclusive: taxInclusive,
       );
@@ -333,6 +348,16 @@ class PurchasingRepository extends SyncRepository {
         totalMinor: split.totalMinor,
         ppnMinor: split.taxMinor,
       );
+    });
+  }
+
+  /// Receive all outstanding quantity on a PO (idempotent if already received).
+  Future<void> receivePurchaseOrder(String poId) async {
+    final po = await getPurchaseOrder(poId);
+    if (po == null || po.status == 'received') return;
+    final lines = await linesForPo(poId);
+    await receiveLines(poId, {
+      for (final l in lines) l.id: l.qtyOrdered - l.qtyReceived,
     });
   }
 

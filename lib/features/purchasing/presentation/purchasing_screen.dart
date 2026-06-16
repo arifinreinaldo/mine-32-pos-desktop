@@ -7,6 +7,7 @@ import '../../../core/money/money.dart';
 import '../../../shared/widgets/amount_dialog.dart';
 import 'po_create_dialog.dart';
 import 'purchasing_controller.dart';
+import 'receive_po_dialog.dart';
 import 'supplier_editor_dialog.dart';
 
 class PurchasingScreen extends StatelessWidget {
@@ -139,11 +140,16 @@ class _PurchaseOrdersTab extends ConsumerWidget {
                             children: [
                               Text(money.format(Money(po.totalMinor))),
                               const SizedBox(width: 12),
-                              if (po.status == 'ordered')
+                              if (po.status == 'ordered' ||
+                                  po.status == 'partial')
                                 OutlinedButton(
                                   onPressed: () =>
-                                      _receive(context, ref, po.id),
-                                  child: const Text('Receive'),
+                                      _receive(context, ref, po.id, po.number),
+                                  child: Text(
+                                    po.status == 'partial'
+                                        ? 'Receive rest'
+                                        : 'Receive',
+                                  ),
                                 )
                               else
                                 Chip(
@@ -166,9 +172,14 @@ class _PurchaseOrdersTab extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String poId,
+    String poNumber,
   ) async {
-    await ref.read(purchasingRepositoryProvider).receivePurchaseOrder(poId);
-    if (context.mounted) {
+    final received = await ReceivePoDialog.show(
+      context,
+      poId: poId,
+      poNumber: poNumber,
+    );
+    if (received == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Received — stock and AP updated')),
       );

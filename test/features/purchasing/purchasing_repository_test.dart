@@ -222,6 +222,64 @@ void main() {
       await n.close();
     });
 
+    test(
+      'partial receipt: stock, AP and incoming track the received part',
+      () async {
+        final n = await Node.create('solo', InMemoryFolder(), 1000);
+        final supplierId = await n.purchasing.saveSupplier(
+          const SupplierDraft(name: 'PT Sumber Parts'),
+        );
+        final variantId = await n.catalog.savePart(
+          const PartDraft(
+            name: 'Oil Filter',
+            sku: 'OF-1',
+            price: Money(900),
+            cost: Money(500),
+            coreCharge: Money(0),
+          ),
+        );
+        final poId = await n.purchasing.createPurchaseOrder(
+          supplierId: supplierId,
+          locationId: 'L1',
+          lines: [
+            PoLineInput(
+              variantId: variantId,
+              description: 'Oil Filter',
+              qty: 20,
+              unitCostMinor: 30000,
+            ),
+          ],
+        );
+        final lineId = (await n.purchasing.linesForPo(poId)).single.id;
+
+        // Receive 8 of 20.
+        await n.purchasing.receiveLines(poId, {lineId: 8});
+        expect((await n.purchasing.getPurchaseOrder(poId))!.status, 'partial');
+        expect(await n.inventory.onHand(variantId, 'L1'), 8);
+        expect(await n.purchasing.apBalance(supplierId), 8 * 30000);
+        // 12 still on the way.
+        expect(
+          (await n.purchasing.watchIncomingByVariant().first)[variantId],
+          12,
+        );
+
+        // Over-receiving is clamped to the remaining 12 → fully received.
+        await n.purchasing.receiveLines(poId, {lineId: 999});
+        expect((await n.purchasing.getPurchaseOrder(poId))!.status, 'received');
+        expect(await n.inventory.onHand(variantId, 'L1'), 20);
+        expect(await n.purchasing.apBalance(supplierId), 20 * 30000);
+        expect(await n.purchasing.watchIncomingByVariant().first, isEmpty);
+
+        // Books stay balanced across the two partial journals.
+        final tb = await n.accounting.watchTrialBalance().first;
+        final td = tb.fold(0, (s, r) => s + r.debit.minorUnits);
+        final tc = tb.fold(0, (s, r) => s + r.credit.minorUnits);
+        expect(td, tc);
+
+        await n.close();
+      },
+    );
+
     test('incoming reflects open POs and clears once received', () async {
       final n = await Node.create('solo', InMemoryFolder(), 1000);
       final supplierId = await n.purchasing.saveSupplier(
