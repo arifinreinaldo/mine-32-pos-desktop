@@ -11,6 +11,9 @@ class PartDraft {
   final String? brandName;
   final String? description;
   final Money price;
+
+  /// Wholesale/trade price; `Money(0)` = none (wholesale falls back to retail).
+  final Money wholesalePrice;
   final Money cost;
   final Money coreCharge;
   final String unit;
@@ -31,6 +34,7 @@ class PartDraft {
     required this.price,
     required this.cost,
     required this.coreCharge,
+    this.wholesalePrice = const Money(0),
     this.unit = 'each',
     this.isActive = true,
     this.variantName = 'Default',
@@ -53,6 +57,7 @@ class PartDraft {
     String? brandName,
     String? description,
     Money? price,
+    Money? wholesalePrice,
     Money? cost,
     Money? coreCharge,
     String? unit,
@@ -68,6 +73,7 @@ class PartDraft {
       brandName: brandName ?? this.brandName,
       description: description ?? this.description,
       price: price ?? this.price,
+      wholesalePrice: wholesalePrice ?? this.wholesalePrice,
       cost: cost ?? this.cost,
       coreCharge: coreCharge ?? this.coreCharge,
       unit: unit ?? this.unit,

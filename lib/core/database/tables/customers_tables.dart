@@ -11,6 +11,9 @@ class Customers extends Table with SyncableTable {
   TextColumn get taxNumber => text().nullable()();
   TextColumn get address => text().nullable()();
   IntColumn get creditLimitMinor => integer().withDefault(const Constant(0))();
+
+  /// Pricing tier applied at checkout: 'retail' (default) or 'wholesale'.
+  TextColumn get priceTier => text().withDefault(const Constant('retail'))();
   TextColumn get notes => text().nullable()();
 }
 

@@ -50,6 +50,7 @@ void main() {
           sku: 'SP-$i',
           name: 'Default',
           priceMinor: 1000 + i,
+          wholesalePriceMinor: 0,
           costMinor: 500,
           coreChargeMinor: 0,
           reorderPoint: 0,

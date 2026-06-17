@@ -31,9 +31,10 @@ class CartController extends Notifier<Cart> {
     if (index >= 0) {
       final lines = [...state.lines];
       lines[index] = lines[index].copyWith(qty: lines[index].qty + 1);
-      state = Cart(lines: lines);
+      state = Cart(lines: lines, wholesale: state.wholesale);
     } else {
       state = Cart(
+        wholesale: state.wholesale,
         lines: [
           ...state.lines,
           CartLine(
@@ -41,6 +42,7 @@ class CartController extends Notifier<Cart> {
             sku: item.sku,
             name: item.productName,
             unitPrice: item.price,
+            wholesaleUnitPrice: item.wholesalePrice,
             unitCost: item.cost,
           ),
         ],
@@ -54,6 +56,7 @@ class CartController extends Notifier<Cart> {
       return;
     }
     state = Cart(
+      wholesale: state.wholesale,
       lines: state.lines
           .map((l) => l.variantId == variantId ? l.copyWith(qty: qty) : l)
           .toList(),
@@ -62,6 +65,7 @@ class CartController extends Notifier<Cart> {
 
   void removeLine(String variantId) {
     state = Cart(
+      wholesale: state.wholesale,
       lines: state.lines.where((l) => l.variantId != variantId).toList(),
     );
   }
@@ -69,6 +73,7 @@ class CartController extends Notifier<Cart> {
   /// Set an absolute per-line discount, clamped to `[0, gross]`.
   void setLineDiscount(String variantId, Money discount) {
     state = Cart(
+      wholesale: state.wholesale,
       lines: state.lines.map((l) {
         if (l.variantId != variantId) return l;
         final clamped = discount.minorUnits < 0
@@ -77,6 +82,13 @@ class CartController extends Notifier<Cart> {
         return l.copyWith(discount: clamped);
       }).toList(),
     );
+  }
+
+  /// Switch the cart between retail and wholesale pricing (set when a wholesale
+  /// customer is attached).
+  void setWholesale(bool wholesale) {
+    if (state.wholesale == wholesale) return;
+    state = Cart(lines: state.lines, wholesale: wholesale);
   }
 
   void clear() => state = const Cart();

@@ -69,7 +69,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -136,6 +136,16 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await m.createTable(customerReceipts);
         await m.createTable(supplierPayments);
+      }
+      // v10 -> v11: price tiers (variant wholesale price + customer tier).
+      // Only add the column when the table pre-exists *without* it: product
+      // variants exist from v2, customers from v7. For earlier `from`, the table
+      // is (re)created above with the current schema, which already has it.
+      if (from >= 2 && from < 11) {
+        await m.addColumn(productVariants, productVariants.wholesalePriceMinor);
+      }
+      if (from >= 7 && from < 11) {
+        await m.addColumn(customers, customers.priceTier);
       }
       // v9 -> v10: sales returns / refunds (event tables).
       if (from < 10) {

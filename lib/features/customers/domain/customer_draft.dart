@@ -7,6 +7,9 @@ class CustomerDraft {
   final String? npwp;
   final String? address;
   final int creditLimitMinor;
+
+  /// Pricing tier at checkout: 'retail' (default) or 'wholesale'.
+  final String priceTier;
   final String? notes;
 
   const CustomerDraft({
@@ -17,6 +20,9 @@ class CustomerDraft {
     this.npwp,
     this.address,
     this.creditLimitMinor = 0,
+    this.priceTier = 'retail',
     this.notes,
   });
+
+  bool get isWholesale => priceTier == 'wholesale';
 }

@@ -11,6 +11,7 @@ class CatalogItem {
   final String variantName;
   final String? brandName;
   final Money price;
+  final Money wholesalePrice;
   final Money cost;
   final bool isActive;
 
@@ -25,6 +26,7 @@ class CatalogItem {
     required this.price,
     required this.cost,
     required this.isActive,
+    this.wholesalePrice = const Money(0),
   });
 
   /// Margin as a fraction (e.g. 0.4 = 40%); null when price is zero.

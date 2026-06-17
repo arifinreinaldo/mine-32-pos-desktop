@@ -44,6 +44,10 @@ class ProductVariants extends Table with SyncableTable {
   TextColumn get barcode => text().nullable()();
   TextColumn get name => text().withDefault(const Constant('Default'))();
   IntColumn get priceMinor => integer().withDefault(const Constant(0))();
+
+  /// Wholesale/trade price; 0 = none (wholesale customers fall back to retail).
+  IntColumn get wholesalePriceMinor =>
+      integer().withDefault(const Constant(0))();
   IntColumn get costMinor => integer().withDefault(const Constant(0))();
   IntColumn get coreChargeMinor => integer().withDefault(const Constant(0))();
   IntColumn get reorderPoint => integer().withDefault(const Constant(0))();

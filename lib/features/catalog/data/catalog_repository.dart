@@ -124,6 +124,7 @@ class CatalogRepository extends SyncRepository {
       brandName: brandName,
       description: product?.description,
       price: Money(variant.priceMinor),
+      wholesalePrice: Money(variant.wholesalePriceMinor),
       cost: Money(variant.costMinor),
       coreCharge: Money(variant.coreChargeMinor),
       unit: product?.unit ?? 'each',
@@ -222,6 +223,7 @@ class CatalogRepository extends SyncRepository {
           barcode: draft.barcode,
           name: draft.variantName,
           priceMinor: draft.price.minorUnits,
+          wholesalePriceMinor: draft.wholesalePrice.minorUnits,
           costMinor: draft.cost.minorUnits,
           coreChargeMinor: draft.coreCharge.minorUnits,
           reorderPoint: 0,
@@ -287,6 +289,7 @@ class CatalogRepository extends SyncRepository {
       variantName: variant.name,
       brandName: brand?.name,
       price: Money(variant.priceMinor),
+      wholesalePrice: Money(variant.wholesalePriceMinor),
       cost: Money(variant.costMinor),
       isActive: variant.isActive && product.isActive,
     );

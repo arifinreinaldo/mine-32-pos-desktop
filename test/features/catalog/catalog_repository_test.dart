@@ -141,6 +141,26 @@ void main() {
       await repo.db.close();
     });
 
+    test('wholesale price round-trips through save/get/watch', () async {
+      final repo = await singleRepo();
+      final id = await repo.savePart(
+        const PartDraft(
+          name: 'Brake Pad',
+          sku: 'BP-1',
+          price: Money(2500),
+          wholesalePrice: Money(2000),
+          cost: Money(1500),
+          coreCharge: Money(0),
+        ),
+      );
+      expect((await repo.getPart(id))!.wholesalePrice, const Money(2000));
+      expect(
+        (await repo.watch().first).single.wholesalePrice,
+        const Money(2000),
+      );
+      await repo.db.close();
+    });
+
     test('savePart updates an existing part in place', () async {
       final repo = await singleRepo();
       final id = await repo.savePart(

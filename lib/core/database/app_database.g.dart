@@ -4499,6 +4499,17 @@ class $ProductVariantsTable extends ProductVariants
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _wholesalePriceMinorMeta =
+      const VerificationMeta('wholesalePriceMinor');
+  @override
+  late final GeneratedColumn<int> wholesalePriceMinor = GeneratedColumn<int>(
+    'wholesale_price_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _costMinorMeta = const VerificationMeta(
     'costMinor',
   );
@@ -4562,6 +4573,7 @@ class $ProductVariantsTable extends ProductVariants
     barcode,
     name,
     priceMinor,
+    wholesalePriceMinor,
     costMinor,
     coreChargeMinor,
     reorderPoint,
@@ -4648,6 +4660,15 @@ class $ProductVariantsTable extends ProductVariants
         priceMinor.isAcceptableOrUnknown(data['price_minor']!, _priceMinorMeta),
       );
     }
+    if (data.containsKey('wholesale_price_minor')) {
+      context.handle(
+        _wholesalePriceMinorMeta,
+        wholesalePriceMinor.isAcceptableOrUnknown(
+          data['wholesale_price_minor']!,
+          _wholesalePriceMinorMeta,
+        ),
+      );
+    }
     if (data.containsKey('cost_minor')) {
       context.handle(
         _costMinorMeta,
@@ -4727,6 +4748,10 @@ class $ProductVariantsTable extends ProductVariants
         DriftSqlType.int,
         data['${effectivePrefix}price_minor'],
       )!,
+      wholesalePriceMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wholesale_price_minor'],
+      )!,
       costMinor: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cost_minor'],
@@ -4772,6 +4797,9 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
   final String? barcode;
   final String name;
   final int priceMinor;
+
+  /// Wholesale/trade price; 0 = none (wholesale customers fall back to retail).
+  final int wholesalePriceMinor;
   final int costMinor;
   final int coreChargeMinor;
   final int reorderPoint;
@@ -4787,6 +4815,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
     this.barcode,
     required this.name,
     required this.priceMinor,
+    required this.wholesalePriceMinor,
     required this.costMinor,
     required this.coreChargeMinor,
     required this.reorderPoint,
@@ -4809,6 +4838,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
     }
     map['name'] = Variable<String>(name);
     map['price_minor'] = Variable<int>(priceMinor);
+    map['wholesale_price_minor'] = Variable<int>(wholesalePriceMinor);
     map['cost_minor'] = Variable<int>(costMinor);
     map['core_charge_minor'] = Variable<int>(coreChargeMinor);
     map['reorder_point'] = Variable<int>(reorderPoint);
@@ -4832,6 +4862,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
           : Value(barcode),
       name: Value(name),
       priceMinor: Value(priceMinor),
+      wholesalePriceMinor: Value(wholesalePriceMinor),
       costMinor: Value(costMinor),
       coreChargeMinor: Value(coreChargeMinor),
       reorderPoint: Value(reorderPoint),
@@ -4855,6 +4886,9 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
       barcode: serializer.fromJson<String?>(json['barcode']),
       name: serializer.fromJson<String>(json['name']),
       priceMinor: serializer.fromJson<int>(json['priceMinor']),
+      wholesalePriceMinor: serializer.fromJson<int>(
+        json['wholesalePriceMinor'],
+      ),
       costMinor: serializer.fromJson<int>(json['costMinor']),
       coreChargeMinor: serializer.fromJson<int>(json['coreChargeMinor']),
       reorderPoint: serializer.fromJson<int>(json['reorderPoint']),
@@ -4875,6 +4909,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
       'barcode': serializer.toJson<String?>(barcode),
       'name': serializer.toJson<String>(name),
       'priceMinor': serializer.toJson<int>(priceMinor),
+      'wholesalePriceMinor': serializer.toJson<int>(wholesalePriceMinor),
       'costMinor': serializer.toJson<int>(costMinor),
       'coreChargeMinor': serializer.toJson<int>(coreChargeMinor),
       'reorderPoint': serializer.toJson<int>(reorderPoint),
@@ -4893,6 +4928,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
     Value<String?> barcode = const Value.absent(),
     String? name,
     int? priceMinor,
+    int? wholesalePriceMinor,
     int? costMinor,
     int? coreChargeMinor,
     int? reorderPoint,
@@ -4908,6 +4944,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
     barcode: barcode.present ? barcode.value : this.barcode,
     name: name ?? this.name,
     priceMinor: priceMinor ?? this.priceMinor,
+    wholesalePriceMinor: wholesalePriceMinor ?? this.wholesalePriceMinor,
     costMinor: costMinor ?? this.costMinor,
     coreChargeMinor: coreChargeMinor ?? this.coreChargeMinor,
     reorderPoint: reorderPoint ?? this.reorderPoint,
@@ -4929,6 +4966,9 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
       priceMinor: data.priceMinor.present
           ? data.priceMinor.value
           : this.priceMinor,
+      wholesalePriceMinor: data.wholesalePriceMinor.present
+          ? data.wholesalePriceMinor.value
+          : this.wholesalePriceMinor,
       costMinor: data.costMinor.present ? data.costMinor.value : this.costMinor,
       coreChargeMinor: data.coreChargeMinor.present
           ? data.coreChargeMinor.value
@@ -4953,6 +4993,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
           ..write('barcode: $barcode, ')
           ..write('name: $name, ')
           ..write('priceMinor: $priceMinor, ')
+          ..write('wholesalePriceMinor: $wholesalePriceMinor, ')
           ..write('costMinor: $costMinor, ')
           ..write('coreChargeMinor: $coreChargeMinor, ')
           ..write('reorderPoint: $reorderPoint, ')
@@ -4973,6 +5014,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
     barcode,
     name,
     priceMinor,
+    wholesalePriceMinor,
     costMinor,
     coreChargeMinor,
     reorderPoint,
@@ -4992,6 +5034,7 @@ class ProductVariant extends DataClass implements Insertable<ProductVariant> {
           other.barcode == this.barcode &&
           other.name == this.name &&
           other.priceMinor == this.priceMinor &&
+          other.wholesalePriceMinor == this.wholesalePriceMinor &&
           other.costMinor == this.costMinor &&
           other.coreChargeMinor == this.coreChargeMinor &&
           other.reorderPoint == this.reorderPoint &&
@@ -5009,6 +5052,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
   final Value<String?> barcode;
   final Value<String> name;
   final Value<int> priceMinor;
+  final Value<int> wholesalePriceMinor;
   final Value<int> costMinor;
   final Value<int> coreChargeMinor;
   final Value<int> reorderPoint;
@@ -5025,6 +5069,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
     this.barcode = const Value.absent(),
     this.name = const Value.absent(),
     this.priceMinor = const Value.absent(),
+    this.wholesalePriceMinor = const Value.absent(),
     this.costMinor = const Value.absent(),
     this.coreChargeMinor = const Value.absent(),
     this.reorderPoint = const Value.absent(),
@@ -5042,6 +5087,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
     this.barcode = const Value.absent(),
     this.name = const Value.absent(),
     this.priceMinor = const Value.absent(),
+    this.wholesalePriceMinor = const Value.absent(),
     this.costMinor = const Value.absent(),
     this.coreChargeMinor = const Value.absent(),
     this.reorderPoint = const Value.absent(),
@@ -5064,6 +5110,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
     Expression<String>? barcode,
     Expression<String>? name,
     Expression<int>? priceMinor,
+    Expression<int>? wholesalePriceMinor,
     Expression<int>? costMinor,
     Expression<int>? coreChargeMinor,
     Expression<int>? reorderPoint,
@@ -5081,6 +5128,8 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
       if (barcode != null) 'barcode': barcode,
       if (name != null) 'name': name,
       if (priceMinor != null) 'price_minor': priceMinor,
+      if (wholesalePriceMinor != null)
+        'wholesale_price_minor': wholesalePriceMinor,
       if (costMinor != null) 'cost_minor': costMinor,
       if (coreChargeMinor != null) 'core_charge_minor': coreChargeMinor,
       if (reorderPoint != null) 'reorder_point': reorderPoint,
@@ -5100,6 +5149,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
     Value<String?>? barcode,
     Value<String>? name,
     Value<int>? priceMinor,
+    Value<int>? wholesalePriceMinor,
     Value<int>? costMinor,
     Value<int>? coreChargeMinor,
     Value<int>? reorderPoint,
@@ -5117,6 +5167,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
       barcode: barcode ?? this.barcode,
       name: name ?? this.name,
       priceMinor: priceMinor ?? this.priceMinor,
+      wholesalePriceMinor: wholesalePriceMinor ?? this.wholesalePriceMinor,
       costMinor: costMinor ?? this.costMinor,
       coreChargeMinor: coreChargeMinor ?? this.coreChargeMinor,
       reorderPoint: reorderPoint ?? this.reorderPoint,
@@ -5158,6 +5209,9 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
     if (priceMinor.present) {
       map['price_minor'] = Variable<int>(priceMinor.value);
     }
+    if (wholesalePriceMinor.present) {
+      map['wholesale_price_minor'] = Variable<int>(wholesalePriceMinor.value);
+    }
     if (costMinor.present) {
       map['cost_minor'] = Variable<int>(costMinor.value);
     }
@@ -5189,6 +5243,7 @@ class ProductVariantsCompanion extends UpdateCompanion<ProductVariant> {
           ..write('barcode: $barcode, ')
           ..write('name: $name, ')
           ..write('priceMinor: $priceMinor, ')
+          ..write('wholesalePriceMinor: $wholesalePriceMinor, ')
           ..write('costMinor: $costMinor, ')
           ..write('coreChargeMinor: $coreChargeMinor, ')
           ..write('reorderPoint: $reorderPoint, ')
@@ -15524,6 +15579,18 @@ class $CustomersTable extends Customers
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _priceTierMeta = const VerificationMeta(
+    'priceTier',
+  );
+  @override
+  late final GeneratedColumn<String> priceTier = GeneratedColumn<String>(
+    'price_tier',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('retail'),
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -15546,6 +15613,7 @@ class $CustomersTable extends Customers
     taxNumber,
     address,
     creditLimitMinor,
+    priceTier,
     notes,
   ];
   @override
@@ -15636,6 +15704,12 @@ class $CustomersTable extends Customers
         ),
       );
     }
+    if (data.containsKey('price_tier')) {
+      context.handle(
+        _priceTierMeta,
+        priceTier.isAcceptableOrUnknown(data['price_tier']!, _priceTierMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -15695,6 +15769,10 @@ class $CustomersTable extends Customers
         DriftSqlType.int,
         data['${effectivePrefix}credit_limit_minor'],
       )!,
+      priceTier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price_tier'],
+      )!,
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -15729,6 +15807,9 @@ class Customer extends DataClass implements Insertable<Customer> {
   final String? taxNumber;
   final String? address;
   final int creditLimitMinor;
+
+  /// Pricing tier applied at checkout: 'retail' (default) or 'wholesale'.
+  final String priceTier;
   final String? notes;
   const Customer({
     required this.id,
@@ -15742,6 +15823,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     this.taxNumber,
     this.address,
     required this.creditLimitMinor,
+    required this.priceTier,
     this.notes,
   });
   @override
@@ -15768,6 +15850,7 @@ class Customer extends DataClass implements Insertable<Customer> {
       map['address'] = Variable<String>(address);
     }
     map['credit_limit_minor'] = Variable<int>(creditLimitMinor);
+    map['price_tier'] = Variable<String>(priceTier);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -15797,6 +15880,7 @@ class Customer extends DataClass implements Insertable<Customer> {
           ? const Value.absent()
           : Value(address),
       creditLimitMinor: Value(creditLimitMinor),
+      priceTier: Value(priceTier),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -15820,6 +15904,7 @@ class Customer extends DataClass implements Insertable<Customer> {
       taxNumber: serializer.fromJson<String?>(json['taxNumber']),
       address: serializer.fromJson<String?>(json['address']),
       creditLimitMinor: serializer.fromJson<int>(json['creditLimitMinor']),
+      priceTier: serializer.fromJson<String>(json['priceTier']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
   }
@@ -15838,6 +15923,7 @@ class Customer extends DataClass implements Insertable<Customer> {
       'taxNumber': serializer.toJson<String?>(taxNumber),
       'address': serializer.toJson<String?>(address),
       'creditLimitMinor': serializer.toJson<int>(creditLimitMinor),
+      'priceTier': serializer.toJson<String>(priceTier),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -15854,6 +15940,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     Value<String?> taxNumber = const Value.absent(),
     Value<String?> address = const Value.absent(),
     int? creditLimitMinor,
+    String? priceTier,
     Value<String?> notes = const Value.absent(),
   }) => Customer(
     id: id ?? this.id,
@@ -15867,6 +15954,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     taxNumber: taxNumber.present ? taxNumber.value : this.taxNumber,
     address: address.present ? address.value : this.address,
     creditLimitMinor: creditLimitMinor ?? this.creditLimitMinor,
+    priceTier: priceTier ?? this.priceTier,
     notes: notes.present ? notes.value : this.notes,
   );
   Customer copyWithCompanion(CustomersCompanion data) {
@@ -15886,6 +15974,7 @@ class Customer extends DataClass implements Insertable<Customer> {
       creditLimitMinor: data.creditLimitMinor.present
           ? data.creditLimitMinor.value
           : this.creditLimitMinor,
+      priceTier: data.priceTier.present ? data.priceTier.value : this.priceTier,
       notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
@@ -15904,6 +15993,7 @@ class Customer extends DataClass implements Insertable<Customer> {
           ..write('taxNumber: $taxNumber, ')
           ..write('address: $address, ')
           ..write('creditLimitMinor: $creditLimitMinor, ')
+          ..write('priceTier: $priceTier, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
@@ -15922,6 +16012,7 @@ class Customer extends DataClass implements Insertable<Customer> {
     taxNumber,
     address,
     creditLimitMinor,
+    priceTier,
     notes,
   );
   @override
@@ -15939,6 +16030,7 @@ class Customer extends DataClass implements Insertable<Customer> {
           other.taxNumber == this.taxNumber &&
           other.address == this.address &&
           other.creditLimitMinor == this.creditLimitMinor &&
+          other.priceTier == this.priceTier &&
           other.notes == this.notes);
 }
 
@@ -15954,6 +16046,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   final Value<String?> taxNumber;
   final Value<String?> address;
   final Value<int> creditLimitMinor;
+  final Value<String> priceTier;
   final Value<String?> notes;
   final Value<int> rowid;
   const CustomersCompanion({
@@ -15968,6 +16061,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     this.taxNumber = const Value.absent(),
     this.address = const Value.absent(),
     this.creditLimitMinor = const Value.absent(),
+    this.priceTier = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -15983,6 +16077,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     this.taxNumber = const Value.absent(),
     this.address = const Value.absent(),
     this.creditLimitMinor = const Value.absent(),
+    this.priceTier = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -16002,6 +16097,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     Expression<String>? taxNumber,
     Expression<String>? address,
     Expression<int>? creditLimitMinor,
+    Expression<String>? priceTier,
     Expression<String>? notes,
     Expression<int>? rowid,
   }) {
@@ -16017,6 +16113,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
       if (taxNumber != null) 'tax_number': taxNumber,
       if (address != null) 'address': address,
       if (creditLimitMinor != null) 'credit_limit_minor': creditLimitMinor,
+      if (priceTier != null) 'price_tier': priceTier,
       if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
@@ -16034,6 +16131,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     Value<String?>? taxNumber,
     Value<String?>? address,
     Value<int>? creditLimitMinor,
+    Value<String>? priceTier,
     Value<String?>? notes,
     Value<int>? rowid,
   }) {
@@ -16049,6 +16147,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
       taxNumber: taxNumber ?? this.taxNumber,
       address: address ?? this.address,
       creditLimitMinor: creditLimitMinor ?? this.creditLimitMinor,
+      priceTier: priceTier ?? this.priceTier,
       notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
@@ -16090,6 +16189,9 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     if (creditLimitMinor.present) {
       map['credit_limit_minor'] = Variable<int>(creditLimitMinor.value);
     }
+    if (priceTier.present) {
+      map['price_tier'] = Variable<String>(priceTier.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -16113,6 +16215,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
           ..write('taxNumber: $taxNumber, ')
           ..write('address: $address, ')
           ..write('creditLimitMinor: $creditLimitMinor, ')
+          ..write('priceTier: $priceTier, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -22522,6 +22625,7 @@ typedef $$ProductVariantsTableCreateCompanionBuilder =
       Value<String?> barcode,
       Value<String> name,
       Value<int> priceMinor,
+      Value<int> wholesalePriceMinor,
       Value<int> costMinor,
       Value<int> coreChargeMinor,
       Value<int> reorderPoint,
@@ -22540,6 +22644,7 @@ typedef $$ProductVariantsTableUpdateCompanionBuilder =
       Value<String?> barcode,
       Value<String> name,
       Value<int> priceMinor,
+      Value<int> wholesalePriceMinor,
       Value<int> costMinor,
       Value<int> coreChargeMinor,
       Value<int> reorderPoint,
@@ -22603,6 +22708,11 @@ class $$ProductVariantsTableFilterComposer
 
   ColumnFilters<int> get priceMinor => $composableBuilder(
     column: $table.priceMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get wholesalePriceMinor => $composableBuilder(
+    column: $table.wholesalePriceMinor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22686,6 +22796,11 @@ class $$ProductVariantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get wholesalePriceMinor => $composableBuilder(
+    column: $table.wholesalePriceMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get costMinor => $composableBuilder(
     column: $table.costMinor,
     builder: (column) => ColumnOrderings(column),
@@ -22747,6 +22862,11 @@ class $$ProductVariantsTableAnnotationComposer
 
   GeneratedColumn<int> get priceMinor => $composableBuilder(
     column: $table.priceMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get wholesalePriceMinor => $composableBuilder(
+    column: $table.wholesalePriceMinor,
     builder: (column) => column,
   );
 
@@ -22814,6 +22934,7 @@ class $$ProductVariantsTableTableManager
                 Value<String?> barcode = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> priceMinor = const Value.absent(),
+                Value<int> wholesalePriceMinor = const Value.absent(),
                 Value<int> costMinor = const Value.absent(),
                 Value<int> coreChargeMinor = const Value.absent(),
                 Value<int> reorderPoint = const Value.absent(),
@@ -22830,6 +22951,7 @@ class $$ProductVariantsTableTableManager
                 barcode: barcode,
                 name: name,
                 priceMinor: priceMinor,
+                wholesalePriceMinor: wholesalePriceMinor,
                 costMinor: costMinor,
                 coreChargeMinor: coreChargeMinor,
                 reorderPoint: reorderPoint,
@@ -22848,6 +22970,7 @@ class $$ProductVariantsTableTableManager
                 Value<String?> barcode = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> priceMinor = const Value.absent(),
+                Value<int> wholesalePriceMinor = const Value.absent(),
                 Value<int> costMinor = const Value.absent(),
                 Value<int> coreChargeMinor = const Value.absent(),
                 Value<int> reorderPoint = const Value.absent(),
@@ -22864,6 +22987,7 @@ class $$ProductVariantsTableTableManager
                 barcode: barcode,
                 name: name,
                 priceMinor: priceMinor,
+                wholesalePriceMinor: wholesalePriceMinor,
                 costMinor: costMinor,
                 coreChargeMinor: coreChargeMinor,
                 reorderPoint: reorderPoint,
@@ -27717,6 +27841,7 @@ typedef $$CustomersTableCreateCompanionBuilder =
       Value<String?> taxNumber,
       Value<String?> address,
       Value<int> creditLimitMinor,
+      Value<String> priceTier,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -27733,6 +27858,7 @@ typedef $$CustomersTableUpdateCompanionBuilder =
       Value<String?> taxNumber,
       Value<String?> address,
       Value<int> creditLimitMinor,
+      Value<String> priceTier,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -27798,6 +27924,11 @@ class $$CustomersTableFilterComposer
 
   ColumnFilters<int> get creditLimitMinor => $composableBuilder(
     column: $table.creditLimitMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get priceTier => $composableBuilder(
+    column: $table.priceTier,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27871,6 +28002,11 @@ class $$CustomersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get priceTier => $composableBuilder(
+    column: $table.priceTier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -27923,6 +28059,9 @@ class $$CustomersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get priceTier =>
+      $composableBuilder(column: $table.priceTier, builder: (column) => column);
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 }
@@ -27966,6 +28105,7 @@ class $$CustomersTableTableManager
                 Value<String?> taxNumber = const Value.absent(),
                 Value<String?> address = const Value.absent(),
                 Value<int> creditLimitMinor = const Value.absent(),
+                Value<String> priceTier = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomersCompanion(
@@ -27980,6 +28120,7 @@ class $$CustomersTableTableManager
                 taxNumber: taxNumber,
                 address: address,
                 creditLimitMinor: creditLimitMinor,
+                priceTier: priceTier,
                 notes: notes,
                 rowid: rowid,
               ),
@@ -27996,6 +28137,7 @@ class $$CustomersTableTableManager
                 Value<String?> taxNumber = const Value.absent(),
                 Value<String?> address = const Value.absent(),
                 Value<int> creditLimitMinor = const Value.absent(),
+                Value<String> priceTier = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomersCompanion.insert(
@@ -28010,6 +28152,7 @@ class $$CustomersTableTableManager
                 taxNumber: taxNumber,
                 address: address,
                 creditLimitMinor: creditLimitMinor,
+                priceTier: priceTier,
                 notes: notes,
                 rowid: rowid,
               ),

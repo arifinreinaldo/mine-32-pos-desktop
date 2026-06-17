@@ -239,9 +239,24 @@ class _CartPanel extends ConsumerWidget {
   }
 
   Future<void> _charge(BuildContext context, WidgetRef ref, Cart cart) async {
+    // Collapse the tier choice into each line's charged unit price so the posted
+    // sale and receipt record what was actually billed.
+    final w = cart.wholesale;
+    final lines = [
+      for (final l in cart.lines)
+        CartLine(
+          variantId: l.variantId,
+          sku: l.sku,
+          name: l.name,
+          unitPrice: l.effectiveUnitPrice(w),
+          unitCost: l.unitCost,
+          qty: l.qty,
+          discount: l.discount,
+        ),
+    ];
     final result = await PaymentDialog.show(
       context,
-      lines: cart.lines,
+      lines: lines,
       total: cart.total,
       customerId: ref.read(sellCustomerProvider),
     );
@@ -286,11 +301,16 @@ class _CartPanel extends ConsumerWidget {
       builder: (_) => const _CustomerPickerDialog(),
     );
     // A sentinel '' means "Walk-in (clear)".
-    if (selected != null) {
-      ref
-          .read(sellCustomerProvider.notifier)
-          .select(selected.isEmpty ? null : selected);
-    }
+    if (selected == null) return;
+    final id = selected.isEmpty ? null : selected;
+    ref.read(sellCustomerProvider.notifier).select(id);
+    // Switch the cart to the customer's pricing tier.
+    final wholesale =
+        id != null &&
+        (await ref.read(customersRepositoryProvider).getCustomer(id))
+                ?.priceTier ==
+            'wholesale';
+    ref.read(cartProvider.notifier).setWholesale(wholesale);
   }
 }
 
@@ -369,7 +389,12 @@ class _CartLineRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final money = ref.watch(moneyFormatProvider);
     final notifier = ref.read(cartProvider.notifier);
+    final wholesale = ref.watch(cartProvider).wholesale;
+    final unitPrice = line.effectiveUnitPrice(wholesale);
+    final lineTotal = line.effectiveTotal(wholesale);
     final hasDiscount = line.discount.minorUnits > 0;
+    final isWholesalePriced =
+        wholesale && line.wholesaleUnitPrice.minorUnits > 0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -380,9 +405,9 @@ class _CartLineRow extends ConsumerWidget {
               children: [
                 Text(line.name, overflow: TextOverflow.ellipsis),
                 Text(
-                  hasDiscount
-                      ? '${line.sku} • ${money.format(line.unitPrice)} • −${money.format(line.discount)}'
-                      : '${line.sku} • ${money.format(line.unitPrice)}',
+                  '${line.sku} • ${money.format(unitPrice)}'
+                  '${isWholesalePriced ? ' (wholesale)' : ''}'
+                  '${hasDiscount ? ' • −${money.format(line.discount)}' : ''}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: hasDiscount ? theme.colorScheme.tertiary : null,
                   ),
@@ -413,7 +438,7 @@ class _CartLineRow extends ConsumerWidget {
           ),
           SizedBox(
             width: 72,
-            child: Text(money.format(line.total), textAlign: TextAlign.right),
+            child: Text(money.format(lineTotal), textAlign: TextAlign.right),
           ),
         ],
       ),

@@ -32,6 +32,7 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
   late final TextEditingController _brand;
   late final TextEditingController _description;
   late final TextEditingController _price;
+  late final TextEditingController _wholesale;
   late final TextEditingController _cost;
   late final TextEditingController _coreCharge;
   late bool _isActive;
@@ -55,6 +56,11 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
     _brand = TextEditingController(text: d.brandName ?? '');
     _description = TextEditingController(text: d.description ?? '');
     _price = TextEditingController(text: d.price.toMajorString(scale: _scale));
+    _wholesale = TextEditingController(
+      text: d.wholesalePrice.minorUnits == 0
+          ? ''
+          : d.wholesalePrice.toMajorString(scale: _scale),
+    );
     _cost = TextEditingController(text: d.cost.toMajorString(scale: _scale));
     _coreCharge = TextEditingController(
       text: d.coreCharge.toMajorString(scale: _scale),
@@ -71,6 +77,7 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
       _brand,
       _description,
       _price,
+      _wholesale,
       _cost,
       _coreCharge,
     ]) {
@@ -109,6 +116,7 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
           ? null
           : _description.text.trim(),
       price: _toMoney(_price),
+      wholesalePrice: _toMoney(_wholesale),
       cost: _toMoney(_cost),
       coreCharge: _toMoney(_coreCharge),
       isActive: _isActive,
@@ -191,6 +199,17 @@ class _PartEditorDialogState extends ConsumerState<PartEditorDialog> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _wholesale,
+                  decoration: const InputDecoration(
+                    labelText: 'Wholesale price',
+                    helperText:
+                        'Charged to wholesale customers (blank = retail)',
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: _money,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

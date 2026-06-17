@@ -84,7 +84,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Settle AR (customer receipts) + AP (supplier payments): event-sourced ledger + balanced journals (Dr Cash/Cr AR; Dr AP/Cr Cash) + UI (Receive payment / Pay)
 - [x] Input-PPN on purchases: PKP goods-receipt splits recoverable VAT (Dr Inventory net · Dr PPN Input · Cr AP gross); auto from company PKP flag + default rate; bp=0 unchanged
 - [x] Partial receipts: receive any quantity per PO line (Receive dialog); status ordered→partial→received; AP & incoming track the received part; clamped to outstanding
-- [ ] price tiers; receipt allocation per invoice
+- [x] Price tiers (2-tier retail/wholesale): variant wholesale price (v11) + customer 'wholesale' flag; checkout re-prices the cart to the customer's tier (retail fallback when a part has no wholesale price)
+- [ ] receipt allocation per invoice
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine

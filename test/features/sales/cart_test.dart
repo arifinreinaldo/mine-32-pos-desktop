@@ -5,7 +5,12 @@ import 'package:mine32_pos/features/catalog/domain/catalog_item.dart';
 import 'package:mine32_pos/features/sales/domain/cart.dart';
 import 'package:mine32_pos/features/sales/presentation/sell_controller.dart';
 
-CatalogItem _item(String id, {int price = 1000, int cost = 600}) => CatalogItem(
+CatalogItem _item(
+  String id, {
+  int price = 1000,
+  int cost = 600,
+  int wholesale = 0,
+}) => CatalogItem(
   variantId: id,
   productId: 'p-$id',
   sku: id,
@@ -14,6 +19,7 @@ CatalogItem _item(String id, {int price = 1000, int cost = 600}) => CatalogItem(
   variantName: 'Default',
   brandName: null,
   price: Money(price),
+  wholesalePrice: Money(wholesale),
   cost: Money(cost),
   isActive: true,
 );
@@ -104,6 +110,35 @@ void main() {
       expect(parkedCtrl.recallAt(0), isNull);
       parkedCtrl.park(const Cart());
       expect(container.read(parkedSalesProvider), isEmpty);
+    });
+
+    test('wholesale tier re-prices lines (with retail fallback)', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final ctrl = container.read(cartProvider.notifier);
+
+      ctrl.addItem(_item('A', price: 1000, wholesale: 800)); // has wholesale
+      ctrl.addItem(_item('B', price: 500)); // no wholesale → retail fallback
+
+      // Retail by default.
+      expect(container.read(cartProvider).total, const Money(1500));
+
+      // Switch to wholesale: A → 800, B stays 500.
+      ctrl.setWholesale(true);
+      final cart = container.read(cartProvider);
+      expect(cart.wholesale, isTrue);
+      expect(cart.total, const Money(1300));
+
+      // The flag survives further edits (e.g. qty change).
+      ctrl.setQty('A', 2); // 2×800 + 500
+      expect(container.read(cartProvider).total, const Money(2100));
+
+      // Back to retail.
+      ctrl.setWholesale(false);
+      expect(
+        container.read(cartProvider).total,
+        const Money(2500),
+      ); // 2×1000+500
     });
 
     test('setLineDiscount applies and clamps to the line gross', () {

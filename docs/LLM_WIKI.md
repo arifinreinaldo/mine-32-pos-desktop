@@ -97,7 +97,7 @@ Root/cross-cutting providers are in `lib/core/di/providers.dart`
   intermediates then converts. Format via `moneyFormatProvider`
   (`currencyScaleProvider` gives scale: IDR=0, USD=2).
 - **Database** (`core/database/`): one `AppDatabase` (`@DriftDatabase`),
-  `schemaVersion` currently **10**. Tables split under `tables/` by concern.
+  `schemaVersion` currently **11**. Tables split under `tables/` by concern.
   `SyncRepository.writeSyncable` stamps HLC + writes row + change-log atomically.
 - **Sync** (`core/sync/`): every mutation appends a `ChangeRecord` to
   `change_log` (the outbox). `SyncEngine.export()` flushes unexported records to

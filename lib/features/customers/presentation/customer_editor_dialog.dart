@@ -35,12 +35,14 @@ class _CustomerEditorDialogState extends ConsumerState<CustomerEditorDialog> {
   late final TextEditingController _notes;
   late final int _scale;
   bool _saving = false;
+  bool _wholesale = false;
 
   @override
   void initState() {
     super.initState();
     _scale = ref.read(currencyScaleProvider);
     final c = widget.initial;
+    _wholesale = c?.priceTier == 'wholesale';
     _name = TextEditingController(text: c?.name ?? '');
     _phone = TextEditingController(text: c?.phone ?? '');
     _email = TextEditingController(text: c?.email ?? '');
@@ -95,6 +97,7 @@ class _CustomerEditorDialogState extends ConsumerState<CustomerEditorDialog> {
             npwp: _t(_npwp),
             address: _t(_address),
             creditLimitMinor: _creditLimitMinor(),
+            priceTier: _wholesale ? 'wholesale' : 'retail',
             notes: _t(_notes),
           ),
         );
@@ -153,6 +156,15 @@ class _CustomerEditorDialogState extends ConsumerState<CustomerEditorDialog> {
                   controller: _creditLimit,
                   decoration: const InputDecoration(labelText: 'Credit limit'),
                   keyboardType: TextInputType.number,
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Wholesale pricing'),
+                  subtitle: const Text(
+                    'Use parts\' wholesale price at checkout',
+                  ),
+                  value: _wholesale,
+                  onChanged: (v) => setState(() => _wholesale = v),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

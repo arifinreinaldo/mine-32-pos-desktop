@@ -65,6 +65,7 @@ class CustomersRepository extends SyncRepository {
         taxNumber: draft.npwp,
         address: draft.address,
         creditLimitMinor: draft.creditLimitMinor,
+        priceTier: draft.priceTier,
         notes: draft.notes,
       ),
     );

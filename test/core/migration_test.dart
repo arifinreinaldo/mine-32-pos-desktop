@@ -94,6 +94,10 @@ void main() {
       expect(await db.select(db.stockMovements).get(), isEmpty);
       expect(await db.select(db.salesReturns).get(), isEmpty);
       expect(await db.select(db.salesReturnLines).get(), isEmpty);
+      // v11 columns are queryable (selecting these tables fails if the
+      // wholesale_price_minor / price_tier columns are missing).
+      expect(await db.select(db.productVariants).get(), isEmpty);
+      expect(await db.select(db.customers).get(), isEmpty);
 
       // Columns added by later migrations exist (querying company_settings would
       // fail if isPkp/taxInclusive/defaultTaxRateId were missing).
