@@ -210,6 +210,9 @@ upgrade chain — extend it when you add tables/columns.
   fake async (this stalled the whole suite twice). Reactive *screens* still use
   the `watchX()` stream via a `StreamProvider`.
 - **Deterministic time**: pass `MutableClock(...)` into `AppServices.initialize`.
+- **Scale/perf tests** (`test/perf/`): bulk-insert with `db.batch(...)` (data
+  classes are `Insertable`) to seed many rows fast, bypassing repositories/the
+  change-log; assert correctness at volume + a generous timing bound.
 
 ## 12. Deep docs
 
