@@ -72,9 +72,9 @@ Each feature lives in `lib/features/<feature>/`. Route + nav label are in
 | Feature | Route | Screens / dialogs | Repository (data/) | Key domain types |
 |---|---|---|---|---|
 | **dashboard** | `/dashboard` | dashboard_screen | (reads via providers) | — |
-| **sales / checkout** | `/sell` | sell_screen (cart line-discount, park/recall), payment_dialog | sales_repository (`completeSale`) | cart (`Cart`/`CartLine`), `SaleResult`, `ParkedSale` |
+| **sales / checkout** | `/sell` | sell_screen (cart line-discount, park/recall, wholesale re-pricing), payment_dialog | sales_repository (`completeSale`) | cart (`Cart`/`CartLine`), `SaleResult`, `ParkedSale` |
 | **sales history** | `/sales` | sales_history_screen, return_dialog | returns_repository (`createReturn`,`voidSale`) | receipt, `ReturnableLine` |
-| **catalog** | `/catalog` | catalog_screen, part_editor_dialog (multi-variant), fitment_editor_dialog | catalog_repository (`savePart`,`itemsForProduct`), auto_parts_repository, parts_csv_import | `PartDraft` (`variantName`), `CatalogItem`, auto_parts_models (`VehicleDraft`) |
+| **catalog** | `/catalog` | catalog_screen, part_editor_dialog (multi-variant, wholesale price), fitment_editor_dialog | catalog_repository (`savePart`,`itemsForProduct`), auto_parts_repository, parts_csv_import | `PartDraft` (`variantName`,`wholesalePrice`), `CatalogItem`, auto_parts_models (`VehicleDraft`) |
 | **inventory** | `/inventory` | inventory_screen (incoming col), stock_adjust_dialog, stock_transfer_dialog, stock_count_dialog | inventory_repository (`addMovement`,`transfer`,`applyCount`,`onHand`,`stockAtLocation`) | stock_models (`StockLevel`,`LocationDraft`), `MovementReason` |
 | **purchasing** | `/purchasing` | purchasing_screen, po_create_dialog, receive_po_dialog (partial), supplier_editor_dialog | purchasing_repository (`receiveLines`/`receivePurchaseOrder`,`paySupplier`,`apBalance`,`watchIncomingByVariant`) | purchasing_models (`SupplierDraft`) — PO status ordered→partial→received |
 | **customers** | `/customers` | customers_screen (open-invoice receipts), customer_editor_dialog, customer_vehicle_dialog | customers_repository (`receivePayment`(saleId),`arBalance`,`openInvoices`) | `CustomerDraft` (`priceTier`) |
@@ -128,6 +128,7 @@ Root/cross-cutting providers are in `lib/core/di/providers.dart`
 | **Faktur** | Indonesian tax invoice; buyer NPWP + serial captured per sale; exported as CoreTax CSV/XML. |
 | **NPWP / PKP** | Tax id / VAT-registered status (company + buyer). |
 | **Core charge** | Refundable deposit on a rebuildable part (`coreChargeMinor`). |
+| **Price tier** | retail vs wholesale. A variant has a `wholesalePriceMinor`; a customer has `priceTier`. Attaching a wholesale customer re-prices the cart (retail fallback when a part has no wholesale price). |
 | **On-account sale** | Credit sale: `paidTotalMinor=0`, journal debits Accounts Receivable. |
 | **Tax-inclusive** | Listed price already contains PPN (ID retail default); `TaxMath.split` separates DPP/PPN. |
 | **YMME / fitment** | Year-Make-Model-Engine vehicle a part fits. |
