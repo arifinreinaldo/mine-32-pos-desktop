@@ -19181,6 +19181,15 @@ class $CustomerReceiptsTable extends CustomerReceipts
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _saleIdMeta = const VerificationMeta('saleId');
+  @override
+  late final GeneratedColumn<String> saleId = GeneratedColumn<String>(
+    'sale_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _amountMinorMeta = const VerificationMeta(
     'amountMinor',
   );
@@ -19221,6 +19230,7 @@ class $CustomerReceiptsTable extends CustomerReceipts
     deletedAt,
     updatedHlc,
     customerId,
+    saleId,
     amountMinor,
     method,
     reference,
@@ -19280,6 +19290,12 @@ class $CustomerReceiptsTable extends CustomerReceipts
     } else if (isInserting) {
       context.missing(_customerIdMeta);
     }
+    if (data.containsKey('sale_id')) {
+      context.handle(
+        _saleIdMeta,
+        saleId.isAcceptableOrUnknown(data['sale_id']!, _saleIdMeta),
+      );
+    }
     if (data.containsKey('amount_minor')) {
       context.handle(
         _amountMinorMeta,
@@ -19336,6 +19352,10 @@ class $CustomerReceiptsTable extends CustomerReceipts
         DriftSqlType.string,
         data['${effectivePrefix}customer_id'],
       )!,
+      saleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sale_id'],
+      ),
       amountMinor: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}amount_minor'],
@@ -19373,6 +19393,9 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
   /// Packed HLC of the last write — drives last-write-wins resolution.
   final String updatedHlc;
   final String customerId;
+
+  /// The sale this receipt is allocated to (null = general on-account payment).
+  final String? saleId;
   final int amountMinor;
   final String method;
   final String? reference;
@@ -19383,6 +19406,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
     this.deletedAt,
     required this.updatedHlc,
     required this.customerId,
+    this.saleId,
     required this.amountMinor,
     required this.method,
     this.reference,
@@ -19398,6 +19422,9 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
     }
     map['updated_hlc'] = Variable<String>(updatedHlc);
     map['customer_id'] = Variable<String>(customerId);
+    if (!nullToAbsent || saleId != null) {
+      map['sale_id'] = Variable<String>(saleId);
+    }
     map['amount_minor'] = Variable<int>(amountMinor);
     map['method'] = Variable<String>(method);
     if (!nullToAbsent || reference != null) {
@@ -19416,6 +19443,9 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
           : Value(deletedAt),
       updatedHlc: Value(updatedHlc),
       customerId: Value(customerId),
+      saleId: saleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(saleId),
       amountMinor: Value(amountMinor),
       method: Value(method),
       reference: reference == null && nullToAbsent
@@ -19436,6 +19466,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
       updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
       customerId: serializer.fromJson<String>(json['customerId']),
+      saleId: serializer.fromJson<String?>(json['saleId']),
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       method: serializer.fromJson<String>(json['method']),
       reference: serializer.fromJson<String?>(json['reference']),
@@ -19451,6 +19482,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
       'deletedAt': serializer.toJson<int?>(deletedAt),
       'updatedHlc': serializer.toJson<String>(updatedHlc),
       'customerId': serializer.toJson<String>(customerId),
+      'saleId': serializer.toJson<String?>(saleId),
       'amountMinor': serializer.toJson<int>(amountMinor),
       'method': serializer.toJson<String>(method),
       'reference': serializer.toJson<String?>(reference),
@@ -19464,6 +19496,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
     Value<int?> deletedAt = const Value.absent(),
     String? updatedHlc,
     String? customerId,
+    Value<String?> saleId = const Value.absent(),
     int? amountMinor,
     String? method,
     Value<String?> reference = const Value.absent(),
@@ -19474,6 +19507,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     updatedHlc: updatedHlc ?? this.updatedHlc,
     customerId: customerId ?? this.customerId,
+    saleId: saleId.present ? saleId.value : this.saleId,
     amountMinor: amountMinor ?? this.amountMinor,
     method: method ?? this.method,
     reference: reference.present ? reference.value : this.reference,
@@ -19490,6 +19524,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
       customerId: data.customerId.present
           ? data.customerId.value
           : this.customerId,
+      saleId: data.saleId.present ? data.saleId.value : this.saleId,
       amountMinor: data.amountMinor.present
           ? data.amountMinor.value
           : this.amountMinor,
@@ -19507,6 +19542,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
           ..write('deletedAt: $deletedAt, ')
           ..write('updatedHlc: $updatedHlc, ')
           ..write('customerId: $customerId, ')
+          ..write('saleId: $saleId, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('method: $method, ')
           ..write('reference: $reference')
@@ -19522,6 +19558,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
     deletedAt,
     updatedHlc,
     customerId,
+    saleId,
     amountMinor,
     method,
     reference,
@@ -19536,6 +19573,7 @@ class CustomerReceipt extends DataClass implements Insertable<CustomerReceipt> {
           other.deletedAt == this.deletedAt &&
           other.updatedHlc == this.updatedHlc &&
           other.customerId == this.customerId &&
+          other.saleId == this.saleId &&
           other.amountMinor == this.amountMinor &&
           other.method == this.method &&
           other.reference == this.reference);
@@ -19548,6 +19586,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
   final Value<int?> deletedAt;
   final Value<String> updatedHlc;
   final Value<String> customerId;
+  final Value<String?> saleId;
   final Value<int> amountMinor;
   final Value<String> method;
   final Value<String?> reference;
@@ -19559,6 +19598,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
     this.deletedAt = const Value.absent(),
     this.updatedHlc = const Value.absent(),
     this.customerId = const Value.absent(),
+    this.saleId = const Value.absent(),
     this.amountMinor = const Value.absent(),
     this.method = const Value.absent(),
     this.reference = const Value.absent(),
@@ -19571,6 +19611,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
     this.deletedAt = const Value.absent(),
     required String updatedHlc,
     required String customerId,
+    this.saleId = const Value.absent(),
     required int amountMinor,
     this.method = const Value.absent(),
     this.reference = const Value.absent(),
@@ -19588,6 +19629,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
     Expression<int>? deletedAt,
     Expression<String>? updatedHlc,
     Expression<String>? customerId,
+    Expression<String>? saleId,
     Expression<int>? amountMinor,
     Expression<String>? method,
     Expression<String>? reference,
@@ -19600,6 +19642,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (updatedHlc != null) 'updated_hlc': updatedHlc,
       if (customerId != null) 'customer_id': customerId,
+      if (saleId != null) 'sale_id': saleId,
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (method != null) 'method': method,
       if (reference != null) 'reference': reference,
@@ -19614,6 +19657,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
     Value<int?>? deletedAt,
     Value<String>? updatedHlc,
     Value<String>? customerId,
+    Value<String?>? saleId,
     Value<int>? amountMinor,
     Value<String>? method,
     Value<String?>? reference,
@@ -19626,6 +19670,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
       deletedAt: deletedAt ?? this.deletedAt,
       updatedHlc: updatedHlc ?? this.updatedHlc,
       customerId: customerId ?? this.customerId,
+      saleId: saleId ?? this.saleId,
       amountMinor: amountMinor ?? this.amountMinor,
       method: method ?? this.method,
       reference: reference ?? this.reference,
@@ -19654,6 +19699,9 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
     if (customerId.present) {
       map['customer_id'] = Variable<String>(customerId.value);
     }
+    if (saleId.present) {
+      map['sale_id'] = Variable<String>(saleId.value);
+    }
     if (amountMinor.present) {
       map['amount_minor'] = Variable<int>(amountMinor.value);
     }
@@ -19678,6 +19726,7 @@ class CustomerReceiptsCompanion extends UpdateCompanion<CustomerReceipt> {
           ..write('deletedAt: $deletedAt, ')
           ..write('updatedHlc: $updatedHlc, ')
           ..write('customerId: $customerId, ')
+          ..write('saleId: $saleId, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('method: $method, ')
           ..write('reference: $reference, ')
@@ -19757,6 +19806,15 @@ class $SupplierPaymentsTable extends SupplierPayments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _poIdMeta = const VerificationMeta('poId');
+  @override
+  late final GeneratedColumn<String> poId = GeneratedColumn<String>(
+    'po_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _amountMinorMeta = const VerificationMeta(
     'amountMinor',
   );
@@ -19797,6 +19855,7 @@ class $SupplierPaymentsTable extends SupplierPayments
     deletedAt,
     updatedHlc,
     supplierId,
+    poId,
     amountMinor,
     method,
     reference,
@@ -19856,6 +19915,12 @@ class $SupplierPaymentsTable extends SupplierPayments
     } else if (isInserting) {
       context.missing(_supplierIdMeta);
     }
+    if (data.containsKey('po_id')) {
+      context.handle(
+        _poIdMeta,
+        poId.isAcceptableOrUnknown(data['po_id']!, _poIdMeta),
+      );
+    }
     if (data.containsKey('amount_minor')) {
       context.handle(
         _amountMinorMeta,
@@ -19912,6 +19977,10 @@ class $SupplierPaymentsTable extends SupplierPayments
         DriftSqlType.string,
         data['${effectivePrefix}supplier_id'],
       )!,
+      poId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}po_id'],
+      ),
       amountMinor: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}amount_minor'],
@@ -19949,6 +20018,9 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
   /// Packed HLC of the last write — drives last-write-wins resolution.
   final String updatedHlc;
   final String supplierId;
+
+  /// The purchase order this payment is allocated to (null = general).
+  final String? poId;
   final int amountMinor;
   final String method;
   final String? reference;
@@ -19959,6 +20031,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
     this.deletedAt,
     required this.updatedHlc,
     required this.supplierId,
+    this.poId,
     required this.amountMinor,
     required this.method,
     this.reference,
@@ -19974,6 +20047,9 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
     }
     map['updated_hlc'] = Variable<String>(updatedHlc);
     map['supplier_id'] = Variable<String>(supplierId);
+    if (!nullToAbsent || poId != null) {
+      map['po_id'] = Variable<String>(poId);
+    }
     map['amount_minor'] = Variable<int>(amountMinor);
     map['method'] = Variable<String>(method);
     if (!nullToAbsent || reference != null) {
@@ -19992,6 +20068,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
           : Value(deletedAt),
       updatedHlc: Value(updatedHlc),
       supplierId: Value(supplierId),
+      poId: poId == null && nullToAbsent ? const Value.absent() : Value(poId),
       amountMinor: Value(amountMinor),
       method: Value(method),
       reference: reference == null && nullToAbsent
@@ -20012,6 +20089,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
       updatedHlc: serializer.fromJson<String>(json['updatedHlc']),
       supplierId: serializer.fromJson<String>(json['supplierId']),
+      poId: serializer.fromJson<String?>(json['poId']),
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       method: serializer.fromJson<String>(json['method']),
       reference: serializer.fromJson<String?>(json['reference']),
@@ -20027,6 +20105,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
       'deletedAt': serializer.toJson<int?>(deletedAt),
       'updatedHlc': serializer.toJson<String>(updatedHlc),
       'supplierId': serializer.toJson<String>(supplierId),
+      'poId': serializer.toJson<String?>(poId),
       'amountMinor': serializer.toJson<int>(amountMinor),
       'method': serializer.toJson<String>(method),
       'reference': serializer.toJson<String?>(reference),
@@ -20040,6 +20119,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
     Value<int?> deletedAt = const Value.absent(),
     String? updatedHlc,
     String? supplierId,
+    Value<String?> poId = const Value.absent(),
     int? amountMinor,
     String? method,
     Value<String?> reference = const Value.absent(),
@@ -20050,6 +20130,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     updatedHlc: updatedHlc ?? this.updatedHlc,
     supplierId: supplierId ?? this.supplierId,
+    poId: poId.present ? poId.value : this.poId,
     amountMinor: amountMinor ?? this.amountMinor,
     method: method ?? this.method,
     reference: reference.present ? reference.value : this.reference,
@@ -20066,6 +20147,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
       supplierId: data.supplierId.present
           ? data.supplierId.value
           : this.supplierId,
+      poId: data.poId.present ? data.poId.value : this.poId,
       amountMinor: data.amountMinor.present
           ? data.amountMinor.value
           : this.amountMinor,
@@ -20083,6 +20165,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
           ..write('deletedAt: $deletedAt, ')
           ..write('updatedHlc: $updatedHlc, ')
           ..write('supplierId: $supplierId, ')
+          ..write('poId: $poId, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('method: $method, ')
           ..write('reference: $reference')
@@ -20098,6 +20181,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
     deletedAt,
     updatedHlc,
     supplierId,
+    poId,
     amountMinor,
     method,
     reference,
@@ -20112,6 +20196,7 @@ class SupplierPayment extends DataClass implements Insertable<SupplierPayment> {
           other.deletedAt == this.deletedAt &&
           other.updatedHlc == this.updatedHlc &&
           other.supplierId == this.supplierId &&
+          other.poId == this.poId &&
           other.amountMinor == this.amountMinor &&
           other.method == this.method &&
           other.reference == this.reference);
@@ -20124,6 +20209,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
   final Value<int?> deletedAt;
   final Value<String> updatedHlc;
   final Value<String> supplierId;
+  final Value<String?> poId;
   final Value<int> amountMinor;
   final Value<String> method;
   final Value<String?> reference;
@@ -20135,6 +20221,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
     this.deletedAt = const Value.absent(),
     this.updatedHlc = const Value.absent(),
     this.supplierId = const Value.absent(),
+    this.poId = const Value.absent(),
     this.amountMinor = const Value.absent(),
     this.method = const Value.absent(),
     this.reference = const Value.absent(),
@@ -20147,6 +20234,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
     this.deletedAt = const Value.absent(),
     required String updatedHlc,
     required String supplierId,
+    this.poId = const Value.absent(),
     required int amountMinor,
     this.method = const Value.absent(),
     this.reference = const Value.absent(),
@@ -20164,6 +20252,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
     Expression<int>? deletedAt,
     Expression<String>? updatedHlc,
     Expression<String>? supplierId,
+    Expression<String>? poId,
     Expression<int>? amountMinor,
     Expression<String>? method,
     Expression<String>? reference,
@@ -20176,6 +20265,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (updatedHlc != null) 'updated_hlc': updatedHlc,
       if (supplierId != null) 'supplier_id': supplierId,
+      if (poId != null) 'po_id': poId,
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (method != null) 'method': method,
       if (reference != null) 'reference': reference,
@@ -20190,6 +20280,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
     Value<int?>? deletedAt,
     Value<String>? updatedHlc,
     Value<String>? supplierId,
+    Value<String?>? poId,
     Value<int>? amountMinor,
     Value<String>? method,
     Value<String?>? reference,
@@ -20202,6 +20293,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
       deletedAt: deletedAt ?? this.deletedAt,
       updatedHlc: updatedHlc ?? this.updatedHlc,
       supplierId: supplierId ?? this.supplierId,
+      poId: poId ?? this.poId,
       amountMinor: amountMinor ?? this.amountMinor,
       method: method ?? this.method,
       reference: reference ?? this.reference,
@@ -20230,6 +20322,9 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
     if (supplierId.present) {
       map['supplier_id'] = Variable<String>(supplierId.value);
     }
+    if (poId.present) {
+      map['po_id'] = Variable<String>(poId.value);
+    }
     if (amountMinor.present) {
       map['amount_minor'] = Variable<int>(amountMinor.value);
     }
@@ -20254,6 +20349,7 @@ class SupplierPaymentsCompanion extends UpdateCompanion<SupplierPayment> {
           ..write('deletedAt: $deletedAt, ')
           ..write('updatedHlc: $updatedHlc, ')
           ..write('supplierId: $supplierId, ')
+          ..write('poId: $poId, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('method: $method, ')
           ..write('reference: $reference, ')
@@ -29565,6 +29661,7 @@ typedef $$CustomerReceiptsTableCreateCompanionBuilder =
       Value<int?> deletedAt,
       required String updatedHlc,
       required String customerId,
+      Value<String?> saleId,
       required int amountMinor,
       Value<String> method,
       Value<String?> reference,
@@ -29578,6 +29675,7 @@ typedef $$CustomerReceiptsTableUpdateCompanionBuilder =
       Value<int?> deletedAt,
       Value<String> updatedHlc,
       Value<String> customerId,
+      Value<String?> saleId,
       Value<int> amountMinor,
       Value<String> method,
       Value<String?> reference,
@@ -29620,6 +29718,11 @@ class $$CustomerReceiptsTableFilterComposer
 
   ColumnFilters<String> get customerId => $composableBuilder(
     column: $table.customerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get saleId => $composableBuilder(
+    column: $table.saleId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -29678,6 +29781,11 @@ class $$CustomerReceiptsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get saleId => $composableBuilder(
+    column: $table.saleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get amountMinor => $composableBuilder(
     column: $table.amountMinor,
     builder: (column) => ColumnOrderings(column),
@@ -29724,6 +29832,9 @@ class $$CustomerReceiptsTableAnnotationComposer
     column: $table.customerId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get saleId =>
+      $composableBuilder(column: $table.saleId, builder: (column) => column);
 
   GeneratedColumn<int> get amountMinor => $composableBuilder(
     column: $table.amountMinor,
@@ -29780,6 +29891,7 @@ class $$CustomerReceiptsTableTableManager
                 Value<int?> deletedAt = const Value.absent(),
                 Value<String> updatedHlc = const Value.absent(),
                 Value<String> customerId = const Value.absent(),
+                Value<String?> saleId = const Value.absent(),
                 Value<int> amountMinor = const Value.absent(),
                 Value<String> method = const Value.absent(),
                 Value<String?> reference = const Value.absent(),
@@ -29791,6 +29903,7 @@ class $$CustomerReceiptsTableTableManager
                 deletedAt: deletedAt,
                 updatedHlc: updatedHlc,
                 customerId: customerId,
+                saleId: saleId,
                 amountMinor: amountMinor,
                 method: method,
                 reference: reference,
@@ -29804,6 +29917,7 @@ class $$CustomerReceiptsTableTableManager
                 Value<int?> deletedAt = const Value.absent(),
                 required String updatedHlc,
                 required String customerId,
+                Value<String?> saleId = const Value.absent(),
                 required int amountMinor,
                 Value<String> method = const Value.absent(),
                 Value<String?> reference = const Value.absent(),
@@ -29815,6 +29929,7 @@ class $$CustomerReceiptsTableTableManager
                 deletedAt: deletedAt,
                 updatedHlc: updatedHlc,
                 customerId: customerId,
+                saleId: saleId,
                 amountMinor: amountMinor,
                 method: method,
                 reference: reference,
@@ -29853,6 +29968,7 @@ typedef $$SupplierPaymentsTableCreateCompanionBuilder =
       Value<int?> deletedAt,
       required String updatedHlc,
       required String supplierId,
+      Value<String?> poId,
       required int amountMinor,
       Value<String> method,
       Value<String?> reference,
@@ -29866,6 +29982,7 @@ typedef $$SupplierPaymentsTableUpdateCompanionBuilder =
       Value<int?> deletedAt,
       Value<String> updatedHlc,
       Value<String> supplierId,
+      Value<String?> poId,
       Value<int> amountMinor,
       Value<String> method,
       Value<String?> reference,
@@ -29908,6 +30025,11 @@ class $$SupplierPaymentsTableFilterComposer
 
   ColumnFilters<String> get supplierId => $composableBuilder(
     column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poId => $composableBuilder(
+    column: $table.poId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -29966,6 +30088,11 @@ class $$SupplierPaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get poId => $composableBuilder(
+    column: $table.poId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get amountMinor => $composableBuilder(
     column: $table.amountMinor,
     builder: (column) => ColumnOrderings(column),
@@ -30012,6 +30139,9 @@ class $$SupplierPaymentsTableAnnotationComposer
     column: $table.supplierId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get poId =>
+      $composableBuilder(column: $table.poId, builder: (column) => column);
 
   GeneratedColumn<int> get amountMinor => $composableBuilder(
     column: $table.amountMinor,
@@ -30068,6 +30198,7 @@ class $$SupplierPaymentsTableTableManager
                 Value<int?> deletedAt = const Value.absent(),
                 Value<String> updatedHlc = const Value.absent(),
                 Value<String> supplierId = const Value.absent(),
+                Value<String?> poId = const Value.absent(),
                 Value<int> amountMinor = const Value.absent(),
                 Value<String> method = const Value.absent(),
                 Value<String?> reference = const Value.absent(),
@@ -30079,6 +30210,7 @@ class $$SupplierPaymentsTableTableManager
                 deletedAt: deletedAt,
                 updatedHlc: updatedHlc,
                 supplierId: supplierId,
+                poId: poId,
                 amountMinor: amountMinor,
                 method: method,
                 reference: reference,
@@ -30092,6 +30224,7 @@ class $$SupplierPaymentsTableTableManager
                 Value<int?> deletedAt = const Value.absent(),
                 required String updatedHlc,
                 required String supplierId,
+                Value<String?> poId = const Value.absent(),
                 required int amountMinor,
                 Value<String> method = const Value.absent(),
                 Value<String?> reference = const Value.absent(),
@@ -30103,6 +30236,7 @@ class $$SupplierPaymentsTableTableManager
                 deletedAt: deletedAt,
                 updatedHlc: updatedHlc,
                 supplierId: supplierId,
+                poId: poId,
                 amountMinor: amountMinor,
                 method: method,
                 reference: reference,

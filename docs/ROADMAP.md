@@ -85,7 +85,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Input-PPN on purchases: PKP goods-receipt splits recoverable VAT (Dr Inventory net · Dr PPN Input · Cr AP gross); auto from company PKP flag + default rate; bp=0 unchanged
 - [x] Partial receipts: receive any quantity per PO line (Receive dialog); status ordered→partial→received; AP & incoming track the received part; clamped to outstanding
 - [x] Price tiers (2-tier retail/wholesale): variant wholesale price (v11) + customer 'wholesale' flag; checkout re-prices the cart to the customer's tier (retail fallback when a part has no wholesale price)
-- [ ] receipt allocation per invoice
+- [x] Receipt allocation per invoice: receipts/payments tag a sale/PO (v12); per-invoice outstanding via openInvoices/openPurchaseOrders; customer detail lists open invoices with per-invoice Receive (running AR/AP unchanged)
 
 ## M7 — Sync UX & Dashboard
 - [x] Sync screen: device id, pick shared folder (file_picker), pending-changes count, last-sync, "Sync now" running the folder-transport engine

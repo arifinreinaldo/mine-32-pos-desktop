@@ -69,7 +69,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openOnDisk());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -146,6 +146,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from >= 7 && from < 11) {
         await m.addColumn(customers, customers.priceTier);
+      }
+      // v11 -> v12: invoice allocation on settlement events (tables ship at v9).
+      if (from >= 9 && from < 12) {
+        await m.addColumn(customerReceipts, customerReceipts.saleId);
+        await m.addColumn(supplierPayments, supplierPayments.poId);
       }
       // v9 -> v10: sales returns / refunds (event tables).
       if (from < 10) {

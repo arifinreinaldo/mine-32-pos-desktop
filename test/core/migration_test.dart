@@ -98,6 +98,9 @@ void main() {
       // wholesale_price_minor / price_tier columns are missing).
       expect(await db.select(db.productVariants).get(), isEmpty);
       expect(await db.select(db.customers).get(), isEmpty);
+      // v12 allocation columns (sale_id / po_id) are queryable too.
+      expect(await db.select(db.customerReceipts).get(), isEmpty);
+      expect(await db.select(db.supplierPayments).get(), isEmpty);
 
       // Columns added by later migrations exist (querying company_settings would
       // fail if isPkp/taxInclusive/defaultTaxRateId were missing).

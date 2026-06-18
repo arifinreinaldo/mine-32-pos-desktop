@@ -51,6 +51,12 @@ final customerArProvider = FutureProvider.autoDispose.family<int, String>(
   (ref, id) => ref.watch(customersRepositoryProvider).arBalance(id),
 );
 
+/// On-account invoices with an outstanding balance, for targeted receipts.
+final openInvoicesProvider = FutureProvider.autoDispose
+    .family<List<({Sale sale, int outstanding})>, String>(
+      (ref, id) => ref.watch(customersRepositoryProvider).openInvoices(id),
+    );
+
 final customerHistoryProvider = FutureProvider.autoDispose
     .family<List<Sale>, String>(
       (ref, id) => ref.watch(customersRepositoryProvider).purchaseHistory(id),

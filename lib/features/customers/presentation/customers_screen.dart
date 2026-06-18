@@ -120,6 +120,7 @@ class _CustomerDetail extends ConsumerWidget {
     final theme = Theme.of(context);
     final money = ref.watch(moneyFormatProvider);
     final ar = ref.watch(customerArProvider(customer.id));
+    final openInvoices = ref.watch(openInvoicesProvider(customer.id));
     final vehicles = ref.watch(customerVehiclesProvider(customer.id));
     final history = ref.watch(customerHistoryProvider(customer.id));
 
@@ -183,6 +184,43 @@ class _CustomerDetail extends ConsumerWidget {
             const SizedBox(height: 8),
             _info('Address', customer.address!),
           ],
+          openInvoices.maybeWhen(
+            data: (list) => list.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Open invoices',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        for (final inv in list)
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.receipt_long_outlined),
+                            title: Text(inv.sale.number),
+                            subtitle: Text(
+                              'Outstanding ${money.format(Money(inv.outstanding))}',
+                            ),
+                            trailing: TextButton(
+                              onPressed: () => _receivePayment(
+                                context,
+                                ref,
+                                inv.outstanding,
+                                saleId: inv.sale.id,
+                                title: 'Receive — ${inv.sale.number}',
+                              ),
+                              child: const Text('Receive'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
           const SizedBox(height: 20),
           Row(
             children: [
@@ -258,11 +296,13 @@ class _CustomerDetail extends ConsumerWidget {
   Future<void> _receivePayment(
     BuildContext context,
     WidgetRef ref,
-    int suggested,
-  ) async {
+    int suggested, {
+    String? saleId,
+    String? title,
+  }) async {
     final result = await AmountDialog.show(
       context,
-      title: 'Receive payment',
+      title: title ?? 'Receive payment',
       suggested: suggested > 0 ? suggested : null,
     );
     if (result == null) return;
@@ -272,8 +312,10 @@ class _CustomerDetail extends ConsumerWidget {
           customerId: customer.id,
           amountMinor: result.amountMinor,
           method: result.method,
+          saleId: saleId,
         );
     ref.invalidate(customerArProvider(customer.id));
+    ref.invalidate(openInvoicesProvider(customer.id));
     ref.invalidate(customerHistoryProvider(customer.id));
     if (context.mounted) {
       ScaffoldMessenger.of(

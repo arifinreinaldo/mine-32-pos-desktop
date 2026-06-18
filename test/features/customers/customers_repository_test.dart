@@ -241,6 +241,65 @@ void main() {
       await n.close();
     });
 
+    test('a receipt allocated to an invoice clears that invoice', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      final customerId = await n.customers.saveCustomer(
+        const CustomerDraft(name: 'PT Bengkel Jaya'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Clutch Kit',
+          sku: 'CK-1',
+          price: Money(50000),
+          cost: Money(30000),
+          coreCharge: Money(0),
+        ),
+      );
+      await n.inventory.addMovement(
+        variantId: variantId,
+        locationId: 'L1',
+        qty: 10,
+        reason: MovementReason.purchase,
+      );
+      // Two on-account sales → two open invoices.
+      Future<String> sell() async => (await n.sales.completeSale(
+        lines: [
+          CartLine(
+            variantId: variantId,
+            sku: 'CK-1',
+            name: 'Clutch Kit',
+            unitPrice: const Money(50000),
+            unitCost: const Money(30000),
+          ),
+        ],
+        locationId: 'L1',
+        tendered: const Money(0),
+        customerId: customerId,
+        onAccount: true,
+      )).saleId;
+      final firstId = await sell();
+      await sell();
+
+      var open = await n.customers.openInvoices(customerId);
+      expect(open, hasLength(2));
+      expect(open.every((i) => i.outstanding == 50000), isTrue);
+
+      // Allocate a full payment to the first invoice.
+      await n.customers.receivePayment(
+        customerId: customerId,
+        amountMinor: 50000,
+        saleId: firstId,
+      );
+
+      open = await n.customers.openInvoices(customerId);
+      expect(open, hasLength(1), reason: 'first invoice settled');
+      expect(open.single.sale.id, isNot(firstId));
+      // Overall AR still nets correctly (100000 billed − 50000 received).
+      expect(await n.customers.arBalance(customerId), 50000);
+
+      await n.close();
+    });
+
     test('customers replicate to another device', () async {
       final folder = InMemoryFolder();
       final a = await Node.create('device-a', folder, 1000);

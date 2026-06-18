@@ -122,12 +122,52 @@ class PurchasingRepository extends SyncRepository {
     return fromPos - paid;
   }
 
+  /// Purchase orders for a supplier with goods received but not yet fully paid
+  /// (received value − allocated payments > 0), oldest first.
+  Future<List<({PurchaseOrder po, int outstanding})>> openPurchaseOrders(
+    String supplierId,
+  ) async {
+    final pos =
+        await (db.select(db.purchaseOrders)
+              ..where(
+                (t) => t.supplierId.equals(supplierId) & t.deletedAt.isNull(),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+            .get();
+    final payments =
+        await (db.select(db.supplierPayments)..where(
+              (t) =>
+                  t.supplierId.equals(supplierId) &
+                  t.deletedAt.isNull() &
+                  t.poId.isNotNull(),
+            ))
+            .get();
+    final allocated = <String, int>{};
+    for (final p in payments) {
+      final pid = p.poId;
+      if (pid != null) allocated[pid] = (allocated[pid] ?? 0) + p.amountMinor;
+    }
+    final out = <({PurchaseOrder po, int outstanding})>[];
+    for (final po in pos) {
+      final lines = await linesForPo(po.id);
+      final received = lines.fold(
+        0,
+        (s, l) => s + l.qtyReceived * l.unitCostMinor,
+      );
+      final outstanding = received - (allocated[po.id] ?? 0);
+      if (outstanding > 0) out.add((po: po, outstanding: outstanding));
+    }
+    return out;
+  }
+
   /// Record a payment to a supplier against AP and post Dr AP / Cr Cash.
+  /// When [poId] is given the payment is allocated to that purchase order.
   Future<String> paySupplier({
     required String supplierId,
     required int amountMinor,
     String method = 'cash',
     String? reference,
+    String? poId,
   }) async {
     final id = _uuid.v7();
     await db.transaction(() async {
@@ -141,6 +181,7 @@ class PurchasingRepository extends SyncRepository {
           updatedAt: now,
           updatedHlc: hlc.pack(),
           supplierId: supplierId,
+          poId: poId,
           amountMinor: amountMinor,
           method: method,
           reference: reference,

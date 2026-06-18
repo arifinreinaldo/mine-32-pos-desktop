@@ -77,7 +77,7 @@ Each feature lives in `lib/features/<feature>/`. Route + nav label are in
 | **catalog** | `/catalog` | catalog_screen, part_editor_dialog (multi-variant), fitment_editor_dialog | catalog_repository (`savePart`,`itemsForProduct`), auto_parts_repository, parts_csv_import | `PartDraft` (`variantName`), `CatalogItem`, auto_parts_models (`VehicleDraft`) |
 | **inventory** | `/inventory` | inventory_screen (incoming col), stock_adjust_dialog, stock_transfer_dialog, stock_count_dialog | inventory_repository (`addMovement`,`transfer`,`applyCount`,`onHand`,`stockAtLocation`) | stock_models (`StockLevel`,`LocationDraft`), `MovementReason` |
 | **purchasing** | `/purchasing` | purchasing_screen, po_create_dialog, receive_po_dialog (partial), supplier_editor_dialog | purchasing_repository (`receiveLines`/`receivePurchaseOrder`,`paySupplier`,`apBalance`,`watchIncomingByVariant`) | purchasing_models (`SupplierDraft`) — PO status ordered→partial→received |
-| **customers** | `/customers` | customers_screen, customer_editor_dialog, customer_vehicle_dialog | customers_repository (`receivePayment`,`arBalance`) | `CustomerDraft` |
+| **customers** | `/customers` | customers_screen (open-invoice receipts), customer_editor_dialog, customer_vehicle_dialog | customers_repository (`receivePayment`(saleId),`arBalance`,`openInvoices`) | `CustomerDraft` (`priceTier`) |
 | **accounting** | `/accounting` | accounting_screen (3 tabs), manual_journal_dialog, tax_rate_editor_dialog | accounting_repository (`postJournal`,`postSaleJournal`…) | accounting_models (`AccountCode`,`JournalLineInput`), tax_math, coretax_csv, coretax_xml |
 | **reports** | `/reports` | reports_screen (PPN CSV + CoreTax XML) | reports_repository | (P&L / Balance Sheet / PPN via accounting) |
 | **sync** | `/sync` | sync_screen (history) | sync_service, sync_scheduler | `SyncInfo`, `SyncRun` |
@@ -97,7 +97,7 @@ Root/cross-cutting providers are in `lib/core/di/providers.dart`
   intermediates then converts. Format via `moneyFormatProvider`
   (`currencyScaleProvider` gives scale: IDR=0, USD=2).
 - **Database** (`core/database/`): one `AppDatabase` (`@DriftDatabase`),
-  `schemaVersion` currently **11**. Tables split under `tables/` by concern.
+  `schemaVersion` currently **12**. Tables split under `tables/` by concern.
   `SyncRepository.writeSyncable` stamps HLC + writes row + change-log atomically.
 - **Sync** (`core/sync/`): every mutation appends a `ChangeRecord` to
   `change_log` (the outbox). `SyncEngine.export()` flushes unexported records to

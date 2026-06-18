@@ -173,12 +173,54 @@ class CustomersRepository extends SyncRepository {
     return fromSales - received;
   }
 
+  /// On-account sales for a customer that still have an outstanding balance
+  /// after any allocated receipts (oldest first) — for statements and targeted
+  /// payment.
+  Future<List<({Sale sale, int outstanding})>> openInvoices(
+    String customerId,
+  ) async {
+    final sales =
+        await (db.select(db.sales)
+              ..where(
+                (t) =>
+                    t.customerId.equals(customerId) &
+                    t.deletedAt.isNull() &
+                    t.status.equals('completed'),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+            .get();
+    final receipts =
+        await (db.select(db.customerReceipts)..where(
+              (t) =>
+                  t.customerId.equals(customerId) &
+                  t.deletedAt.isNull() &
+                  t.saleId.isNotNull(),
+            ))
+            .get();
+    final allocated = <String, int>{};
+    for (final r in receipts) {
+      final sid = r.saleId;
+      if (sid != null) allocated[sid] = (allocated[sid] ?? 0) + r.amountMinor;
+    }
+    return [
+      for (final s in sales)
+        if (s.totalMinor - s.paidTotalMinor - (allocated[s.id] ?? 0) > 0)
+          (
+            sale: s,
+            outstanding:
+                s.totalMinor - s.paidTotalMinor - (allocated[s.id] ?? 0),
+          ),
+    ];
+  }
+
   /// Record a receipt from a customer against AR and post Dr Cash / Cr AR.
+  /// When [saleId] is given the receipt is allocated to that invoice.
   Future<String> receivePayment({
     required String customerId,
     required int amountMinor,
     String method = 'cash',
     String? reference,
+    String? saleId,
   }) async {
     final id = _uuid.v7();
     await db.transaction(() async {
@@ -192,6 +234,7 @@ class CustomersRepository extends SyncRepository {
           updatedAt: now,
           updatedHlc: hlc.pack(),
           customerId: customerId,
+          saleId: saleId,
           amountMinor: amountMinor,
           method: method,
           reference: reference,

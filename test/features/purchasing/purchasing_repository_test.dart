@@ -280,6 +280,60 @@ void main() {
       },
     );
 
+    test('a payment allocated to a PO clears that PO from open list', () async {
+      final n = await Node.create('solo', InMemoryFolder(), 1000);
+      final supplierId = await n.purchasing.saveSupplier(
+        const SupplierDraft(name: 'PT Sumber Parts'),
+      );
+      final variantId = await n.catalog.savePart(
+        const PartDraft(
+          name: 'Oil Filter',
+          sku: 'OF-1',
+          price: Money(900),
+          cost: Money(500),
+          coreCharge: Money(0),
+        ),
+      );
+      Future<String> orderAndReceive() async {
+        final poId = await n.purchasing.createPurchaseOrder(
+          supplierId: supplierId,
+          locationId: 'L1',
+          lines: [
+            PoLineInput(
+              variantId: variantId,
+              description: 'Oil Filter',
+              qty: 10,
+              unitCostMinor: 30000,
+            ),
+          ],
+        );
+        await n.purchasing.receivePurchaseOrder(poId);
+        return poId;
+      }
+
+      final firstPo = await orderAndReceive();
+      await orderAndReceive();
+
+      var open = await n.purchasing.openPurchaseOrders(supplierId);
+      expect(open, hasLength(2));
+      expect(open.every((o) => o.outstanding == 300000), isTrue);
+
+      // Pay the first PO in full.
+      await n.purchasing.paySupplier(
+        supplierId: supplierId,
+        amountMinor: 300000,
+        poId: firstPo,
+      );
+
+      open = await n.purchasing.openPurchaseOrders(supplierId);
+      expect(open, hasLength(1), reason: 'first PO settled');
+      expect(open.single.po.id, isNot(firstPo));
+      // Overall AP still nets (600000 received − 300000 paid).
+      expect(await n.purchasing.apBalance(supplierId), 300000);
+
+      await n.close();
+    });
+
     test('incoming reflects open POs and clears once received', () async {
       final n = await Node.create('solo', InMemoryFolder(), 1000);
       final supplierId = await n.purchasing.saveSupplier(
