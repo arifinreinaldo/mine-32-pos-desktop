@@ -79,7 +79,7 @@ Each feature lives in `lib/features/<feature>/`. Route + nav label are in
 | **purchasing** | `/purchasing` | purchasing_screen, po_create_dialog, receive_po_dialog (partial), supplier_editor_dialog | purchasing_repository (`receiveLines`/`receivePurchaseOrder`,`paySupplier`,`apBalance`,`watchIncomingByVariant`) | purchasing_models (`SupplierDraft`) — PO status ordered→partial→received |
 | **customers** | `/customers` | customers_screen (open-invoice receipts), customer_editor_dialog, customer_vehicle_dialog | customers_repository (`receivePayment`(saleId),`arBalance`,`openInvoices`) | `CustomerDraft` (`priceTier`) |
 | **accounting** | `/accounting` | accounting_screen (3 tabs), manual_journal_dialog, tax_rate_editor_dialog | accounting_repository (`postJournal`,`postSaleJournal`…) | accounting_models (`AccountCode`,`JournalLineInput`), tax_math, coretax_csv, coretax_xml |
-| **reports** | `/reports` | reports_screen (PPN CSV + CoreTax XML) | reports_repository | (P&L / Balance Sheet / PPN via accounting) |
+| **reports** | `/reports` | reports_screen (P&L, Balance Sheet, net PPN, PPN CSV + CoreTax XML) | reports_repository | accounting (`profitAndLoss`,`balanceSheet`,`netPpn`) |
 | **sync** | `/sync` | sync_screen (history) | sync_service, sync_scheduler | `SyncInfo`, `SyncRun` |
 | **settings** | `/settings` | settings_screen | settings_repository, sample_data | `SettingsDraft` |
 

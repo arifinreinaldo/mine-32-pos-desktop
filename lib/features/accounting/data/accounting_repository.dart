@@ -739,6 +739,49 @@ class AccountingRepository extends SyncRepository {
     return out;
   }
 
+  /// Net PPN for a period: output tax (PPN Keluaran, on sales) minus
+  /// recoverable input tax (PPN Masukan, on purchases) = the amount payable to
+  /// the tax office. Computed from posted journal lines on the two PPN accounts.
+  Future<({Money output, Money input, Money payable})> netPpn({
+    int? fromMs,
+    int? toMs,
+  }) async {
+    final jl = db.journalLines;
+    final j = db.journals;
+    final a = db.accounts;
+    final debit = jl.debitMinor.sum();
+    final credit = jl.creditMinor.sum();
+
+    Future<({int d, int c})> totals(String code) async {
+      var pred =
+          jl.deletedAt.isNull() &
+          j.deletedAt.isNull() &
+          a.deletedAt.isNull() &
+          a.code.equals(code);
+      if (fromMs != null) pred = pred & j.date.isBiggerOrEqualValue(fromMs);
+      if (toMs != null) pred = pred & j.date.isSmallerThanValue(toMs);
+      final row =
+          await (db.select(jl).join([
+                  innerJoin(j, j.id.equalsExp(jl.journalId)),
+                  innerJoin(a, a.id.equalsExp(jl.accountId)),
+                ])
+                ..addColumns([debit, credit])
+                ..where(pred))
+              .getSingleOrNull();
+      return (d: row?.read(debit) ?? 0, c: row?.read(credit) ?? 0);
+    }
+
+    final out = await totals(AccountCode.ppnOutput); // liability: credit-normal
+    final inp = await totals(AccountCode.ppnInput); // asset: debit-normal
+    final output = out.c - out.d;
+    final input = inp.d - inp.c;
+    return (
+      output: Money(output),
+      input: Money(input),
+      payable: Money(output - input),
+    );
+  }
+
   // --- Financial statements ---
 
   /// Sum of journal-line debits/credits per account (filtered by account type

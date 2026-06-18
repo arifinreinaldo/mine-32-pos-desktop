@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/di/providers.dart';
+import '../../../core/money/money.dart';
 import '../../accounting/domain/accounting_models.dart';
 import '../../accounting/presentation/accounting_controller.dart';
 import '../data/reports_repository.dart';
@@ -88,3 +89,14 @@ final balanceSheetProvider = FutureProvider.autoDispose<BalanceSheet>((ref) {
       .watch(accountingRepositoryProvider)
       .balanceSheet(asOfMs: range.toMs);
 });
+
+/// Output PPN − input PPN = net VAT payable for the period (Indonesia CoreTax).
+final netPpnProvider =
+    FutureProvider.autoDispose<({Money output, Money input, Money payable})>((
+      ref,
+    ) {
+      final range = ref.watch(reportRangeProvider);
+      return ref
+          .watch(accountingRepositoryProvider)
+          .netPpn(fromMs: range.fromMs, toMs: range.toMs);
+    });

@@ -217,6 +217,45 @@ class _ReportBody extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          const _Panel(title: 'PPN (VAT)', child: _PpnBody()),
+        ],
+      ),
+    );
+  }
+}
+
+class _PpnBody extends ConsumerWidget {
+  const _PpnBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ppn = ref.watch(netPpnProvider);
+    final money = ref.watch(moneyFormatProvider);
+    final theme = Theme.of(context);
+    return ppn.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text('Error: $e'),
+      data: (r) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _kv('Output PPN (sales)', money.format(r.output)),
+          _kv('Input PPN (purchases)', money.format(r.input)),
+          const Divider(),
+          _kv(
+            r.payable.isNegative ? 'PPN refundable' : 'PPN payable',
+            money.format(r.payable.abs()),
+            bold: true,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Output − input. File via Reports → CoreTax XML / PPN CSV.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );

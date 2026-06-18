@@ -70,6 +70,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Tests: tax math, balanced posting, sale→journal, PPN tax summary, reports & accounting screens
 - [x] CoreTax PPN CSV export (Reports → "PPN CSV"; faktur rows with DPP/PPN/buyer/NPWP)
 - [x] P&L + Balance Sheet statements (Reports screen, period-filtered)
+- [x] Net PPN payable (output − input) panel on Reports — reconciles output tax (sales) against recoverable input tax (purchases) for the PKP filing
 - [x] Journal browser (Accounting → Journals tab: list + expandable legs) + manual journal entry (balanced-only Post)
 - [x] Tax-rate editor (Accounting → Tax rates tab: CRUD, single-default invariant, inclusive/exclusive, % entry)
 - [x] CoreTax XML faktur export (TaxInvoiceBulk structure with per-line GoodService detail; Reports → "CoreTax XML"; validate against current DJP schema before filing)
