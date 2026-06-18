@@ -30,8 +30,12 @@ class AccountingRepository extends SyncRepository {
   }
 
   Future<void> seedChartOfAccounts() async {
-    final count = await db.accounts.count().getSingle();
-    if (count > 0) return;
+    // Seed only the *missing* accounts (by code), so a DB seeded before a new
+    // account was added (e.g. PPN Input) self-heals on upgrade instead of
+    // silently lacking it. Stable, normal startups write nothing.
+    final existing = (await db.select(db.accounts).get())
+        .map((a) => a.code)
+        .toSet();
     const seed = <List<String>>[
       [AccountCode.cash, 'Cash', 'asset'],
       [AccountCode.bank, 'Bank', 'asset'],
@@ -46,6 +50,7 @@ class AccountingRepository extends SyncRepository {
       [AccountCode.inventoryAdjustment, 'Inventory Adjustments', 'expense'],
     ];
     for (final a in seed) {
+      if (existing.contains(a[0])) continue;
       // Deterministic id (stable across devices) so two devices seeding the
       // same chart of accounts converge to one row per code on sync/restore
       // instead of duplicating by code.

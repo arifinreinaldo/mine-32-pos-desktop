@@ -141,6 +141,24 @@ void main() {
       ); // 2×1000+500
     });
 
+    test('a discount on a wholesale line clamps to the wholesale gross', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final ctrl = container.read(cartProvider.notifier);
+
+      ctrl.addItem(_item('A', price: 1000, wholesale: 600));
+      ctrl.setWholesale(true); // line bills at 600
+
+      // A discount above the wholesale gross (600) but below retail (1000) must
+      // clamp to 600 so the total never goes negative.
+      ctrl.setLineDiscount('A', const Money(800));
+      expect(
+        container.read(cartProvider).lines.single.discount,
+        const Money(600),
+      );
+      expect(container.read(cartProvider).total, const Money(0));
+    });
+
     test('setLineDiscount applies and clamps to the line gross', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);

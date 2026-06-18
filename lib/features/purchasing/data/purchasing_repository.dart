@@ -305,19 +305,20 @@ class PurchasingRepository extends SyncRepository {
     });
   }
 
-  /// Whether to split recoverable input-PPN on goods receipt: only for a
-  /// VAT-registered (PKP) company, using the default tax rate. Returns
-  /// (basisPoints, inclusive); (0, true) means no input tax.
-  Future<(int, bool)> _purchaseTax() async {
+  /// Input-PPN rate (basis points) to split out of a goods receipt: only for a
+  /// VAT-registered (PKP) company with a default tax rate; 0 = no input tax.
+  /// (The rate's inclusive flag is a *sales-pricing* concept and is ignored
+  /// here — a purchase cost is always the gross amount payable to the supplier,
+  /// so the tax is split out of it inclusively, keeping ledger AP == apBalance.)
+  Future<int> _purchaseTax() async {
     final settings =
         await (db.select(db.companySettings)
               ..where((t) => t.id.equals('default'))
               ..limit(1))
             .getSingleOrNull();
-    if (settings?.isPkp != true) return (0, true);
+    if (settings?.isPkp != true) return 0;
     final rate = await accounting.defaultTaxRate();
-    if (rate == null) return (0, true);
-    return (rate.basisPoints, rate.inclusive);
+    return rate?.basisPoints ?? 0;
   }
 
   /// Receive specific quantities. [quantities] maps a PO-line id to the qty to
@@ -326,7 +327,7 @@ class PurchasingRepository extends SyncRepository {
   /// `partial`, and posts the goods-receipt journal for the received value
   /// (input-PPN split for a PKP company). One transaction.
   Future<void> receiveLines(String poId, Map<String, int> quantities) async {
-    final (taxBp, taxInclusive) = await _purchaseTax();
+    final taxBp = await _purchaseTax();
     await db.transaction(() async {
       final po = await getPurchaseOrder(poId);
       if (po == null || po.status == 'received') return;
@@ -381,7 +382,7 @@ class PurchasingRepository extends SyncRepository {
       final split = TaxMath.split(
         amountMinor: receivedValue,
         basisPoints: taxBp,
-        inclusive: taxInclusive,
+        inclusive: true, // PO cost is the gross owed; split tax out of it
       );
       await accounting.postPurchaseJournal(
         poId: poId,

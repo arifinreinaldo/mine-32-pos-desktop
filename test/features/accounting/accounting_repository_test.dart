@@ -47,6 +47,30 @@ void main() {
       },
     );
 
+    test(
+      'seedChartOfAccounts back-fills a missing account (upgrade self-heal)',
+      () async {
+        final db = AppDatabase(NativeDatabase.memory());
+        final repo = _acct(db);
+        await repo.hlcService.load();
+        await repo.seedDefaults();
+        expect((await db.select(db.accounts).get()).length, 11);
+
+        // Simulate an older DB that predates the PPN Input account.
+        await (db.delete(
+          db.accounts,
+        )..where((t) => t.code.equals(AccountCode.ppnInput))).go();
+        expect((await db.select(db.accounts).get()).length, 10);
+        expect(await repo.accountByCode(AccountCode.ppnInput), isNull);
+
+        // Re-seeding adds only the missing one back.
+        await repo.seedChartOfAccounts();
+        expect((await db.select(db.accounts).get()).length, 11);
+        expect(await repo.accountByCode(AccountCode.ppnInput), isNotNull);
+        await db.close();
+      },
+    );
+
     test('postJournal rejects an unbalanced journal', () async {
       final db = AppDatabase(NativeDatabase.memory());
       final repo = _acct(db);

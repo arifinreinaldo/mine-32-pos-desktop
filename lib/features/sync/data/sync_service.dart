@@ -112,10 +112,14 @@ class SyncService {
     if (raw == null || raw.isEmpty) return const [];
     final list = jsonDecode(raw);
     if (list is! List) return const [];
-    return [
+    final conflicts = [
       for (final e in list)
         ConflictRecord.fromJson((e as Map).cast<String, dynamic>()),
     ];
+    // Insertion order across peers within one import isn't strictly time-sorted;
+    // present newest-first by the change time.
+    conflicts.sort((a, b) => b.at.compareTo(a.at));
+    return conflicts;
   }
 
   Future<String?> _meta(String key) async {

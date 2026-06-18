@@ -70,15 +70,18 @@ class CartController extends Notifier<Cart> {
     );
   }
 
-  /// Set an absolute per-line discount, clamped to `[0, gross]`.
+  /// Set an absolute per-line discount, clamped to `[0, effective gross]` so the
+  /// line total can't go negative — using the gross at the cart's current tier
+  /// (a wholesale line clamps to its wholesale gross, not the higher retail one).
   void setLineDiscount(String variantId, Money discount) {
     state = Cart(
       wholesale: state.wholesale,
       lines: state.lines.map((l) {
         if (l.variantId != variantId) return l;
+        final cap = l.effectiveGross(state.wholesale);
         final clamped = discount.minorUnits < 0
             ? const Money(0)
-            : (discount.minorUnits > l.gross.minorUnits ? l.gross : discount);
+            : (discount.minorUnits > cap.minorUnits ? cap : discount);
         return l.copyWith(discount: clamped);
       }).toList(),
     );
